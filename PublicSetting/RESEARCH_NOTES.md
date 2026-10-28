@@ -39,7 +39,7 @@ Not proved:
 2. Any o(T) regret upper bound for a randomized learner on a globally consistent target family in the public setting.
 3. The requested randomized-versus-deterministic separation, or a no-go theorem.
 
-The last two are the open mathematical core. The source intentionally contains no admitted proof, sorry, axiom, or fabricated existence theorem.
+The last two are the open mathematical core. The current tracked Lean/Rocq source modules contain no admitted proof, sorry, axiom, or fabricated existence theorem. Research gaps are recorded as prose, not encoded as proved existence claims.
 
 ## Next mathematical step
 
@@ -59,7 +59,7 @@ A valid positive construction would need an intermediate hypothesis class: enoug
 
 A low-mass witness obstruction is now partly machine-checked. In `PublicSetting/Lean/PublicProtocol.lean`, `NatSubprobability` models nonnegative rational atom masses whose every finite prefix sums to at most one. Lean proves that if every atom in a prefix of length N has (T\,p_i>1), then the scaled prefix sum exceeds N, and therefore `exists_low_mass_label`: for every natural-number horizon T (in particular T≥1), some label y satisfies (T\,p_y\le1). This is the discrete atom-existence fact needed by the public adversary; the corresponding auxiliary theorem has not yet been duplicated in Rocq.
 
-For the full product class \(H=\mathbb N^{\mathbb N}\), the independently machine-checked Lean/Rocq terminal-target construction can then be selected from the completed prediction path. Its pathwise loss equals the number of rounds with \(\hat y_t\ne y_t^{\rm vis}\); because the witness is chosen before the current sample with mass at most (1/T), the conditional expected loss on each round is at least (1-1/T\), giving expected cumulative loss at least \(T-1\). The target family remains globally consistent, and the visible-witness comparator has zero loss. The probability-measure/conditional-expectation argument is not yet a machine-checked theorem; only the atom-existence lemma in Lean and the pathwise/global-consistency construction in both provers are checked.
+For the full product class \(H=\mathbb N^{\mathbb N}\), the independently machine-checked Lean/Rocq terminal-target construction can then be selected from the completed prediction path. Its pathwise loss equals the number of rounds with \(\hat y_t\ne y_t^{\rm vis}\); because the witness is chosen before the current sample with mass at most (1/T), the conditional expected loss on each round is at least (1-1/T\), giving expected cumulative loss at least \(T-1\). The target family remains globally consistent, and the visible-witness comparator has zero loss. The probability-measure/conditional-expectation argument is not yet a machine-checked theorem; the discrete low-mass atom lemmas and the pathwise/global-consistency construction are checked in both provers, with different but corresponding rational/integer-scaled encodings.
 
 This reinforces the boundary diagnosis: neither the full product class nor the constant-function class is the desired separating class. A positive separation would need an intermediate hypothesis class whose global target constraint prevents the adversary from adapting the acceptable set to the sampled path, while still permitting linear deterministic lower bounds.
 
