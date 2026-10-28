@@ -291,8 +291,8 @@ Proof.
   destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
   - split; [lia | congruence].
   - split.
-    + intro _. exact Hneq.
-    + intro _. reflexivity.
+    + intro Hsame. exact Hneq.
+    + intro Hneq'. reflexivity.
 Qed.
 
 Definition TerminalFamily (prediction visible : nat -> nat) (f : nat -> nat) : Prop :=
