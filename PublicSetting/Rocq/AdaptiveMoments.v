@@ -252,4 +252,15 @@ Proof.
   exact Hbound.
 Qed.
 
+(* Cross-multiplied expectation bound: weighted path sum <= (T+1) * T!,
+   where factorial T is the number of finite uniform draw paths. *)
+Theorem weighted_future_le_rounds_mul_factorial :
+  forall (target : nat -> list nat -> nat) T,
+    weighted_future target T [] <= (T + 1) * factorial T.
+Proof.
+  intros target T.
+  pose proof (weighted_future_le_factorial_succ target T) as Hmoment.
+  rewrite (factorial_succ T) in Hmoment.
+  exact Hmoment.
+Qed.
 End AdaptiveMoments.
