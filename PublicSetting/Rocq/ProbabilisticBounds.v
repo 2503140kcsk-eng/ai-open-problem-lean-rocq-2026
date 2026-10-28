@@ -99,7 +99,7 @@ Section ProbabilisticBounds.
           factorial k * event_count samples e <= q ^ k * length samples).
       { intros e Hin. apply Htail. right. exact Hin. }
       specialize (IH k q Hrest).
-      rewrite Nat.mul_add.
+      rewrite Nat.mul_add_distr_l.
       eapply Nat.le_trans.
       + apply Nat.add_le_mono; [exact Hhead|exact IH].
       + rewrite Nat.mul_succ_l. lia.
@@ -131,7 +131,7 @@ Section ProbabilisticBounds.
   Proof.
     induction samples as [|x xs IH]; intros T bad; simpl.
     - reflexivity.
-    - destruct (bad x); simpl; rewrite (IH T bad); rewrite ?Nat.mul_add; simpl; lia.
+    - destruct (bad x); simpl; rewrite (IH T bad); rewrite ?Nat.mul_add_distr_l; simpl; lia.
   Qed.
 
   Lemma total_value_add :
