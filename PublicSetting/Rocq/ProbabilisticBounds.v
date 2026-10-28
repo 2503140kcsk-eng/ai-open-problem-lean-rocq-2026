@@ -224,4 +224,4 @@ Section ProbabilisticBounds.
       + exact Harith.
   Qed.
 
-End ProbabilisticBounds
+End ProbabilisticBounds.
