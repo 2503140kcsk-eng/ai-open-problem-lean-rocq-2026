@@ -55,6 +55,15 @@ The opposite extreme, the full product class (H=\mathbb N^{\mathbb N}), has enou
 
 A valid positive construction would need an intermediate hypothesis class: enough adaptive structure for every deterministic learner to incur linear loss, but insufficient coordinate freedom for a public adversary to tailor a globally consistent target family to a randomized path. The current literature search and formal work have not established such a class or a theorem ruling it out. This is the remaining mathematical gap, not a Lean/Rocq build failure.
 
+## Low-mass witness obstruction for the full product class
+
+There is a further elementary probabilistic obstruction (not yet formalized as a probability-measure theorem in Lean/Rocq). For any probability mass function \(\pi\) on the countably infinite label set \(\mathbb N\) and every \(T\ge 1\), some label \(y\) has \(\pi(y)\le 1/T\): otherwise each of the first \(T+1\) labels would have mass greater than \(1/T\), so their total mass would exceed one. In the public protocol, the adversary sees the current distribution before the current sample and can choose such a low-mass visible witness at each round.
+
+For the full product class \(H=\mathbb N^{\mathbb N}\), the machine-checked terminal-target construction can then be selected from the completed prediction path. Its pathwise loss equals the number of rounds with \(\hat y_t\ne y_t^{\rm vis}\); therefore the conditional expected loss on each round is at least \(1-1/T\), giving an expected cumulative loss of at least \(T-1\). The target family remains globally consistent, and the visible-witness comparator has zero loss. The pathwise/global-consistency part is formalized; the probability-mass and conditional-expectation bound is still a mathematical argument, not yet a machine-checked theorem.
+
+This reinforces the boundary diagnosis: neither the full product class nor the constant-function class is the desired separating class. A positive separation would need an intermediate hypothesis class whose global target constraint prevents the adversary from adapting the acceptable set to the sampled path, while still permitting linear deterministic lower bounds.
+
+
 ## Generalized terminal-target boundary result
 
 In addition to the bounded-support special case, the Lean/Rocq protocol modules now parameterize an arbitrary realized prediction path and visible-witness path. The final exclusion at round t is the prediction whenever prediction and witness differ, and otherwise a different label. The target subfamily is one global family of functions avoiding that complete exclusion path. The proofs show all visible witnesses are accepted and the resulting pathwise loss gap equals the number of non-collision rounds. This makes the full-product attack's logic independent of any assumed support bound; it still does not give a randomized upper bound for any structurally restricted class.
