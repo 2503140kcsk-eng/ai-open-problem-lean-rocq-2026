@@ -1,6 +1,6 @@
 (* Machine-checked threshold shattering lemmas in Rocq 9.2.
    The information-complexity / eCMI result remains an open research target and
-   is deliberately not represented as an admitted or vacuous theorem here. *)
+   is deliberately not represented as a theorem with a missing proof or vacuous conclusion here. *)
 
 From Stdlib Require Import Arith Bool Lia.
 
