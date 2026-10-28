@@ -471,8 +471,8 @@ Proof.
   induction N as [|N IH]; intros HN Hall.
   - lia.
   - destruct N as [|N].
-    + simpl [NatPrefixMass].
-      specialize (Hall 0 (by lia)).
+    + assert (Hfirst : D < T * mass 0) by (apply Hall; lia).
+      cbn [NatPrefixMass].
       lia.
     + change (S (S N) * D <
         T * (NatPrefixMass mass (S N) + mass (S N))).
