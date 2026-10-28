@@ -115,15 +115,15 @@ Let the label set be \(Y=\mathbb N\), and restrict allowed sets to co-singletons
 \]
 Enumerate all total computable online policy kernels with valid discrete distributions by indices \(C\in\mathbb N\). A context \(x=(C,\eta)\) consists of a challenge-policy index and a code for a finite public transcript \(\eta\). It is selected before the learner's current draw. Write \(\pi_C(\eta,x)\) for the distribution output by policy \(C\) on that embedded transcript and context. Let \(m(C,\eta,x)\) be the least label attaining the maximum atom of that distribution. Such an atom exists for every probability distribution on countable \(\mathbb N\); tie-breaking by least label makes \(m\) unique. This mode function need not itself be computable for the mathematical definition of the class.
 
-For \(C,m\in\mathbb N\), let \(\rho_{C,m}\) be the increasing bijection from \(\mathbb N\setminus\{C\}\) to \(\mathbb N\setminus\{m\}\). Define, for each \(B\in\mathbb N\), one hypothesis \(h_B:X\to\mathbb N\):
+For \(C,m\in\mathbb N\), let \(\rho_{C,m}\) be the increasing bijection from \(\mathbb N\setminus\{C\}\) to \(\mathbb N\setminus\{m\}\). For context \(x=(C,\eta)\), abbreviate \(m_x=m(C,\eta,x)\). Define, for each \(B\in\mathbb N\), one hypothesis \(h_B:X\to\mathbb N\):
 \[
-h_B(C,\eta,x)=
+h_B(x)=
 \begin{cases}
-m(C,\eta,x),&B=C,\\
-\rho_{C,m(C,\eta,x)}(B),&B\ne C.
+m_x,&B=C,\\
+\rho_{C,m_x}(B),&B\ne C.
 \end{cases}
 \]
-Here the redundant final \(x\) in the display denotes the current context, so equivalently \(h_B(x)=m_x\) if \(B=C_x\), and \(\rho_{C_x,m_x}(B)\) otherwise. For explicit arithmetic,
+For explicit arithmetic,
 \[
 \rho_{C,m}(B)=
 \begin{cases}
