@@ -331,7 +331,7 @@ Lemma terminal_pathwise_loss
 Proof.
   induction T as [|T IH].
   - reflexivity.
-  - simpl [ProtocolTotalLoss, MismatchLoss].
+  - simpl [ProtocolTotalLoss MismatchLoss].
     rewrite IH.
     assert (Hstep :
       (if Nat.eq_dec (prediction T) (terminal_exclusion prediction visible T)
