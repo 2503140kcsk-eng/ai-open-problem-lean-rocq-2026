@@ -37,5 +37,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Show pinned Rocq version and compile
+        shell: bash
         run: |
-          docker run --rm             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/work"             -w /work             rocq/rocq-prover:9.2.0             sh -lc 'rocq --version && rocq compile -Q . PublicSetting PublicSetting.v'
+          # The official container runs as a non-root user. Keep the checked-out
+          # GitHub workspace mounted read-only and compile in the container's
+          # writable /tmp so Rocq can create .glob/.vo artifacts.
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
+            rocq/rocq-prover:9.2.0 \
+            sh -lc 'set -eu; mkdir -p /tmp/rocq-check; cp /input/PublicSetting.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v'
