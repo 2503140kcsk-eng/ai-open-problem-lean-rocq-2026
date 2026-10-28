@@ -435,7 +435,7 @@ theorem prefix_scaled_gt
   | succ n ih =>
       by_cases hn : n = 0
       · subst n
-        simpa [prefixMass] using h 0 (by omega)
+        simpa [prefixMass, Rat.zero_add] using h 0 (by omega)
       · have hprev : (n : Rat) < (T : Rat) * prefixMass mass n :=
           ih (by omega) (by
             intro i hi
@@ -443,37 +443,41 @@ theorem prefix_scaled_gt
         have hlast : 1 < (T : Rat) * mass n := h n (by omega)
         calc
           (Nat.succ n : Rat) = (n : Rat) + 1 := by simp
-          _ < (T : Rat) * prefixMass mass n + (T : Rat) * mass n :=
-            add_lt_add hprev hlast
+          _ = 1 + (n : Rat) := Rat.add_comm _ _
+          _ < 1 + ((T : Rat) * prefixMass mass n) :=
+            (Rat.add_lt_add_left (c := (1 : Rat))).mpr hprev
+          _ = ((T : Rat) * prefixMass mass n) + 1 := Rat.add_comm _ _
+          _ < ((T : Rat) * prefixMass mass n) + ((T : Rat) * mass n) :=
+            (Rat.add_lt_add_left (c := (T : Rat) * prefixMass mass n)).mpr hlast
           _ = (T : Rat) * prefixMass mass (Nat.succ n) := by
-            simp [prefixMass, mul_add]
+            simp [prefixMass, Rat.mul_add]
 
 /-- Every countable probability mass function has an atom of mass at most 1/T
 for any positive integer horizon T. This is the pre-draw low-mass witness fact. -/
 theorem exists_low_mass_label
     (p : NatSubprobability) (T : Nat) (hT : 0 < T) :
     ∃ y, (T : Rat) * p.mass y ≤ 1 := by
-  by_contra hnot
-  have hall : ∀ y, 1 < (T : Rat) * p.mass y := by
-    intro y
-    rcases lt_or_ge 1 ((T : Rat) * p.mass y) with hlt | hge
-    · exact hlt
-    · exact False.elim (hnot ⟨y, hge⟩)
-  have hsum :
-      ((T + 1 : Nat) : Rat) <
-        (T : Rat) * prefixMass p.mass (T + 1) := by
-    exact prefix_scaled_gt p.mass T (T + 1) (by omega) (fun i hi => hall i)
-  have hbound :
-      (T : Rat) * prefixMass p.mass (T + 1) ≤ (T : Rat) := by
-    exact mul_le_mul_of_nonneg_left
-      (p.prefix_le_one (T + 1)) (Nat.cast_nonneg T)
-  have hcontr : ((T + 1 : Nat) : Rat) < (T : Rat) :=
-    lt_of_lt_of_le hsum hbound
-  have hTle : (T : Rat) ≤ ((T + 1 : Nat) : Rat) := by
-    calc
-      (T : Rat) ≤ (T : Rat) + 1 :=
-        le_add_of_nonneg_right (show (0 : Rat) ≤ 1 by decide)
-      _ = ((T + 1 : Nat) : Rat) := by simp
-  exact (not_lt_of_ge hTle) hcontr
+  by_cases hsmall : ∃ y, (T : Rat) * p.mass y ≤ 1
+  · exact hsmall
+  · have hall : ∀ y, 1 < (T : Rat) * p.mass y := by
+      intro y
+      rcases lt_or_ge 1 ((T : Rat) * p.mass y) with hlt | hge
+      · exact hlt
+      · exact False.elim (hsmall ⟨y, hge⟩)
+    have hsum :
+        ((T + 1 : Nat) : Rat) <
+          (T : Rat) * prefixMass p.mass (T + 1) := by
+      exact prefix_scaled_gt p.mass T (T + 1) (by omega) (fun i hi => hall i)
+    have hbound :
+        (T : Rat) * prefixMass p.mass (T + 1) ≤ (T : Rat) := by
+      simpa using Rat.mul_le_mul_of_nonneg_left
+        (p.prefix_le_one (T + 1)) (Nat.cast_nonneg T)
+    have hcontr : ((T + 1 : Nat) : Rat) < (T : Rat) :=
+      lt_of_lt_of_le hsum hbound
+    have hTle : (T : Rat) ≤ ((T + 1 : Nat) : Rat) := by
+      rw [Nat.cast_add, Nat.cast_one]
+      simpa using (Rat.add_le_add_left (c := (T : Rat))).mpr
+        (Rat.le_of_lt (show (0 : Rat) < 1 by decide))
+    exact (not_lt_of_ge hTle) hcontr
 
 end PublicSetting.Protocol
