@@ -207,4 +207,21 @@ Section ProbabilisticBounds.
       nia.
   Qed.
 
+  Theorem total_value_le_from_factorial_tails :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (loss : Omega -> nat) (K T q : nat),
+      (forall event, In event events ->
+        factorial K * event_count samples event <= q ^ K * length samples) ->
+      T * length events * q ^ K <= factorial K ->
+      (forall x, loss x <= K + (if event_any events x then T else 0)) ->
+      total_value samples loss <= (K + 1) * length samples.
+  Proof.
+    intros samples events loss K T q Htail Harith Hpoint.
+    eapply total_value_le_threshold_plus_one.
+    - exact Hpoint.
+    - apply bad_budget_of_union_tail_bound with (events := events) (k := K) (q := q).
+      + exact Htail.
+      + exact Harith.
+  Qed.
+
 End ProbabilisticBounds
