@@ -59,7 +59,3 @@ Proof.
   - exact thresholds_not_shatter_pair.
 Qed.
 
-(* This definition records an eventual research target only; it is not proof that
-   a learner with an O(d) evaluated CMI/eCMI bound exists. *)
-Definition LowECMIResearchTarget (Learner : Type) (hasLinearECMI : Learner -> Prop) : Prop :=
-  exists learner : Learner, hasLinearECMI learner.
