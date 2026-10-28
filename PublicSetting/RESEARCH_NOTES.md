@@ -153,7 +153,7 @@ The adversary chooses \(x_t\) before the current action; it does not need the cu
 
 ### Property 2 — \(O(\log T)\) expected regret for a randomized learner
 
-For horizon \(T\), use a randomized learner \(R_T\) that draws independently and uniformly from \(\{0,\ldots,T-1\}\) each round, ignoring context and history. This is a total computable policy kernel.
+Use a single horizon-free randomized learner \(R\): at round \(t\), it draws independently and uniformly from \(\{0,\ldots,t-1\}\), ignoring context and history. Its support grows with elapsed time, so the same learner works for every finite horizon.
 
 An arbitrary legal terminal target family must, by the required co-singleton form and the bijection \(B\mapsto h_B(x)\), omit one fixed hypothesis index \(B^\star\). Its regret is the number
 \[
@@ -163,38 +163,40 @@ It suffices to upper-bound \(\mathbb E[\max_B M_B]\), which is stronger than bou
 
 For every fixed \(B\le T\), every time \(t\), and every prior transcript, the context \(x_t\) and therefore \(h_B(x_t)\) are fixed before the current independent uniform draw. Thus
 \[
-\Pr(\hat y_t=h_B(x_t)\mid\text{past})\le 1/T.
+\Pr(\hat y_t=h_B(x_t)\mid\text{past})\le 1/t.
 \]
-For any \(k\le T\), the probability that a fixed \(B\le T\) matches at least \(k\) rounds is at most
+Write \(H_T=\sum_{t=1}^{T}1/t\). For any \(k\le T\), iterated conditioning bounds the probability that a fixed \(B\le T\) matches on any chosen set \(I\) of \(k\) rounds by \(\prod_{t\in I}(1/t)\). A union bound over choices of \(I\) gives
 \[
-\binom{T}{k}T^{-k}\le(e/k)^k
+\Pr(M_B\ge k)\le
+\sum_{|I|=k}\prod_{t\in I}\frac1t
+\le \frac{H_T^k}{k!}\le(eH_T/k)^k.
 \]
-by iterated conditioning over a chosen set of \(k\) rounds and a union bound over all such subsets. Union-bounding over \(T+1\) indices gives
+Union-bounding over \(T+1\) indices gives
 \[
 \Pr\!\left(\max_{B\le T}M_B\ge k\right)
-\le (T+1)(e/k)^k.
+\le (T+1)(eH_T/k)^k.
 \]
-Summing this tail, with threshold \(k_0=\lceil4\log(T+2)\rceil\) for sufficiently large \(T\) and the trivial bound for smaller \(T\), yields
+Taking \(k_0=\lceil4eH_T\rceil\), the right side is at most \((T+1)4^{-k}\) for \(k\ge k_0\); summing this tail and using the trivial bound for small \(T\) yields
 \[
-\mathbb E[\max_{B\le T}M_B]=O(\log(T+2)).
+\mathbb E[\max_{B\le T}M_B]=O(H_T)=O(\log(T+2)).
 \]
 
-For \(B>T\), if \(B\ne C_t\), the increasing-bijection formula implies \(h_B(x_t)\ge T\), outside the randomized learner's support. Thus a high-index hypothesis can match the learner only at a round where \(C_t=B>T\) and the draw equals \(m_{x_t}\). Let
+For \(B>T\), if \(B\ne C_t\), the increasing-bijection formula implies \(h_B(x_t)\ge B-1\ge T\), outside the randomized learner's support \(\{0,\ldots,t-1\}\). Thus a high-index hypothesis can match the learner only at a round where \(C_t=B>T\) and the draw equals \(m_{x_t}\). Let
 \[
 Z=\sum_{t=1}^{T}\mathbf1\{C_t>T,\ \hat y_t=m_{x_t}\}.
 \]
-The context is chosen before the current draw, so each summand has conditional expectation at most \(1/T\), whence \(\mathbb E Z\le1\). Pathwise,
+The context is chosen before the current draw, so each summand has conditional expectation at most \(1/t\), whence \(\mathbb E Z\le H_T=O(\log(T+2))\). Pathwise,
 \[
 \max_{B\in\mathbb N}M_B
 \le \max_{B\le T}M_B+Z.
 \]
 Consequently
 \[
-\mathbb E[\operatorname{Regret}_T(R_T)]
+\mathbb E[\operatorname{Regret}_T(R)]
 \le \mathbb E[\max_B M_B]
 =O(\log(T+2))=o(T).
 \]
-This proof allows the adversary to adapt contexts to the public past. It does not assume that the terminally selected index \(B^\star\) was chosen before random draws.
+In particular Markov's inequality gives \(\Pr(\operatorname{Regret}_T(R)\ge\varepsilon T)=O(\log T)/(\varepsilon T)\to0\), so linear-loss paths are atypical for this learner. This proof allows the adversary to adapt contexts to the public past. It does not assume that the terminally selected index \(B^\star\) was chosen before random draws.
 
 ### Property 3 — one fixed target family at each horizon
 
