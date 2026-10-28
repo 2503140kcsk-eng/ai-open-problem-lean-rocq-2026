@@ -1,0 +1,171 @@
+From Stdlib Require Import Arith Lia List Bool.
+Import ListNotations.
+
+(* Finite-counting lemmas for the randomized public-setting proof.
+   The per-index stochastic tail premise is intentionally explicit: this file
+   checks event-union aggregation and the expectation truncation, but does not
+   pretend that the conditional-uniform-draw-to-factorial-tail bridge has
+   already been formalized. *)
+
+Section ProbabilisticBounds.
+  Context {Omega : Type}.
+
+  Fixpoint event_count (samples : list Omega) (event : Omega -> bool) : nat :=
+    match samples with
+    | [] => 0
+    | x :: xs => (if event x then 1 else 0) + event_count xs event
+    end.
+
+  Fixpoint event_any (events : list (Omega -> bool)) : Omega -> bool :=
+    match events with
+    | [] => fun _ => false
+    | e :: es => fun x => e x || event_any es x
+    end.
+
+  Fixpoint sum_event_counts (samples : list Omega)
+      (events : list (Omega -> bool)) : nat :=
+    match events with
+    | [] => 0
+    | e :: es => event_count samples e + sum_event_counts samples es
+    end.
+
+  Fixpoint total_value (samples : list Omega) (value : Omega -> nat) : nat :=
+    match samples with
+    | [] => 0
+    | x :: xs => value x + total_value xs value
+    end.
+
+  Fixpoint factorial (n : nat) : nat :=
+    match n with
+    | 0 => 1
+    | S k => S k * factorial k
+    end.
+
+  Lemma factorial_pos : forall n, 0 < factorial n.
+  Proof.
+    induction n; simpl; [lia|].
+    apply Nat.mul_pos; lia.
+  Qed.
+
+  Lemma event_count_or_le :
+    forall (samples : list Omega) (p q : Omega -> bool),
+      event_count samples (fun x => p x || q x) <=
+      event_count samples p + event_count samples q.
+  Proof.
+    induction samples as [|x xs IH]; intros p q; simpl.
+    - lia.
+    - destruct (p x); destruct (q x); simpl; specialize (IH p q); lia.
+  Qed.
+
+  Lemma event_count_any_le_sum :
+    forall (samples : list Omega) (events : list (Omega -> bool)),
+      event_count samples (event_any events) <=
+      sum_event_counts samples events.
+  Proof.
+    intros samples events.
+    induction events as [|e es IH]; simpl.
+    - lia.
+    - eapply Nat.le_trans.
+      + apply event_count_or_le.
+      + specialize (IH samples). lia.
+  Qed.
+
+  Lemma factorial_mul_event_counts_le :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (k q : nat),
+      (forall event, In event events ->
+        factorial k * event_count samples event <=
+          q ^ k * length samples) ->
+      factorial k * sum_event_counts samples events <=
+        length events * (q ^ k * length samples).
+  Proof.
+    intros samples events.
+    induction events as [|event events IH]; intros k q Htail; simpl.
+    - lia.
+    - assert (Hhead :
+        factorial k * event_count samples event <= q ^ k * length samples).
+      { apply Htail. left. reflexivity. }
+      assert (Hrest :
+        forall e, In e events ->
+          factorial k * event_count samples e <= q ^ k * length samples).
+      { intros e Hin. apply Htail. right. exact Hin. }
+      specialize (IH k q Hrest).
+      rewrite Nat.mul_add.
+      eapply Nat.le_trans.
+      + apply Nat.add_le_mono; [exact Hhead|exact IH].
+      + rewrite Nat.mul_succ_l. lia.
+  Qed.
+
+  Lemma total_value_mono :
+    forall (samples : list Omega) (f g : Omega -> nat),
+      (forall x, f x <= g x) ->
+      total_value samples f <= total_value samples g.
+  Proof.
+    intros samples f g Hpoint.
+    induction samples as [|x xs IH]; simpl; [lia|].
+    specialize (Hpoint x). lia.
+  Qed.
+
+  Lemma total_value_const :
+    forall (samples : list Omega) (K : nat),
+      total_value samples (fun _ => K) = K * length samples.
+  Proof.
+    induction samples as [|x xs IH]; intros K; simpl.
+    - reflexivity.
+    - rewrite IH. rewrite Nat.mul_succ_r. lia.
+  Qed.
+
+  Lemma total_value_indicator :
+    forall (samples : list Omega) (T : nat) (bad : Omega -> bool),
+      total_value samples (fun x => if bad x then T else 0) =
+        T * event_count samples bad.
+  Proof.
+    induction samples as [|x xs IH]; intros T bad; simpl.
+    - reflexivity.
+    - destruct (bad x); simpl; rewrite IH; rewrite ?Nat.mul_add; simpl; lia.
+  Qed.
+
+  Lemma total_value_add :
+    forall (samples : list Omega) (f g : Omega -> nat),
+      total_value samples (fun x => f x + g x) =
+        total_value samples f + total_value samples g.
+  Proof.
+    induction samples as [|x xs IH]; intros f g; simpl.
+    - reflexivity.
+    - rewrite IH. lia.
+  Qed.
+
+  (* If factorial k * count(event_i) <= q^k * N for each member of events,
+     then the finite union bound follows after cross-multiplication. *)
+  Theorem factorial_mul_union_tail_le :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (k q : nat),
+      (forall event, In event events ->
+        factorial k * event_count samples event <= q ^ k * length samples) ->
+      factorial k * event_count samples (event_any events) <=
+        length events * (q ^ k * length samples).
+  Proof.
+    intros samples events k q Htail.
+    eapply Nat.le_trans.
+    - apply Nat.mul_le_mono_l.
+      apply event_count_any_le_sum.
+    - apply factorial_mul_event_counts_le. exact Htail.
+  Qed.
+
+  Theorem total_value_le_threshold_plus_one :
+    forall (samples : list Omega) (loss : Omega -> nat)
+      (bad : Omega -> bool) (K T : nat),
+      (forall x, loss x <= K + (if bad x then T else 0)) ->
+      T * event_count samples bad <= length samples ->
+      total_value samples loss <= (K + 1) * length samples.
+  Proof.
+    intros samples loss bad K T Hpoint Hbudget.
+    eapply Nat.le_trans.
+    - apply total_value_mono. exact Hpoint.
+    - rewrite total_value_add.
+      rewrite total_value_const.
+      rewrite total_value_indicator.
+      nia.
+  Qed.
+
+End ProbabilisticBounds
