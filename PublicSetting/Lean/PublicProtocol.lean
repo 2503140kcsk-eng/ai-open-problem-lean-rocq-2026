@@ -487,8 +487,10 @@ theorem exists_low_mass_label
       Rat.le_trans (Rat.le_of_lt hsum) hbound
     have hsucc : (T : Rat) < (Nat.succ T : Rat) := by
       rw [show ((Nat.succ T : Nat) : Rat) = (T : Rat) + 1 by simp]
-      simpa using (Rat.add_lt_add_left (c := (T : Rat))).mpr
-        (show (0 : Rat) < 1 by decide)
-    exact ((Rat.not_le (a := (Nat.succ T : Rat)) (b := (T : Rat))).mpr hsucc) hcontrle
+      simpa only [Rat.add_zero] using
+        (Rat.add_lt_add_left (c := (T : Rat))).mpr
+          (show (0 : Rat) < 1 by decide)
+    exact False.elim
+      (((Rat.not_le (a := (Nat.succ T : Rat)) (b := (T : Rat))).mpr hsucc) hcontrle)
 
 end PublicSetting.Protocol
