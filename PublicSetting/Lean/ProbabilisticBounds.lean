@@ -167,9 +167,8 @@ theorem badBudget_of_union_tail_bound {Ω : Type}
             simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
       _ ≤ factorial k * samples.length :=
             Nat.mul_le_mul_right samples.length arithmeticBudget
-  by_contra hnot
-  have hlt : samples.length < T * eventCount samples (eventAny events) :=
-    Nat.lt_of_not_ge hnot
+  apply Nat.le_of_not_gt
+  intro hlt
   have hstrict :
       factorial k * samples.length <
         factorial k * (T * eventCount samples (eventAny events)) :=
