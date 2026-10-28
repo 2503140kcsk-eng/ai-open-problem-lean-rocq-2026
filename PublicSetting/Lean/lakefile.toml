@@ -1,6 +1,6 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments"]
 
 [[lean_lib]]
 name = "PublicSetting"
@@ -10,3 +10,6 @@ name = "PublicProtocol"
 
 [[lean_lib]]
 name = "ProbabilisticBounds"
+
+[[lean_lib]]
+name = "AdaptiveMoments"
