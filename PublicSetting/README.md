@@ -29,6 +29,7 @@ The Lean and Rocq files are independent developments. They formalize:
 2. The elementary but useful fact that one and the same nonnegative regret profile cannot be both o(T) and Ω(T).
 3. A global-consistency model in which one fixed subfamily F of H induces every accepted-label set.
 4. An all-horizons pathwise construction for complement-of-singleton accepted sets, and the fact that a prediction path equal to the excluded labels incurs exactly T losses over horizon T.
+5. In Lean only, a machine-checked discrete subprobability lemma: among countably many nonnegative rational masses with every finite prefix bounded by one, some label has mass at most (1/T) for every positive integer horizon T.
 
 All stated lemmas are intended to be proved without placeholders. The complement-of-singleton construction is a boundary-case / adversarial-path lemma; it is **not** a randomized-versus-deterministic separation. It does not establish that any randomized learner has o(T) regret in the public protocol.
 
