@@ -511,7 +511,8 @@ Proof.
   destruct (finite_low_mass_or_all_large mass T D (S T)) as [Hex | Hall].
   - destruct Hex as [y [_ Hle]]. exists y. exact Hle.
   - exfalso.
-    pose proof (prefix_scaled_gt_nat mass T D (S T) (by lia) Hall) as Hsum.
+    assert (HN : 0 < S T) by lia.
+    pose proof (prefix_scaled_gt_nat mass T D (S T) HN Hall) as Hsum.
     assert (Hprefix : T * NatPrefixMass mass (S T) <= T * D).
     {
       apply Nat.mul_le_mono_l.
