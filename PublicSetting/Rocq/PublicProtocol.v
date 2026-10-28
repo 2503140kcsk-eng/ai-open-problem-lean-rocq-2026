@@ -208,5 +208,8 @@ Definition ProtocolIsLinear (r : nat -> nat) : Prop :=
     forall T : nat, N <= T -> a * T <= b * r T.
 
 Definition PublicRandomizedDeterministicSeparation
-    (randomizedRegret deterministicRegret : nat -> nat) : Prop :=
-  ProtocolIsSublinear randomizedRegret /\ ProtocolIsLinear deterministicRegret.
+    (DeterministicLearner : Type)
+    (randomizedRegret : nat -> nat)
+    (deterministicRegret : DeterministicLearner -> nat -> nat) : Prop :=
+  ProtocolIsSublinear randomizedRegret /\
+  forall learner : DeterministicLearner, ProtocolIsLinear (deterministicRegret learner).
