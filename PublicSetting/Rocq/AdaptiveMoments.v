@@ -245,8 +245,11 @@ Proof.
   intros target T.
   pose proof (weighted_future_le_bound target T []) as Hbound.
   pose proof (weighted_future_bound_mul_factorial T 0) as Hfactor.
+  simpl in Hbound.
   simpl in Hfactor.
-  nia.
+  rewrite Nat.mul_1_r in Hfactor.
+  rewrite Hfactor in Hbound.
+  exact Hbound.
 Qed.
 
 End AdaptiveMoments.
