@@ -209,3 +209,46 @@ The diagonal lower bound requires an index \(A\) for the learner's strategy. It 
 Thus this is a concrete separation for the explicitly restricted *computable-policy model*. It does **not** establish the requested separation for the unrestricted public partial-feedback model left open in Shao–Fang–Lin–Tao (arXiv:2601.21462v3, Section 5.3). That gap is substantive: an uncountable class of all noncomputable deterministic strategies cannot be substituted into this co-singleton permutation construction, because a per-context bijection into countable \(Y=\mathbb N\) forces the hypothesis index class itself to be countable.
 
 No Lean or Rocq formalization of this new construction has yet been added; the asymptotic tail and diagonal arguments above are mathematical proofs in this research note and must be machine-checked before claiming formal verification.
+
+
+## Audit: why the diagonal construction still does not cover every deterministic learner
+
+Date: 2026-10-28. This section records an attempted unrestricted extension of the computable-policy construction. It is an obstruction to that *particular construction method*, not a theorem ruling out the original separation.
+
+### The tempting non-injective extension
+
+Let \(\mathcal A\) be an index set of deterministic policies. For a challenger \(A\in\mathcal A\) and context/history \(z\), let \(p_A(z)\in\mathbb N\) be its deterministic prediction. Define hypotheses with indices \(B\in\mathcal A\) by
+\[
+h_B(A,z)=
+\begin{cases}
+p_A(z),&B=A,\\
+q_{A,z}(B),&B\ne A,
+\end{cases}
+\]
+where \(q_{A,z}:\mathcal A\setminus\{A\}\to
+\mathbb N\setminus\{p_A(z)\}\) is a surjection with every fibre infinite.
+
+For any fixed \(A\), the target family \(F_A=\{h_B:B\ne A\}\) induces exactly the co-singleton \(\mathbb N\setminus\{p_A(z)\}\) at contexts whose challenger is \(A\). At contexts with challenger \(C\ne A\), removing just \(h_A\) does not remove any label from the image because every fibre of \(q_{C,z}\) is infinite and \(h_C\in F_A\); the induced label set remains all of \(\mathbb N\). Thus a deterministic learner \(A\), challenged at context \(A\) each round, can be wrong on all \(T\) rounds under one fixed \(F_A\). This repairs the local fibre collision in the earlier bijection-only construction.
+
+For a randomized learner choosing uniformly from \(\{0,\ldots,t-1\}\), if the target index \(A\) is fixed and the challenger at round \(t\) is \(A\), then the current loss probability is at most \(1/t\), because the excluded label is the deterministic value \(p_A(z_t)\), chosen before the sample. At other challenger indices, the family \(F_A\) induces all labels and produces no loss. This is a useful local design idea.
+
+### Why this is not yet a class for *all* deterministic policies
+
+The definition above requires \(\mathcal A\) to index every permitted deterministic learner while also embedding \(A\) as a context coordinate visible to the learner. That self-indexing is impossible if learners are unrestricted functions and contexts themselves are drawn from the same set.
+
+Let \(\kappa=|\mathcal X|\) be the cardinality of the instance space and let \(|\mathcal Y|\ge2\). Even the memoryless deterministic maps \(\mathcal X\to\mathcal Y\) have cardinality
+\[
+|\mathcal Y|^\kappa\ge2^\kappa>\kappa.
+\]
+Allowing dependence on finite histories does not reduce this lower bound. Therefore no context space of size \(\kappa\) can contain a distinct visible context code for every arbitrary deterministic policy over that same context space. For countable \(\mathcal X,\mathcal Y=\mathbb N\), there are already continuum-many deterministic maps, but only countably many context codes; for uncountable \(\mathcal X\), Cantor's theorem gives the analogous strict gap.
+
+One could parameterize a narrower family such as computable or suitably coded measurable policies, but that no longer proves the required lower bound for *every* deterministic learner. If one uses Borel codes, the joint measurability of code-to-policy evaluation also needs a separate proof; it cannot simply be assumed for an unrestricted enumeration of all Borel functions.
+
+### Current mathematical status
+
+- The fibre-surjection formula above is a concrete repair of the *local* uniqueness/fibre issue in the diagonal construction.
+- The unrestricted diagonal quantifier remains unmet because the strategy index cannot be inserted into the visible context for all set-theoretic policies by this route.
+- This cardinality argument is **not** a no-go theorem for every possible hypothesis class: a successful class might diagonalize along paths without literally indexing policies in the context.
+- No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
+
+Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, Section 5.3 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
