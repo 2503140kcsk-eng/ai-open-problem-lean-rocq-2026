@@ -44,7 +44,16 @@ Section ProbabilisticBounds.
   Lemma factorial_pos : forall n, 0 < factorial n.
   Proof.
     induction n; simpl; [lia|].
-    apply Nat.mul_pos; lia.
+    lia.
+  Qed.
+
+  Lemma event_count_false :
+    forall (samples : list Omega),
+      event_count samples (fun _ => false) = 0.
+  Proof.
+    induction samples as [|x xs IH]; simpl.
+    - reflexivity.
+    - rewrite IH. reflexivity.
   Qed.
 
   Lemma event_count_or_le :
@@ -64,10 +73,10 @@ Section ProbabilisticBounds.
   Proof.
     intros samples events.
     induction events as [|e es IH]; simpl.
-    - lia.
+    - rewrite event_count_false. lia.
     - eapply Nat.le_trans.
       + apply event_count_or_le.
-      + specialize (IH samples). lia.
+      + lia.
   Qed.
 
   Lemma factorial_mul_event_counts_le :
@@ -112,7 +121,7 @@ Section ProbabilisticBounds.
   Proof.
     induction samples as [|x xs IH]; intros K; simpl.
     - reflexivity.
-    - rewrite IH. rewrite Nat.mul_succ_r. lia.
+    - rewrite (IH K). rewrite Nat.mul_succ_r. lia.
   Qed.
 
   Lemma total_value_indicator :
@@ -122,7 +131,7 @@ Section ProbabilisticBounds.
   Proof.
     induction samples as [|x xs IH]; intros T bad; simpl.
     - reflexivity.
-    - destruct (bad x); simpl; rewrite IH; rewrite ?Nat.mul_add; simpl; lia.
+    - destruct (bad x); simpl; rewrite (IH T bad); rewrite ?Nat.mul_add; simpl; lia.
   Qed.
 
   Lemma total_value_add :
@@ -132,7 +141,7 @@ Section ProbabilisticBounds.
   Proof.
     induction samples as [|x xs IH]; intros f g; simpl.
     - reflexivity.
-    - rewrite IH. lia.
+    - rewrite (IH f g). lia.
   Qed.
 
   (* If factorial k * count(event_i) <= q^k * N for each member of events,
