@@ -119,12 +119,13 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
                 rw [totalValue_const, totalValue_indicator]
                 simp
       have hcount : eventCount (List.range (history.length + 1)) hit ≤ 1 := by
-        simpa [hit, hitAt, eq_comm] using
-          eventCount_range_eq_le_one (history.length + 1)
-            (target history.length history)
+        change eventCount (List.range (history.length + 1))
+          (fun draw => decide (draw = target history.length history)) ≤ 1
+        exact eventCount_range_eq_le_one (history.length + 1)
+          (target history.length history)
       have hfinal :
           b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1)) hit) ≤
+              b * eventCount (List.range (history.length + 1)) hit ≤
             (history.length + 2) * b := by
         calc
           b * (history.length + 1) +
