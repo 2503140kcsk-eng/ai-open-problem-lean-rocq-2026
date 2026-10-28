@@ -277,4 +277,34 @@ def PublicRandomizedDeterministicSeparation
   PublicSetting.AsymptoticSeparationSpec
     DeterministicLearner randomizedRegret deterministicRegret
 
+
+/-- The target subfamily of a constant-function class is input-independent:
+for one fixed family F of constants, every context has the same accepted labels. -/
+def ConstantFamilyAccepts (F : Nat → Prop) (_context label : Nat) : Prop :=
+  F label
+
+theorem constant_family_accepts_independent
+    (F : Nat → Prop) (x x' y : Nat) :
+    ConstantFamilyAccepts F x y ↔ ConstantFamilyAccepts F x' y := by
+  rfl
+
+/-- Consequently, the standard set-valued separation construction using
+different co-singleton sets at different rounds does not directly lift to
+set-realizability by a fixed subfamily of constant hypotheses. -/
+theorem constant_hypothesis_complement_exclusion_is_fixed
+    (excluded : Nat → Nat) (F : Nat → Prop)
+    (h : ∀ t y, ConstantFamilyAccepts F t y ↔ y ≠ excluded t) :
+    ∀ t s, excluded t = excluded s := by
+  intro t s
+  have hnot : ¬ ConstantFamilyAccepts F t (excluded t) := by
+    intro hF
+    have hself : excluded t ≠ excluded t :=
+      (h t (excluded t)).mp hF
+    exact hself rfl
+  by_cases heq : excluded t = excluded s
+  · exact heq
+  · exfalso
+    apply hnot
+    exact (h s (excluded t)).mpr heq
+
 end PublicSetting.Protocol

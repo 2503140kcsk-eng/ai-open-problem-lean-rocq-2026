@@ -16,4 +16,9 @@
    - https://rocq-prover.org/install
    - https://rocq-prover.org/refman/practical-tools/utilities.html
 
+
+5. Raman, Vinod; Subedi, Unique; Tewari, Ambuj. “Online Learning with Set-valued Feedback.” PMLR 247 (2024), Section 4.1, Theorem 3. Used to audit why the usual randomized-versus-deterministic separation does not immediately yield a public set-realizable partial-feedback separation.
+   - https://proceedings.mlr.press/v247/raman24b.html
+   - https://ar5iv.labs.arxiv.org/html/2306.06247
+
 The literature search was performed through academic and web-search connectors. It is not an exhaustive proof of nonexistence of a later result.

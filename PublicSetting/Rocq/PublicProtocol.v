@@ -293,6 +293,43 @@ Proof.
       contradiction.
 Qed.
 
+
+(* For a fixed subfamily of constant hypotheses, the projected acceptable
+   labels are independent of the instance. *)
+Definition ConstantFamilyAccepts (F : nat -> Prop) (_context label : nat) : Prop :=
+  F label.
+
+Lemma constant_family_accepts_independent
+    (F : nat -> Prop) (x x' y : nat) :
+  ConstantFamilyAccepts F x y <-> ConstantFamilyAccepts F x' y.
+Proof.
+  reflexivity.
+Qed.
+
+(* This formally records why the standard set-valued-feedback separation
+   does not transfer verbatim: one global family of constant hypotheses
+   cannot induce different co-singleton exclusions at different rounds. *)
+Lemma constant_hypothesis_complement_exclusion_is_fixed
+    (excluded : nat -> nat) (F : nat -> Prop)
+    (H : forall t y, ConstantFamilyAccepts F t y <-> y <> excluded t) :
+  forall t s, excluded t = excluded s.
+Proof.
+  intros t s.
+  assert (Hnot : ~ ConstantFamilyAccepts F t (excluded t)).
+  {
+    intro HF.
+    apply (proj1 (H t (excluded t))) in HF.
+    contradiction.
+  }
+  destruct (Nat.eq_dec (excluded t) (excluded s)) as [Heq | Hneq].
+  - exact Heq.
+  - exfalso.
+    apply Hnot.
+    apply (proj2 (H s (excluded t))).
+    exact Hneq.
+Qed.
+
+
 (* A proposition stating the requested asymptotic separation is only a
    specification here; no theorem in this file proves the randomized upper bound. *)
 Definition ProtocolIsSublinear (r : nat -> nat) : Prop :=
