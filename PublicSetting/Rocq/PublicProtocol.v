@@ -66,7 +66,7 @@ Section PublicProtocol.
   Lemma learner_view_length (history : list PublicRound) :
     length (learner_view history) = length history.
   Proof.
-    unfold learner_view. apply map_length.
+    unfold learner_view. apply length_map.
   Qed.
 
   Lemma play_round_length
@@ -77,7 +77,7 @@ Section PublicProtocol.
       (omega : Omega) :
     length (play_round adversary learner draw history omega) = length history + 1.
   Proof.
-    unfold play_round. simpl. rewrite app_length. simpl. lia.
+    unfold play_round. simpl. rewrite length_app. simpl. lia.
   Qed.
 
   Definition AcceptedLabels
