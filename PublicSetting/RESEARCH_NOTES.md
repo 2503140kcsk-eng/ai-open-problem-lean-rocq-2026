@@ -101,3 +101,109 @@ This rules out an attractive but incorrect heuristic: *finite parameter dimensio
 ### Necessary obstruction to test in future candidates
 
 A candidate fails immediately if, for distinct queried contexts and each finite exclusion path \((p_s)_{s\in J}\), the family of hypotheses avoiding those exclusions still projects to \(\mathcal Y\setminus\{p_t\}\) at every excluded coordinate and to all of \(\mathcal Y\) elsewhere. A successful class must prevent this extension property while still permitting an adversary to preserve witness-realizability and exclude every deterministic learner's prediction on linearly many rounds. The affine and full-product examples do not meet that latter randomized requirement.
+
+
+## New diagonal construction in the computable-learner model
+
+Date: 2026-10-28. This is a **new restricted-model construction**, not a resolution of the unrestricted open problem. It gives a rigorous candidate satisfying the three requested properties when learners are restricted to total computable policies. The restriction is essential to the diagonal lower bound and must not be silently dropped.
+
+### Model and hypothesis class
+
+Let the label set be \(Y=\mathbb N\), and restrict allowed sets to co-singletons
+\[
+\mathcal S(Y)=\{Y\setminus\{y\}:y\in\mathbb N\}.
+\]
+Enumerate all total computable online policy kernels with valid discrete distributions by indices \(C\in\mathbb N\). A context \(x=(C,\eta)\) consists of a challenge-policy index and a code for a finite public transcript \(\eta\). It is selected before the learner's current draw. Write \(\pi_C(\eta,x)\) for the distribution output by policy \(C\) on that embedded transcript and context. Let \(m(C,\eta,x)\) be the least label attaining the maximum atom of that distribution. Such an atom exists for every probability distribution on countable \(\mathbb N\); tie-breaking by least label makes \(m\) unique. This mode function need not itself be computable for the mathematical definition of the class.
+
+For \(C,m\in\mathbb N\), let \(\rho_{C,m}\) be the increasing bijection from \(\mathbb N\setminus\{C\}\) to \(\mathbb N\setminus\{m\}\). Define, for each \(B\in\mathbb N\), one hypothesis \(h_B:X\to\mathbb N\):
+\[
+h_B(C,\eta,x)=
+\begin{cases}
+m(C,\eta,x),&B=C,\\
+\rho_{C,m(C,\eta,x)}(B),&B\ne C.
+\end{cases}
+\]
+Here the redundant final \(x\) in the display denotes the current context, so equivalently \(h_B(x)=m_x\) if \(B=C_x\), and \(\rho_{C_x,m_x}(B)\) otherwise. For explicit arithmetic,
+\[
+\rho_{C,m}(B)=
+\begin{cases}
+B,&B<C,\ B<m,\\
+B+1,&B<C,\ B\ge m,\\
+B-1,&B>C,\ B\le m,\\
+B,&B>C,\ B>m.
+\end{cases}
+\]
+At every fixed context \(x\), the map \(B\mapsto h_B(x)\) is a bijection \(\mathbb N\to\mathbb N\). If \(B\ne C_x\), then \(h_B(x)\in\{B-1,B,B+1\}\) (with the obvious boundary-safe interpretation at zero).
+
+For a single fixed index \(B^\star\), take one global target family
+\[
+F^\star=\{h_B:B\ne B^\star\}.
+\]
+Because each context's evaluation map is a bijection, its induced acceptable set is exactly
+\[
+F^\star(x)=\mathbb N\setminus\{h_{B^\star}(x)\}.
+\]
+The same \(F^\star\) is used at every round. Every hypothesis in \(F^\star\) has zero loss on every round of that instance, so the comparator loss is zero. The excluded hypothesis \(h_{B^\star}\) has loss one on every round.
+
+### Property 1 — linear deterministic loss for every computable deterministic learner
+
+Let a deterministic learner have code \(A\). At round \(t\), choose context \(x_t=(A,\eta_t)\), where \(\eta_t\) encodes the actual past transcript. Since \(\pi_A(\eta_t,x_t)\) is a point mass at the learner's prediction \(p_t\), its mode is \(m_{x_t}=p_t\), and hence \(h_A(x_t)=p_t\). After observing this deterministic policy, the adversary reveals any \(y_t^{vis}\ne p_t\). The one fixed family \(F^\star=\{h_B:B\ne A\}\) makes that witness acceptable and excludes the learner's prediction on every round. Therefore the realized regret is exactly \(T\).
+
+The adversary chooses \(x_t\) before the current action; it does not need the current sampled prediction. The witness is chosen after the deterministic action as allowed by the public protocol.
+
+### Property 2 — \(O(\log T)\) expected regret for a randomized learner
+
+For horizon \(T\), use a randomized learner \(R_T\) that draws independently and uniformly from \(\{0,\ldots,T-1\}\) each round, ignoring context and history. This is a total computable policy kernel.
+
+An arbitrary legal terminal target family must, by the required co-singleton form and the bijection \(B\mapsto h_B(x)\), omit one fixed hypothesis index \(B^\star\). Its regret is the number
+\[
+M_{B^\star}=\sum_{t=1}^{T}\mathbf1\{\hat y_t=h_{B^\star}(x_t)\}.
+\]
+It suffices to upper-bound \(\mathbb E[\max_B M_B]\), which is stronger than bounding the regret for any particular valid family.
+
+For every fixed \(B\le T\), every time \(t\), and every prior transcript, the context \(x_t\) and therefore \(h_B(x_t)\) are fixed before the current independent uniform draw. Thus
+\[
+\Pr(\hat y_t=h_B(x_t)\mid\text{past})\le 1/T.
+\]
+For any \(k\le T\), the probability that a fixed \(B\le T\) matches at least \(k\) rounds is at most
+\[
+\binom{T}{k}T^{-k}\le(e/k)^k
+\]
+by iterated conditioning over a chosen set of \(k\) rounds and a union bound over all such subsets. Union-bounding over \(T+1\) indices gives
+\[
+\Pr\!\left(\max_{B\le T}M_B\ge k\right)
+\le (T+1)(e/k)^k.
+\]
+Summing this tail, with threshold \(k_0=\lceil4\log(T+2)\rceil\) for sufficiently large \(T\) and the trivial bound for smaller \(T\), yields
+\[
+\mathbb E[\max_{B\le T}M_B]=O(\log(T+2)).
+\]
+
+For \(B>T\), if \(B\ne C_t\), the increasing-bijection formula implies \(h_B(x_t)\ge T\), outside the randomized learner's support. Thus a high-index hypothesis can match the learner only at a round where \(C_t=B>T\) and the draw equals \(m_{x_t}\). Let
+\[
+Z=\sum_{t=1}^{T}\mathbf1\{C_t>T,\ \hat y_t=m_{x_t}\}.
+\]
+The context is chosen before the current draw, so each summand has conditional expectation at most \(1/T\), whence \(\mathbb E Z\le1\). Pathwise,
+\[
+\max_{B\in\mathbb N}M_B
+\le \max_{B\le T}M_B+Z.
+\]
+Consequently
+\[
+\mathbb E[\operatorname{Regret}_T(R_T)]
+\le \mathbb E[\max_B M_B]
+=O(\log(T+2))=o(T).
+\]
+This proof allows the adversary to adapt contexts to the public past. It does not assume that the terminally selected index \(B^\star\) was chosen before random draws.
+
+### Property 3 — one fixed target family at each horizon
+
+For every admissible realized sequence, any valid global target family is \(F^\star=\{h_B:B\ne B^\star\}\) for a single index \(B^\star\); it generates all roundwise acceptable sets simultaneously. The deterministic lower uses \(B^\star=A\). The randomized upper takes a supremum over all \(B^\star\), including an index chosen after observing the entire path. No round-by-round-changing target family is used.
+
+### Scope limitation — why this is not yet the original theorem
+
+The diagonal lower bound requires an index \(A\) for the learner's strategy. It therefore applies to total computable deterministic learners, not to every set-theoretically possible (possibly noncomputable) deterministic strategy in the original paper's model. The randomized upper is valid for the displayed computable learner. The hypothesis class is defined using the fixed enumeration of computable policy kernels, and is independent of the horizon \(T\); only \(R_T\) depends on the horizon.
+
+Thus this is a concrete separation for the explicitly restricted *computable-policy model*. It does **not** establish the requested separation for the unrestricted public partial-feedback model left open in Shao–Fang–Lin–Tao (arXiv:2601.21462v3, Section 5.3). That gap is substantive: an uncountable class of all noncomputable deterministic strategies cannot be substituted into this co-singleton permutation construction, because a per-context bijection into countable \(Y=\mathbb N\) forces the hypothesis index class itself to be countable.
+
+No Lean or Rocq formalization of this new construction has yet been added; the asymptotic tail and diagonal arguments above are mathematical proofs in this research note and must be machine-checked before claiming formal verification.
