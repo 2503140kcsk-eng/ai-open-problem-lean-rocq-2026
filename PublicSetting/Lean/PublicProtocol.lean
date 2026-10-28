@@ -4,7 +4,7 @@ import PublicSetting
 /-!
 # Public-setting protocol model
 
-This module formalizes the information order in Section 5.3 of
+This module formalizes the information order in Section 3.3 of
 Shao, Fang, Lin, and Tao, *Partial Feedback Online Learning* (arXiv:2601.21462v3).
 
 The current-round visible witness is selected from the past public transcript,
