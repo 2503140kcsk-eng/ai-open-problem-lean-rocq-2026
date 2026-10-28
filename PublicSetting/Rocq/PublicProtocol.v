@@ -331,7 +331,7 @@ Lemma terminal_pathwise_loss
 Proof.
   induction T as [|T IH].
   - reflexivity.
-  - simpl [ProtocolTotalLoss MismatchLoss].
+  - cbn [ProtocolTotalLoss MismatchLoss].
     rewrite IH.
     assert (Hstep :
       (if Nat.eq_dec (prediction T) (terminal_exclusion prediction visible T)
@@ -353,7 +353,7 @@ Lemma terminal_comparator_loss_zero
 Proof.
   induction T as [|T IH].
   - reflexivity.
-  - simpl [ProtocolTotalLoss].
+  - cbn [ProtocolTotalLoss].
     rewrite IH.
     destruct (Nat.eq_dec
       (visible T) (terminal_exclusion prediction visible T)) as [Heq | Hneq].
