@@ -53,9 +53,4 @@ theorem threshold_class_dimension_one_pairwise :
     (∀ a b, a < b → ¬ ShattersPair ThresholdClass a b) :=
   ⟨thresholds_shatter_singleton, fun _ _ h => thresholds_not_shatter_pair h⟩
 
-/-- Specification placeholder for the separate information-complexity research
-question. This is a predicate, not a theorem asserting existence of a learner. -/
-def LowECMIResearchTarget (Learner : Type) (hasLinearECMI : Learner → Prop) : Prop :=
-  ∃ learner : Learner, hasLinearECMI learner
-
 end VCLearning
