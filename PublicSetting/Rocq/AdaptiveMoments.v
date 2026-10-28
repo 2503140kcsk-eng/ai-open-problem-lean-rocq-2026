@@ -85,7 +85,7 @@ Proof.
       { intros z Hz. apply Nat.eqb_neq. intro Heq. subst z. contradiction. }
       rewrite (event_count_false_of_all_false xs (fun z => Nat.eqb z x) Hfalse).
       simpl. lia.
-    + rewrite Hx. simpl. specialize (IH Htail target). lia.
+    + simpl. specialize (IH Htail target). lia.
 Qed.
 
 Lemma event_count_outcomes_eq_le_one :
