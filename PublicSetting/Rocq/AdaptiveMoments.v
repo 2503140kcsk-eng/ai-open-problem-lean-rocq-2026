@@ -230,7 +230,7 @@ Proof.
   - cbn [weighted_future_bound].
     replace (current + 2) with (S (current + 1)) by lia.
     rewrite (Nat.mul_comm (S (current + 1)) (weighted_future_bound n (S current))).
-    rewrite Nat.mul_assoc.
+    rewrite <- Nat.mul_assoc.
     rewrite <- (factorial_succ (current + 1)).
     rewrite (IH (S current)).
     replace (current + S n + 1) with (S current + n + 1) by lia.
