@@ -146,7 +146,7 @@ Section ProbabilisticBounds.
       as [Hle | Hgt].
     - exact Hle.
     - assert (Hlt : length samples < T * event_count samples (event_any events)) by lia.
-      pose proof (Nat.mul_lt_mono_pos_l (length samples) (T * event_count samples (event_any events)) (factorial k) Hlt (factorial_pos k)) as Hstrict.
+      pose proof (proj1 (Nat.mul_lt_mono_pos_l (factorial k) (length samples) (T * event_count samples (event_any events)) (factorial_pos k)) Hlt) as Hstrict.
       lia.
   Qed.
 
