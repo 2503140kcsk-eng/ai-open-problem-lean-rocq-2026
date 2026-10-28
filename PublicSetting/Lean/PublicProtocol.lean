@@ -198,7 +198,10 @@ theorem bounded_support_public_attack {D : Type v} {Ω : Type z}
 /-- The requested public-setting separation remains a specification, not a theorem
 in this repository: this type alone does not establish either bound. -/
 def PublicRandomizedDeterministicSeparation
-    (randomizedRegret deterministicRegret : Nat → Nat) : Prop :=
-  PublicSetting.IsSublinear randomizedRegret ∧ PublicSetting.IsLinear deterministicRegret
+    (DeterministicLearner : Type)
+    (randomizedRegret : Nat → Nat)
+    (deterministicRegret : DeterministicLearner → Nat → Nat) : Prop :=
+  PublicSetting.AsymptoticSeparationSpec
+    DeterministicLearner randomizedRegret deterministicRegret
 
 end PublicSetting.Protocol
