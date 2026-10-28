@@ -165,7 +165,7 @@ Section ProbabilisticBounds.
       total_value samples (fun _ => K) = K * length samples.
   Proof.
     induction samples as [|x xs IH]; intros K; simpl.
-    - reflexivity.
+    - rewrite Nat.mul_0_r. reflexivity.
     - rewrite (IH K). rewrite Nat.mul_succ_r. lia.
   Qed.
 
@@ -175,7 +175,7 @@ Section ProbabilisticBounds.
         T * event_count samples bad.
   Proof.
     induction samples as [|x xs IH]; intros T bad; simpl.
-    - reflexivity.
+    - rewrite Nat.mul_0_r. reflexivity.
     - destruct (bad x); simpl; rewrite (IH T bad); rewrite ?Nat.mul_add_distr_l; simpl; lia.
   Qed.
 
