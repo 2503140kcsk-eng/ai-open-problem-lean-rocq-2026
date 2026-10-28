@@ -96,7 +96,7 @@ def complementSingletonInstance (excluded : Nat → Nat) :
           simpa using hy
         · have hne : excluded s + 1 ≠ excluded s :=
             Nat.ne_of_gt (Nat.lt_succ_self (excluded s))
-          simpa [hst] using hne
+          simp [hst]
       · simp
     · rintro ⟨h, hh, rfl⟩
       exact hh t
@@ -146,7 +146,7 @@ theorem complementSingleton_is_global (excluded : Nat → Nat) :
           simpa using hy
         · have hne : excluded s + 1 ≠ excluded s :=
             Nat.ne_of_gt (Nat.lt_succ_self (excluded s))
-          simpa [hst] using hne
+          simp [hst]
       · simp
     · rintro ⟨h, hh, rfl⟩
       exact hh t
