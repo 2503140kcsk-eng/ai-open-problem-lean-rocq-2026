@@ -2,3 +2,4 @@
 PublicSetting.v
 PublicProtocol.v
 ProbabilisticBounds.v
+AdaptiveMoments.v
