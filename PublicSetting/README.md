@@ -35,7 +35,7 @@ All stated lemmas are intended to be proved without placeholders. The complement
 
 ## What remains open in this repository
 
-The main separation is **not proved** here. The operational model now records the learner's own previous sampled predictions and gives the public adversary access to all completed previous rounds, while keeping current-round sampling hidden until after the visible witness is chosen. It also enforces one global target subfamily. The remaining bridge is to define and verify probability measures, the paper's exact minimax-regret semantics, and then prove a construction or impossibility theorem for every horizon T. The asymptotic profile predicate below is only a specification, not evidence that a game realizes those profiles.
+The main separation is **not proved** here. The operational model now records the learner's own previous sampled predictions and gives the public adversary access to all completed previous rounds, while keeping current-round sampling hidden until after the visible witness is chosen. It also enforces one global target subfamily. The remaining bridge is to define and verify probability measures, the paper's exact minimax-regret semantics, connect the discrete low-mass lemmas to conditional expected loss, and then prove a construction or impossibility theorem for every horizon T. The asymptotic profile predicate below is only a specification, not evidence that a game realizes those profiles.
 
 No theorem named “exists separation” is declared or assumed. No axiom, sorry, or admitted step is used to pretend the open problem is solved.
 
