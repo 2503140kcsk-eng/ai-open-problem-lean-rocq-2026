@@ -10,7 +10,7 @@ The horizon quantifier matters. A result for one finite T does not establish asy
 
 ## Literature audit
 
-Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. Section 5.2 explicitly says the existence of a randomized/deterministic learnability separation under public setting remains open. The same paper gives a different result: randomized learnability under oblivious setting can fail to persist under public setting (Theorem 19). The two statements must not be conflated.
+Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. Section 3.3 explicitly says the existence of a randomized/deterministic learnability separation under the public setting remains open. The same paper gives a different result: randomized learnability under the oblivious setting can fail to persist under the public setting (Theorem 18). The two statements must not be conflated.
 
 - Paper: https://arxiv.org/abs/2601.21462
 - HTML source: https://arxiv.org/html/2601.21462v3
