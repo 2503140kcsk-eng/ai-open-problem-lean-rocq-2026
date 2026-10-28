@@ -127,7 +127,7 @@ theorem complement_value_iff (prediction : Nat → Nat) (t y : Nat) :
         simpa using hy
       · have hne : prediction s + 1 ≠ prediction s :=
           Nat.ne_of_gt (Nat.lt_succ_self (prediction s))
-        simpa [hst] using hne
+        simp [hst]
     · rfl
 
 theorem complement_family_accepts_iff (prediction : Nat → Nat) (t y : Nat) :
