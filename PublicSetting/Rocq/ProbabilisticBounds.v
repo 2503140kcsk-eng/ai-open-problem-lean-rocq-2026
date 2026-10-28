@@ -105,6 +105,21 @@ Section ProbabilisticBounds.
       + lia.
   Qed.
 
+  Theorem factorial_mul_union_tail_le :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (k q : nat),
+      (forall event, In event events ->
+        factorial k * event_count samples event <= q ^ k * length samples) ->
+      factorial k * event_count samples (event_any events) <=
+        length events * (q ^ k * length samples).
+  Proof.
+    intros samples events k q Htail.
+    eapply Nat.le_trans.
+    - apply Nat.mul_le_mono_l.
+      apply event_count_any_le_sum.
+    - apply factorial_mul_event_counts_le. exact Htail.
+  Qed.
+
   Lemma bad_budget_of_union_tail_bound :
     forall (samples : list Omega) (events : list (Omega -> bool))
       (k q T : nat),
@@ -176,21 +191,6 @@ Section ProbabilisticBounds.
 
   (* If factorial k * count(event_i) <= q^k * N for each member of events,
      then the finite union bound follows after cross-multiplication. *)
-  Theorem factorial_mul_union_tail_le :
-    forall (samples : list Omega) (events : list (Omega -> bool))
-      (k q : nat),
-      (forall event, In event events ->
-        factorial k * event_count samples event <= q ^ k * length samples) ->
-      factorial k * event_count samples (event_any events) <=
-        length events * (q ^ k * length samples).
-  Proof.
-    intros samples events k q Htail.
-    eapply Nat.le_trans.
-    - apply Nat.mul_le_mono_l.
-      apply event_count_any_le_sum.
-    - apply factorial_mul_event_counts_le. exact Htail.
-  Qed.
-
   Theorem total_value_le_threshold_plus_one :
     forall (samples : list Omega) (loss : Omega -> nat)
       (bad : Omega -> bool) (K T : nat),
