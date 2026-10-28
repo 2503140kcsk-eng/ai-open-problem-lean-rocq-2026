@@ -105,6 +105,36 @@ Section ProbabilisticBounds.
       + rewrite Nat.mul_succ_l. lia.
   Qed.
 
+  Lemma bad_budget_of_union_tail_bound :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (k q T : nat),
+      (forall event, In event events ->
+        factorial k * event_count samples event <= q ^ k * length samples) ->
+      T * length events * q ^ k <= factorial k ->
+      T * event_count samples (event_any events) <= length samples.
+  Proof.
+    intros samples events k q T Htail Harith.
+    pose proof (factorial_mul_union_tail_le samples events k q Htail) as Hunion.
+    assert (Hscaled :
+      factorial k * (T * event_count samples (event_any events)) <=
+      factorial k * length samples).
+    {
+      eapply Nat.le_trans.
+      - replace (factorial k * (T * event_count samples (event_any events)))
+          with (T * (factorial k * event_count samples (event_any events))) by nia.
+        apply Nat.mul_le_mono_l. exact Hunion.
+      - replace (T * (length events * (q ^ k * length samples)))
+          with ((T * length events * q ^ k) * length samples) by nia.
+        apply Nat.mul_le_mono_r. exact Harith.
+    }
+    destruct (le_gt_dec (T * event_count samples (event_any events)) (length samples))
+      as [Hle | Hgt].
+    - exact Hle.
+    - assert (Hlt : length samples < T * event_count samples (event_any events)) by lia.
+      pose proof (Nat.mul_lt_mono_pos_l (factorial_pos k) Hlt) as Hstrict.
+      lia.
+  Qed.
+
   Lemma total_value_mono :
     forall (samples : list Omega) (f g : Omega -> nat),
       (forall x, f x <= g x) ->
