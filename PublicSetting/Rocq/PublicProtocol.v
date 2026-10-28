@@ -470,15 +470,20 @@ Lemma prefix_scaled_gt_nat
 Proof.
   induction N as [|N IH]; intros HN Hall.
   - lia.
-  - change (S N * D < T * (NatPrefixMass mass N + mass N)).
-    rewrite Nat.mul_succ_l, Nat.mul_add_distr_l.
-    assert (Hprev : N * D < T * NatPrefixMass mass N).
-    {
-      apply IH; [lia |].
-      intros i Hi. apply Hall. lia.
-    }
-    assert (Hlast : D < T * mass N) by (apply Hall; lia).
-    lia.
+  - destruct N as [|N].
+    + simpl [NatPrefixMass].
+      specialize (Hall 0 (by lia)).
+      lia.
+    + change (S (S N) * D <
+        T * (NatPrefixMass mass (S N) + mass (S N))).
+      rewrite Nat.mul_succ_l, Nat.mul_add_distr_l.
+      assert (Hprev : S N * D < T * NatPrefixMass mass (S N)).
+      {
+        apply IH; [lia |].
+        intros i Hi. apply Hall. lia.
+      }
+      assert (Hlast : D < T * mass (S N)) by (apply Hall; lia).
+      lia.
 Qed.
 
 Lemma finite_low_mass_or_all_large
