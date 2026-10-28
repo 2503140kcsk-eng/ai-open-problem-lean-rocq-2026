@@ -278,7 +278,7 @@ Lemma visible_ne_terminal_exclusion
 Proof.
   unfold terminal_exclusion.
   destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
-  - rewrite Heq. lia.
+  - lia.
   - congruence.
 Qed.
 
@@ -289,7 +289,7 @@ Lemma prediction_eq_terminal_exclusion_iff
 Proof.
   unfold terminal_exclusion.
   destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
-  - rewrite Heq. split; [lia | congruence].
+  - split; [lia | congruence].
   - split; [reflexivity | intros; congruence].
 Qed.
 
