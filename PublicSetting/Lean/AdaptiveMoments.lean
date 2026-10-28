@@ -115,7 +115,7 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
                     (fun draw => if hit draw then b else 0) := by
                 rw [totalValue_add]
           _ = b * (history.length + 1) +
-                b * eventCount (List.range (history.length + 1) hit) := by
+                b * eventCount (List.range (history.length + 1)) hit := by
                 rw [totalValue_const, totalValue_indicator]
       have hcount : eventCount (List.range (history.length + 1)) hit ≤ 1 := by
         simpa [hit, hitAt] using
