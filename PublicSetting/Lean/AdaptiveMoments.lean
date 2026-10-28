@@ -133,15 +133,19 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
           b * (history.length + 1) +
               b * eventCount (List.range (history.length + 1)) hit ≤
             (history.length + 2) * b := by
+        have hidx : history.length + 2 = (history.length + 1) + 1 := by omega
         calc
           b * (history.length + 1) +
               b * eventCount (List.range (history.length + 1)) hit
               ≤ b * (history.length + 1) + b :=
                 Nat.add_le_add_left hcountMul _
-          _ = (history.length + 2) * b := by
-                have hidx : history.length + 2 = (history.length + 1) + 1 := by omega
-                rw [Nat.mul_comm b (history.length + 1), hidx, Nat.add_mul]
+          _ = (history.length + 1) * b + b := by
+                rw [Nat.mul_comm b (history.length + 1)]
+          _ = ((history.length + 1) + 1) * b := by
+                symm
+                rw [Nat.add_mul]
                 simp
+          _ = (history.length + 2) * b := by rw [← hidx]
       calc
         weightedFuture target (n + 1) history
             = totalValue (List.range (history.length + 1))
@@ -150,7 +154,7 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
         _ ≤ totalValue (List.range (history.length + 1))
               (fun draw => b + (if hit draw then b else 0)) := hsum
         _ = b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1)) hit) := hdecomp
+              b * eventCount (List.range (history.length + 1)) hit := hdecomp
         _ ≤ (history.length + 2) * b := hfinal
         _ = weightedFutureBound (n + 1) history.length := by
               simp [weightedFutureBound, b, Nat.mul_comm]
@@ -161,15 +165,18 @@ theorem factorial_succ (n : Nat) :
 theorem weightedFutureBound_mul_factorial (n current : Nat) :
     weightedFutureBound n current * factorial (current + 1) =
       factorial (current + n + 1) := by
-  induction n generalizing current with
+  revert current
+  induction n with
   | zero =>
+      intro current
       simp [weightedFutureBound]
   | succ n ih =>
+      intro current
       calc
         weightedFutureBound (n + 1) current * factorial (current + 1)
             = weightedFutureBound n (current + 1) * factorial (current + 2) := by
                 simp [weightedFutureBound, factorial_succ,
-                  Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+                  Nat.mul_assoc, Nat.mul_left_comm]
         _ = factorial ((current + 1) + n + 1) := ih (current + 1)
         _ = factorial (current + (n + 1) + 1) := by
               congr 1 <;> omega
