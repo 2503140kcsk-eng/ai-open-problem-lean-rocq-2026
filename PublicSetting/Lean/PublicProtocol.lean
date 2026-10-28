@@ -1,4 +1,5 @@
 import Lean
+import PublicSetting
 
 /-!
 # Public-setting protocol model
