@@ -245,4 +245,22 @@ theorem totalValue_le_threshold_plus_one {Ω : Type}
     _ = (K + 1) * samples.length := by
       simp [Nat.add_mul]
 
+
+/-- End-to-end finite-sample consequence of the per-index factorial tail
+premise. The assumption on each event is exactly where the conditional
+uniform-draw / elementary-symmetric-sum proof must be plugged in. Once it is
+available, the union bound and expectation truncation are fully checked here. -/
+theorem totalValue_le_from_factorial_tails {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (loss : Ω → Nat) (K T q : Nat)
+    (eachTail : ∀ event, event ∈ events →
+      factorial K * eventCount samples event ≤ q ^ K * samples.length)
+    (arithmeticBudget : T * events.length * q ^ K ≤ factorial K)
+    (pointwise : ∀ x,
+      loss x ≤ K + (if eventAny events x then T else 0)) :
+    totalValue samples loss ≤ (K + 1) * samples.length := by
+  exact totalValue_le_threshold_plus_one samples loss (eventAny events) K T
+    pointwise
+    (badBudget_of_union_tail_bound samples events K q T eachTail arithmeticBudget)
+
 end PublicSetting.ProbabilisticBounds
