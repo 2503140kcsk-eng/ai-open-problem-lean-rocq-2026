@@ -48,12 +48,12 @@ theorem eventCount_eq_le_one (xs : List Nat) (hxs : xs.Nodup) (target : Nat) :
         have hzero := eventCount_zero_of_all_false xs
           (fun z => decide (z = x)) htailFalse
         simp [eventCount, hzero]
-      · have htail := ih htailNodup target
+      · have htail := ih htailNodup
         simp [eventCount, hxy, htail]
 
 theorem eventCount_range_eq_le_one (n target : Nat) :
     eventCount (List.range n) (fun x => decide (x = target)) ≤ 1 := by
-  exact eventCount_eq_le_one (List.range n) (by simp) target
+  exact eventCount_eq_le_one (List.range n) (List.nodup_range n) target
 
 def weightedFuture (target : Nat → List Nat → Nat) : Nat → List Nat → Nat
   | 0, _ => 1
@@ -106,7 +106,7 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
           totalValue (List.range (history.length + 1))
               (fun draw => b + (if hit draw then b else 0)) =
             b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1) hit) := by
+              b * eventCount (List.range (history.length + 1)) hit := by
         calc
           totalValue (List.range (history.length + 1))
               (fun draw => b + (if hit draw then b else 0))
