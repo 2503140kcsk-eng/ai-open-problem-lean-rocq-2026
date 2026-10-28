@@ -452,6 +452,70 @@ Definition ProtocolIsLinear (r : nat -> nat) : Prop :=
     0 < a /\ 0 < b /\
     forall T : nat, N <= T -> a * T <= b * r T.
 
+(* Integer-scaled subprobability analogue of the Lean low-mass lemma.
+   mass i / D is a rational atom encoded by its integer numerator and common
+   denominator D; every finite prefix of numerators sums to at most D. *)
+
+Fixpoint NatPrefixMass (mass : nat -> nat) (n : nat) : nat :=
+  match n with
+  | O => O
+  | S k => NatPrefixMass mass k + mass k
+  end.
+
+Lemma prefix_scaled_gt_nat
+    (mass : nat -> nat) (T D N : nat) :
+  0 < N ->
+  (forall i, i < N -> D < T * mass i) ->
+  N * D < T * NatPrefixMass mass N.
+Proof.
+  induction N as [|N IH]; intros HN Hall.
+  - lia.
+  - change (S N * D < T * (NatPrefixMass mass N + mass N)).
+    rewrite Nat.mul_succ_l, Nat.mul_add.
+    assert (Hprev : N * D < T * NatPrefixMass mass N).
+    {
+      apply IH; [lia |].
+      intros i Hi. apply Hall. lia.
+    }
+    assert (Hlast : D < T * mass N) by (apply Hall; lia).
+    lia.
+Qed.
+
+Lemma finite_low_mass_or_all_large
+    (mass : nat -> nat) (T D N : nat) :
+  (exists i, i < N /\ T * mass i <= D) \/
+  (forall i, i < N -> D < T * mass i).
+Proof.
+  induction N as [|N IH].
+  - right. intros i Hi. lia.
+  - destruct IH as [[i [Hi Hle]] | Hall].
+    + left. exists i. split; [lia | exact Hle].
+    + destruct (Nat.le_gt_cases (T * mass N) D) as [Hle | Hgt].
+      * left. exists N. split; [lia | exact Hle].
+      * right. intros i Hi.
+        destruct (Nat.lt_ge_cases i N) as [Hlt | Hge].
+        -- apply Hall. exact Hlt.
+        -- assert (i = N) by lia. subst i. exact Hgt.
+Qed.
+
+Lemma exists_scaled_low_mass_nat
+    (mass : nat -> nat) (T D : nat)
+    (prefix_bound : forall n, NatPrefixMass mass n <= D) :
+  exists y, T * mass y <= D.
+Proof.
+  destruct (finite_low_mass_or_all_large mass T D (S T)) as [Hex | Hall].
+  - destruct Hex as [y [_ Hle]]. exists y. exact Hle.
+  - exfalso.
+    pose proof (prefix_scaled_gt_nat mass T D (S T) (by lia) Hall) as Hsum.
+    assert (Hprefix : T * NatPrefixMass mass (S T) <= T * D).
+    {
+      apply Nat.mul_le_mono_l.
+      apply prefix_bound.
+    }
+    rewrite Nat.mul_succ_l in Hsum.
+    lia.
+Qed.
+
 Definition PublicRandomizedDeterministicSeparation
     (DeterministicLearner : Type)
     (randomizedRegret : nat -> nat)
