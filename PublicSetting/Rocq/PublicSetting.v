@@ -1,4 +1,4 @@
-Require Import Arith Lia.
+From Stdlib Require Import Arith Lia.
 
 (* Integer-scaled asymptotic definitions for natural-valued regret profiles. *)
 Definition IsSublinear (r : nat -> nat) : Prop :=
@@ -8,7 +8,8 @@ Definition IsSublinear (r : nat -> nat) : Prop :=
 
 Definition IsLinear (r : nat -> nat) : Prop :=
   exists a b N : nat,
-    0 < a /\ 0 < b /\
+    0 < a /\
+    0 < b /\
     forall T : nat, N <= T -> a * T <= b * r T.
 
 (* A single profile cannot be both o(T) and Omega(T). *)
