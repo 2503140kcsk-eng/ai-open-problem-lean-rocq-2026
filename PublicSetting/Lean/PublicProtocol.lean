@@ -270,6 +270,103 @@ theorem bounded_support_pathwise_regret_gap {D : Type v} {Ω : Type z}
   rw [bounded_support_comparator_loss_zero T sampler actions randomStates]
   simp
 
+/-- Choose the terminal excluded label after both the realized prediction and
+visible witness are known. If they differ, exclude the prediction; on a collision,
+exclude a different label so the witness remains accepted. -/
+def terminalExclusion (prediction visible : Nat → Nat) (t : Nat) : Nat :=
+  if prediction t = visible t then visible t + 1 else prediction t
+
+theorem visible_ne_terminalExclusion
+    (prediction visible : Nat → Nat) (t : Nat) :
+    visible t ≠ terminalExclusion prediction visible t := by
+  by_cases h : prediction t = visible t
+  · simpa [terminalExclusion, h] using
+      (Nat.ne_of_gt (Nat.lt_succ_self (visible t)))
+  · simpa [terminalExclusion, h] using
+      (show visible t ≠ prediction t from fun hv => h hv.symm)
+
+theorem prediction_eq_terminalExclusion_iff
+    (prediction visible : Nat → Nat) (t : Nat) :
+    prediction t = terminalExclusion prediction visible t ↔
+      prediction t ≠ visible t := by
+  by_cases h : prediction t = visible t <;> simp [terminalExclusion, h]
+
+def TerminalFamily (prediction visible : Nat → Nat) (f : Nat → Nat) : Prop :=
+  ComplementFamily (terminalExclusion prediction visible) f
+
+def TerminalAccepts (prediction visible : Nat → Nat) (t y : Nat) : Prop :=
+  ComplementAccepts (terminalExclusion prediction visible) t y
+
+/-- For every pair of finite/infinite paths, one nonempty global family can make
+each visible witness acceptable. The target is chosen from the completed path,
+as allowed by the public-setting terminal consistency rule. -/
+def terminalGlobalInstance (prediction visible : Nat → Nat) :
+    PublicSetting.GlobalHypothesisInstance where
+  H := Nat → Nat
+  X := Nat
+  Y := Nat
+  eval := fun f t => f t
+  target := TerminalFamily prediction visible
+  contexts := fun t => t
+  accepted := fun t y => TerminalAccepts prediction visible t y
+  visible := visible
+  target_nonempty :=
+    complement_family_nonempty (terminalExclusion prediction visible)
+  accepted_exactly_target_values := by
+    intro t y
+    rfl
+  visible_is_accepted := by
+    intro t
+    exact (complement_family_accepts_iff
+      (terminalExclusion prediction visible) t (visible t)).2
+      (visible_ne_terminalExclusion prediction visible t)
+
+/-- Count the rounds on which the prediction differs from its visible witness. -/
+def mismatchLoss : Nat → (Nat → Nat) → (Nat → Nat) → Nat
+  | 0, _, _ => 0
+  | Nat.succ n, prediction, visible =>
+      mismatchLoss n prediction visible +
+        (if prediction n = visible n then 0 else 1)
+
+theorem terminal_pathwise_loss
+    (T : Nat) (prediction visible : Nat → Nat) :
+    PublicSetting.totalLoss T (terminalExclusion prediction visible) prediction =
+      mismatchLoss T prediction visible := by
+  induction T with
+  | zero => rfl
+  | succ T ih =>
+      simp only [PublicSetting.totalLoss, mismatchLoss]
+      rw [ih]
+      have hstep :
+          (if prediction T = terminalExclusion prediction visible T then 1 else 0) =
+          (if prediction T = visible T then 0 else 1) := by
+        by_cases h : prediction T = visible T <;>
+          simp [terminalExclusion, h]
+      rw [hstep]
+
+theorem terminal_comparator_loss_zero
+    (T : Nat) (prediction visible : Nat → Nat) :
+    PublicSetting.totalLoss T (terminalExclusion prediction visible) visible = 0 := by
+  induction T with
+  | zero => rfl
+  | succ T ih =>
+      simp only [PublicSetting.totalLoss]
+      rw [ih]
+      have hne := visible_ne_terminalExclusion prediction visible T
+      simp [hne]
+
+/-- The full-product target can make exactly the non-collision rounds mistakes.
+Thus a randomized upper bound cannot follow from the round order alone: it must
+use structural restrictions on the hypothesis class that prevent this terminal
+target from matching most realized predictions. -/
+theorem terminal_pathwise_regret_gap
+    (T : Nat) (prediction visible : Nat → Nat) :
+    PublicSetting.totalLoss T (terminalExclusion prediction visible) prediction -
+    PublicSetting.totalLoss T (terminalExclusion prediction visible) visible =
+      mismatchLoss T prediction visible := by
+  rw [terminal_pathwise_loss, terminal_comparator_loss_zero]
+  simp
+
 /-- The requested public-setting separation remains a specification, not a theorem
 in this repository: this type alone does not establish either bound. -/
 def PublicRandomizedDeterministicSeparation

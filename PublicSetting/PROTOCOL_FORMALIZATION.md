@@ -49,3 +49,7 @@ rocq compile -Q . PublicSetting PublicProtocol.v
 ```
 
 The workflow verifies the existing foundational proofs and the public-protocol module using free GitHub Actions and the version-pinned official Rocq container.
+
+## General pathwise terminal-target lemma
+
+The protocol sources also define a terminal exclusion path from any pair of realized predictions and pre-draw visible witnesses: exclude the prediction when it differs from the witness; on a collision, exclude a different label. Both proof assistants establish that one global family of all functions avoiding that exclusion sequence accepts every visible witness, and that its pathwise loss equals the number of prediction/witness mismatches (the comparator witness path has zero loss). This applies to the full product class, not only bounded-support samplers. It is a *negative boundary result*: a randomized upper bound must rely on structural restrictions on the hypothesis class; the lemma does not supply that upper bound.

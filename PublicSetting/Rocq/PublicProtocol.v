@@ -266,6 +266,111 @@ Proof.
   lia.
 Qed.
 
+(* General terminal target: exclude the realized prediction when it differs
+   from the visible witness; on a collision, exclude witness+1 instead. *)
+Definition terminal_exclusion (prediction visible : nat -> nat) (t : nat) : nat :=
+  if Nat.eq_dec (prediction t) (visible t)
+  then visible t + 1 else prediction t.
+
+Lemma visible_ne_terminal_exclusion
+    (prediction visible : nat -> nat) (t : nat) :
+  visible t <> terminal_exclusion prediction visible t.
+Proof.
+  unfold terminal_exclusion.
+  destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
+  - rewrite Heq. lia.
+  - congruence.
+Qed.
+
+Lemma prediction_eq_terminal_exclusion_iff
+    (prediction visible : nat -> nat) (t : nat) :
+  prediction t = terminal_exclusion prediction visible t <->
+  prediction t <> visible t.
+Proof.
+  unfold terminal_exclusion.
+  destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
+  - rewrite Heq. split; [lia | congruence].
+  - split; [reflexivity | intros; congruence].
+Qed.
+
+Definition TerminalFamily (prediction visible : nat -> nat) (f : nat -> nat) : Prop :=
+  ComplementFamily (terminal_exclusion prediction visible) f.
+
+Definition TerminalAccepts
+    (prediction visible : nat -> nat) (t y : nat) : Prop :=
+  ComplementAccepts (terminal_exclusion prediction visible) t y.
+
+Lemma terminal_global_family_accepts_visible
+    (prediction visible : nat -> nat) :
+  (exists f, TerminalFamily prediction visible f) /\
+  (forall t, TerminalAccepts prediction visible t (visible t)).
+Proof.
+  split.
+  - apply complement_family_nonempty.
+  - intros t.
+    apply (proj2 (complement_family_accepts_iff
+      (terminal_exclusion prediction visible) t (visible t))).
+    apply visible_ne_terminal_exclusion.
+Qed.
+
+Fixpoint MismatchLoss (T : nat)
+    (prediction visible : nat -> nat) : nat :=
+  match T with
+  | O => 0
+  | S n =>
+      MismatchLoss n prediction visible +
+        (if Nat.eq_dec (prediction n) (visible n) then 0 else 1)
+  end.
+
+Lemma terminal_pathwise_loss
+    (T : nat) (prediction visible : nat -> nat) :
+  ProtocolTotalLoss T (terminal_exclusion prediction visible) prediction =
+    MismatchLoss T prediction visible.
+Proof.
+  induction T as [|T IH].
+  - reflexivity.
+  - simpl [ProtocolTotalLoss, MismatchLoss].
+    rewrite IH.
+    assert (Hstep :
+      (if Nat.eq_dec (prediction T) (terminal_exclusion prediction visible T)
+       then 1 else 0) =
+      (if Nat.eq_dec (prediction T) (visible T) then 0 else 1)).
+    {
+      unfold terminal_exclusion.
+      destruct (Nat.eq_dec (prediction T) (visible T)) as [Heq | Hneq].
+      - rewrite Heq.
+        destruct (Nat.eq_dec (visible T) (visible T + 1)); lia.
+      - destruct (Nat.eq_dec (prediction T) (prediction T)); [reflexivity | contradiction].
+    }
+    rewrite Hstep.
+    reflexivity.
+Qed.
+
+Lemma terminal_comparator_loss_zero
+    (T : nat) (prediction visible : nat -> nat) :
+  ProtocolTotalLoss T (terminal_exclusion prediction visible) visible = 0.
+Proof.
+  induction T as [|T IH].
+  - reflexivity.
+  - simpl [ProtocolTotalLoss].
+    rewrite IH.
+    destruct (Nat.eq_dec
+      (visible T) (terminal_exclusion prediction visible T)) as [Heq | Hneq].
+    + exfalso. exact (visible_ne_terminal_exclusion prediction visible T Heq).
+    + reflexivity.
+Qed.
+
+Lemma terminal_pathwise_regret_gap
+    (T : nat) (prediction visible : nat -> nat) :
+  ProtocolTotalLoss T (terminal_exclusion prediction visible) prediction -
+  ProtocolTotalLoss T (terminal_exclusion prediction visible) visible =
+    MismatchLoss T prediction visible.
+Proof.
+  rewrite (terminal_pathwise_loss T prediction visible).
+  rewrite (terminal_comparator_loss_zero T prediction visible).
+  lia.
+Qed.
+
 (* After the draw path is known, one nonempty global target family
    F = {f | forall t, f(t) <> prediction(t)} realizes each witness and
    excludes every sampled prediction. Witnesses were chosen pre-draw via the
