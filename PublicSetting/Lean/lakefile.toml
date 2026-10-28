@@ -1,6 +1,9 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting"]
+defaultTargets = ["PublicSetting", "PublicProtocol"]
 
 [[lean_lib]]
 name = "PublicSetting"
+
+[[lean_lib]]
+name = "PublicProtocol"
