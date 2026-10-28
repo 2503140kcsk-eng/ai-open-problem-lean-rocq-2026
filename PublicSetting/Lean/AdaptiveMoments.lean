@@ -123,19 +123,25 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
           (fun draw => decide (draw = target history.length history)) ≤ 1
         exact eventCount_range_eq_le_one (history.length + 1)
           (target history.length history)
+      have hcountMul :
+          b * eventCount (List.range (history.length + 1)) hit ≤ b := by
+        calc
+          b * eventCount (List.range (history.length + 1)) hit
+              ≤ b * 1 := Nat.mul_le_mul_left b hcount
+          _ = b := by simp
       have hfinal :
           b * (history.length + 1) +
               b * eventCount (List.range (history.length + 1)) hit ≤
             (history.length + 2) * b := by
         calc
           b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1)) hit)
+              b * eventCount (List.range (history.length + 1)) hit
               ≤ b * (history.length + 1) + b :=
-                Nat.add_le_add_left (Nat.mul_le_mul_left b hcount) _
+                Nat.add_le_add_left hcountMul _
           _ = (history.length + 2) * b := by
-                simp [Nat.add_mul, Nat.mul_add, Nat.mul_comm,
-                  Nat.mul_left_comm, Nat.mul_assoc, Nat.add_assoc,
-                  Nat.add_comm, Nat.add_left_comm]
+                have hidx : history.length + 2 = (history.length + 1) + 1 := by omega
+                rw [Nat.mul_comm b (history.length + 1), hidx, Nat.add_mul]
+                simp
       calc
         weightedFuture target (n + 1) history
             = totalValue (List.range (history.length + 1))
@@ -155,7 +161,7 @@ theorem factorial_succ (n : Nat) :
 theorem weightedFutureBound_mul_factorial (n current : Nat) :
     weightedFutureBound n current * factorial (current + 1) =
       factorial (current + n + 1) := by
-  induction n with
+  induction n generalizing current with
   | zero =>
       simp [weightedFutureBound]
   | succ n ih =>
@@ -174,7 +180,7 @@ theorem weightedFuture_le_factorial_succ
   have hbound := weightedFuture_le_bound target T []
   have hfactor := weightedFutureBound_mul_factorial T 0
   have hboundEq : weightedFutureBound T 0 = factorial (T + 1) := by
-    simpa using hfactor
+    simpa [factorial] using hfactor
   simpa [hboundEq] using hbound
 
 end PublicSetting.AdaptiveMoments
