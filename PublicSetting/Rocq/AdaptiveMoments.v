@@ -224,10 +224,10 @@ Theorem weighted_future_bound_mul_factorial :
     factorial (current + n + 1).
 Proof.
   induction n as [|n IH]; intros current.
-  - simpl [weighted_future_bound].
+  - cbn [weighted_future_bound].
     replace (current + 0 + 1) with (current + 1) by lia.
-    reflexivity.
-  - simpl [weighted_future_bound].
+    rewrite Nat.add_0_r. reflexivity.
+  - cbn [weighted_future_bound].
     replace (current + 2) with (S (current + 1)) by lia.
     rewrite (Nat.mul_comm (S (current + 1)) (weighted_future_bound n (S current))).
     rewrite Nat.mul_assoc.
