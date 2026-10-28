@@ -21,7 +21,15 @@ jobs:
       run:
         working-directory: PublicSetting/Lean
     steps:
-      - uses: actions/checkout@v4
+      # Configure Git before checkout to suppress init.defaultBranch advice from git init.
+      - name: Configure Git default branch
+        working-directory: ${{ runner.temp }}
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@v7
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
       - name: Install elan
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
@@ -35,7 +43,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      # Configure Git before checkout to suppress init.defaultBranch advice from git init.
+      - name: Configure Git default branch
+        working-directory: ${{ runner.temp }}
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@v7
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
       - name: Show pinned Rocq version and compile
         shell: bash
         run: |
