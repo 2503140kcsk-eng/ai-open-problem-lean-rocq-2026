@@ -142,6 +142,40 @@ theorem factorial_mul_union_tail_le {Ω : Type}
     _ ≤ events.length * (q ^ k * samples.length) :=
       factorial_mul_sumEventCounts_le samples events k q eachTail
 
+/-- If the union of index-tail events is small enough after
+cross-multiplication, its contribution to the uniform probability is at most
+1/T. This is the arithmetic bridge from a factorial-scaled union bound to the
+expectation-truncation lemma below. -/
+theorem badBudget_of_union_tail_bound {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (k q T : Nat)
+    (eachTail : ∀ event, event ∈ events →
+      factorial k * eventCount samples event ≤ q ^ k * samples.length)
+    (arithmeticBudget : T * events.length * q ^ k ≤ factorial k) :
+    T * eventCount samples (eventAny events) ≤ samples.length := by
+  have hunion := factorial_mul_union_tail_le samples events k q eachTail
+  have hscaled :
+      factorial k * (T * eventCount samples (eventAny events)) ≤
+        factorial k * samples.length := by
+    calc
+      factorial k * (T * eventCount samples (eventAny events))
+          = T * (factorial k * eventCount samples (eventAny events)) := by
+              simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+      _ ≤ T * (events.length * (q ^ k * samples.length)) :=
+            Nat.mul_le_mul_left T hunion
+      _ = (T * events.length * q ^ k) * samples.length := by
+            simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+      _ ≤ factorial k * samples.length :=
+            Nat.mul_le_mul_right samples.length arithmeticBudget
+  by_contra hnot
+  have hlt : samples.length < T * eventCount samples (eventAny events) :=
+    Nat.lt_of_not_ge hnot
+  have hstrict :
+      factorial k * samples.length <
+        factorial k * (T * eventCount samples (eventAny events)) :=
+    Nat.mul_lt_mul_of_pos_left hlt (factorial_pos k)
+  omega
+
 theorem totalValue_mono {Ω : Type} (samples : List Ω)
     (f g : Ω → Nat) (pointwise : ∀ x, f x ≤ g x) :
     totalValue samples f ≤ totalValue samples g := by
