@@ -232,6 +232,7 @@ Proof.
     rewrite (Nat.mul_comm (S (current + 1)) (weighted_future_bound n (S current))).
     rewrite <- Nat.mul_assoc.
     rewrite <- (factorial_succ (current + 1)).
+    replace (S (current + 1)) with (S current + 1) by lia.
     rewrite (IH (S current)).
     replace (current + S n + 1) with (S current + n + 1) by lia.
     reflexivity.
