@@ -410,4 +410,70 @@ theorem constant_hypothesis_complement_exclusion_is_fixed
     apply hnot
     exact (h s (excluded t)).mpr heq
 
+
+/-- Sum of the first n atomic masses of a countable label distribution. -/
+def prefixMass (mass : Nat → Rat) : Nat → Rat
+  | 0 => 0
+  | Nat.succ n => prefixMass mass n + mass n
+
+/-- A nonnegative discrete sub-probability on the countably infinite label set Nat.
+Every finite prefix has total mass at most one. -/
+structure NatSubprobability where
+  mass : Nat → Rat
+  mass_nonneg : ∀ n, 0 ≤ mass n
+  prefix_le_one : ∀ n, prefixMass mass n ≤ 1
+
+/-- If every atom in a finite prefix has scaled mass greater than one,
+the total scaled prefix mass exceeds the prefix length. -/
+theorem prefix_scaled_gt
+    (mass : Nat → Rat) (T N : Nat)
+    (hN : 0 < N)
+    (h : ∀ i, i < N → 1 < (T : Rat) * mass i) :
+    (N : Rat) < (T : Rat) * prefixMass mass N := by
+  induction N with
+  | zero => omega
+  | succ n ih =>
+      by_cases hn : n = 0
+      · subst n
+        simpa [prefixMass] using h 0 (by omega)
+      · have hprev : (n : Rat) < (T : Rat) * prefixMass mass n :=
+          ih (by omega) (by
+            intro i hi
+            exact h i (by omega))
+        have hlast : 1 < (T : Rat) * mass n := h n (by omega)
+        calc
+          (Nat.succ n : Rat) = (n : Rat) + 1 := by simp
+          _ < (T : Rat) * prefixMass mass n + (T : Rat) * mass n :=
+            add_lt_add hprev hlast
+          _ = (T : Rat) * prefixMass mass (Nat.succ n) := by
+            simp [prefixMass, mul_add]
+
+/-- Every countable probability mass function has an atom of mass at most 1/T
+for any positive integer horizon T. This is the pre-draw low-mass witness fact. -/
+theorem exists_low_mass_label
+    (p : NatSubprobability) (T : Nat) (hT : 0 < T) :
+    ∃ y, (T : Rat) * p.mass y ≤ 1 := by
+  by_contra hnot
+  have hall : ∀ y, 1 < (T : Rat) * p.mass y := by
+    intro y
+    rcases lt_or_ge 1 ((T : Rat) * p.mass y) with hlt | hge
+    · exact hlt
+    · exact False.elim (hnot ⟨y, hge⟩)
+  have hsum :
+      ((T + 1 : Nat) : Rat) <
+        (T : Rat) * prefixMass p.mass (T + 1) := by
+    exact prefix_scaled_gt p.mass T (T + 1) (by omega) (fun i hi => hall i)
+  have hbound :
+      (T : Rat) * prefixMass p.mass (T + 1) ≤ (T : Rat) := by
+    exact mul_le_mul_of_nonneg_left
+      (p.prefix_le_one (T + 1)) (Nat.cast_nonneg T)
+  have hcontr : ((T + 1 : Nat) : Rat) < (T : Rat) :=
+    lt_of_lt_of_le hsum hbound
+  have hTle : (T : Rat) ≤ ((T + 1 : Nat) : Rat) := by
+    calc
+      (T : Rat) ≤ (T : Rat) + 1 :=
+        le_add_of_nonneg_right (show (0 : Rat) ≤ 1 by decide)
+      _ = ((T + 1 : Nat) : Rat) := by simp
+  exact (not_lt_of_ge hTle) hcontr
+
 end PublicSetting.Protocol
