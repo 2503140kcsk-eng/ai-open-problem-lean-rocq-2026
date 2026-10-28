@@ -1,0 +1,6 @@
+name = "public-setting-separation"
+version = "0.1.0"
+defaultTargets = ["PublicSetting"]
+
+[[lean_lib]]
+name = "PublicSetting"
