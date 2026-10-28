@@ -214,7 +214,7 @@ Proof.
     destruct (Nat.eq_dec
       (stream_prediction sampler actions random_states T)
       (stream_prediction sampler actions random_states T)) as [_ | Hneq].
-    + reflexivity.
+    + lia.
     + contradiction.
 Qed.
 
