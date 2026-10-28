@@ -260,9 +260,11 @@ Theorem weighted_future_le_rounds_mul_factorial :
 Proof.
   intros target T.
   pose proof (weighted_future_le_factorial_succ target T) as Hmoment.
-  (* Normalize T + 1 to S T before rewriting the recursive factorial lemma. *)
+  (* Normalize the successor index and unfold one factorial step.
+     Rewriting the recursive equation directly can miss the term because
+     factorial is a fixpoint whose successor case reduces by computation. *)
   replace (T + 1) with (S T) in Hmoment by lia.
-  rewrite (factorial_succ T) in Hmoment.
+  cbn [factorial] in Hmoment.
   replace (T + 1) with (S T) by lia.
   exact Hmoment.
 Qed.
