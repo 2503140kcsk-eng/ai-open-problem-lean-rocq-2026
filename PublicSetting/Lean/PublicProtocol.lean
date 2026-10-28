@@ -168,6 +168,34 @@ theorem stream_witness_ne_prediction {D : Type v} {Ω : Type z}
     streamWitness sampler actions t ≠ streamPrediction sampler actions randomStates t := by
   exact Nat.ne_of_gt (sampler.sample_lt_bound (actions t) (randomStates t))
 
+/-- A single global target family realizes every acceptable set in this finite-support
+counterexample. Its labels at context t are exactly those different from the realized
+sample at t. The visible witness is accepted at every round. -/
+def boundedSupportGlobalInstance {D : Type v} {Ω : Type z}
+    (sampler : BoundedSupportSampler D Ω)
+    (actions : Nat → D) (randomStates : Nat → Ω) :
+    PublicSetting.GlobalHypothesisInstance where
+  H := Nat → Nat
+  X := Nat
+  Y := Nat
+  eval := fun f t => f t
+  target := ComplementFamily (streamPrediction sampler actions randomStates)
+  contexts := fun t => t
+  accepted := fun t y =>
+    ComplementAccepts (streamPrediction sampler actions randomStates) t y
+  visible := streamWitness sampler actions
+  target_nonempty :=
+    complement_family_nonempty (streamPrediction sampler actions randomStates)
+  accepted_exactly_target_values := by
+    intro t y
+    rfl
+  visible_is_accepted := by
+    intro t
+    exact (complement_family_accepts_iff
+      (streamPrediction sampler actions randomStates) t
+      (streamWitness sampler actions t)).2
+      (stream_witness_ne_prediction sampler actions randomStates t)
+
 /-- In this bounded-support example, after seeing the realized prediction path,
 one fixed nonempty target family explains every visible witness while excluding
 every sampled prediction. The terminal F is global, not picked separately per round.
@@ -196,6 +224,49 @@ theorem bounded_support_public_attack {D : Type v} {Ω : Type z}
     have hfalse : prediction t ≠ prediction t :=
       (complement_family_accepts_iff prediction t (prediction t)).1 h
     exact hfalse rfl
+
+/-- The sampled path loses on every round against the single global target:
+its prediction at t is the unique excluded label for that coordinate. -/
+theorem bounded_support_prediction_loss {D : Type v} {Ω : Type z}
+    (T : Nat)
+    (sampler : BoundedSupportSampler D Ω)
+    (actions : Nat → D) (randomStates : Nat → Ω) :
+    PublicSetting.totalLoss T
+      (streamPrediction sampler actions randomStates)
+      (streamPrediction sampler actions randomStates) = T := by
+  exact PublicSetting.matched_path_loss T
+    (streamPrediction sampler actions randomStates)
+
+/-- The visible witness path is a comparator with zero loss for the same target. -/
+theorem bounded_support_comparator_loss_zero {D : Type v} {Ω : Type z}
+    (T : Nat)
+    (sampler : BoundedSupportSampler D Ω)
+    (actions : Nat → D) (randomStates : Nat → Ω) :
+    PublicSetting.totalLoss T
+      (streamPrediction sampler actions randomStates)
+      (streamWitness sampler actions) = 0 := by
+  induction T with
+  | zero => rfl
+  | succ T ih =>
+      simp [PublicSetting.totalLoss, ih, stream_witness_ne_prediction]
+
+/-- Consequently, the sampled-path loss minus the loss of this zero-loss comparator
+is exactly T. This is a lower-bound example for the bounded-support submodel, not
+the open randomized-upper/deterministic-lower separation. -/
+theorem bounded_support_pathwise_regret_gap {D : Type v} {Ω : Type z}
+    (T : Nat)
+    (sampler : BoundedSupportSampler D Ω)
+    (actions : Nat → D) (randomStates : Nat → Ω) :
+    PublicSetting.totalLoss T
+      (streamPrediction sampler actions randomStates)
+      (streamPrediction sampler actions randomStates)
+    -
+    PublicSetting.totalLoss T
+      (streamPrediction sampler actions randomStates)
+      (streamWitness sampler actions) = T := by
+  rw [bounded_support_prediction_loss T sampler actions randomStates]
+  rw [bounded_support_comparator_loss_zero T sampler actions randomStates]
+  simp
 
 /-- The requested public-setting separation remains a specification, not a theorem
 in this repository: this type alone does not establish either bound. -/

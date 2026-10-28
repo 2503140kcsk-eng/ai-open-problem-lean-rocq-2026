@@ -164,6 +164,104 @@ Proof.
   lia.
 Qed.
 
+(* One terminal target family F is fixed from the realized sampled path. At each
+   coordinate t its acceptable labels are exactly those unequal to that sample. *)
+Definition bounded_support_target {D Omega : Type}
+    (sampler : BoundedSupportSampler D Omega)
+    (actions : nat -> D) (random_states : nat -> Omega)
+    (f : nat -> nat) : Prop :=
+  ComplementFamily (stream_prediction sampler actions random_states) f.
+
+Lemma bounded_support_visible_in_global_target {D Omega : Type}
+    (sampler : BoundedSupportSampler D Omega)
+    (actions : nat -> D) (random_states : nat -> Omega) :
+  bounded_support_target sampler actions random_states
+    (stream_witness sampler actions).
+Proof.
+  unfold bounded_support_target, ComplementFamily.
+  intros t.
+  apply stream_witness_ne_prediction.
+Qed.
+
+Fixpoint ProtocolTotalLoss (T : nat)
+    (excluded prediction : nat -> nat) : nat :=
+  match T with
+  | O => 0
+  | S n =>
+      ProtocolTotalLoss n excluded prediction +
+        (if Nat.eq_dec (prediction n) (excluded n) then 1 else 0)
+  end.
+
+Lemma bounded_support_prediction_loss {D Omega : Type}
+    (T : nat)
+    (sampler : BoundedSupportSampler D Omega)
+    (actions : nat -> D) (random_states : nat -> Omega) :
+  ProtocolTotalLoss T
+    (stream_prediction sampler actions random_states)
+    (stream_prediction sampler actions random_states) = T.
+Proof.
+  induction T as [|T IH].
+  - reflexivity.
+  - change
+      (ProtocolTotalLoss T
+         (stream_prediction sampler actions random_states)
+         (stream_prediction sampler actions random_states) +
+       (if Nat.eq_dec
+          (stream_prediction sampler actions random_states T)
+          (stream_prediction sampler actions random_states T)
+        then 1 else 0) = S T).
+    rewrite IH.
+    destruct (Nat.eq_dec
+      (stream_prediction sampler actions random_states T)
+      (stream_prediction sampler actions random_states T)) as [_ | Hneq].
+    + reflexivity.
+    + contradiction.
+Qed.
+
+Lemma bounded_support_comparator_loss_zero {D Omega : Type}
+    (T : nat)
+    (sampler : BoundedSupportSampler D Omega)
+    (actions : nat -> D) (random_states : nat -> Omega) :
+  ProtocolTotalLoss T
+    (stream_prediction sampler actions random_states)
+    (stream_witness sampler actions) = 0.
+Proof.
+  induction T as [|T IH].
+  - reflexivity.
+  - change
+      (ProtocolTotalLoss T
+         (stream_prediction sampler actions random_states)
+         (stream_witness sampler actions) +
+       (if Nat.eq_dec
+          (stream_witness sampler actions T)
+          (stream_prediction sampler actions random_states T)
+        then 1 else 0) = 0).
+    rewrite IH.
+    destruct (Nat.eq_dec
+      (stream_witness sampler actions T)
+      (stream_prediction sampler actions random_states T)) as [Heq | Hneq].
+    + exfalso.
+      exact (stream_witness_ne_prediction sampler actions random_states T Heq).
+    + reflexivity.
+Qed.
+
+Lemma bounded_support_pathwise_regret_gap {D Omega : Type}
+    (T : nat)
+    (sampler : BoundedSupportSampler D Omega)
+    (actions : nat -> D) (random_states : nat -> Omega) :
+  ProtocolTotalLoss T
+    (stream_prediction sampler actions random_states)
+    (stream_prediction sampler actions random_states)
+  -
+  ProtocolTotalLoss T
+    (stream_prediction sampler actions random_states)
+    (stream_witness sampler actions) = T.
+Proof.
+  rewrite (bounded_support_prediction_loss T sampler actions random_states).
+  rewrite (bounded_support_comparator_loss_zero T sampler actions random_states).
+  lia.
+Qed.
+
 (* After the draw path is known, one nonempty global target family
    F = {f | forall t, f(t) <> prediction(t)} realizes each witness and
    excludes every sampled prediction. Witnesses were chosen pre-draw via the
