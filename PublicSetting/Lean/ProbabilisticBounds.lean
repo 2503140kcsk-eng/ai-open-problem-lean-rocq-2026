@@ -22,6 +22,12 @@ def eventCount {Ω : Type} : List Ω → (Ω → Bool) → Nat
   | [], _ => 0
   | x :: xs, event => (if event x then 1 else 0) + eventCount xs event
 
+theorem eventCount_false {Ω : Type} (samples : List Ω) :
+    eventCount samples (fun _ => false) = 0 := by
+  induction samples with
+  | nil => rfl
+  | cons x xs ih => simp [eventCount, ih]
+
 /-- Boolean union of a finite list of events. -/
 def eventAny {Ω : Type} : List (Ω → Bool) → Ω → Bool
   | [], _ => false
@@ -72,7 +78,7 @@ theorem eventCount_any_le_sumEventCounts {Ω : Type}
     (samples : List Ω) (events : List (Ω → Bool)) :
     eventCount samples (eventAny events) ≤ sumEventCounts samples events := by
   induction events with
-  | nil => simp [eventAny, eventCount, sumEventCounts]
+  | nil => simpa [eventAny, sumEventCounts] using eventCount_false samples
   | cons event events ih =>
       calc
         eventCount samples (eventAny (event :: events))
@@ -83,7 +89,40 @@ theorem eventCount_any_le_sumEventCounts {Ω : Type}
           Nat.add_le_add_left ih _
         _ = sumEventCounts samples (event :: events) := rfl
 
-/-- Union-bound aggregation for an arbitrary finite family of index-tail events.
+/-- Sum the per-index factorial-scaled tail estimates. -/
+theorem factorial_mul_sumEventCounts_le {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (k q : Nat)
+    (eachTail : ∀ event, event ∈ events →
+      factorial k * eventCount samples event ≤ q ^ k * samples.length) :
+    factorial k * sumEventCounts samples events ≤
+      events.length * (q ^ k * samples.length) := by
+  induction events with
+  | nil => simp [sumEventCounts]
+  | cons event events ih =>
+      have hhead := eachTail event (by simp)
+      have hrest : ∀ e, e ∈ events →
+          factorial k * eventCount samples e ≤ q ^ k * samples.length := by
+        intro e he
+        exact eachTail e (by simp [he])
+      have htail := ih hrest
+      change factorial k *
+          (eventCount samples event + sumEventCounts samples events) ≤
+        Nat.succ events.length * (q ^ k * samples.length)
+      calc
+        factorial k *
+            (eventCount samples event + sumEventCounts samples events)
+            = factorial k * eventCount samples event +
+                factorial k * sumEventCounts samples events := by
+                  simp [Nat.mul_add]
+        _ ≤ q ^ k * samples.length +
+              events.length * (q ^ k * samples.length) :=
+                Nat.add_le_add hhead htail
+        _ = Nat.succ events.length * (q ^ k * samples.length) := by
+              rw [Nat.succ_mul]
+              omega
+
+/-- Union-bound aggregation for a finite family of index-tail events.
 
 The explicit premise is the per-index tail estimate supplied by the stochastic
 part of the proof: k! * count{M_i >= k} <= q^k * numberOfSamples.
@@ -96,38 +135,12 @@ theorem factorial_mul_union_tail_le {Ω : Type}
     factorial k * eventCount samples (eventAny events) ≤
       events.length * (q ^ k * samples.length) := by
   have hunion := eventCount_any_le_sumEventCounts samples events
-  have hsum :
-      factorial k * sumEventCounts samples events ≤
-        events.length * (q ^ k * samples.length) := by
-    induction events with
-    | nil => simp [sumEventCounts]
-    | cons event events ih =>
-        have hhead := eachTail event (by simp)
-        have hrest : ∀ e, e ∈ events →
-            factorial k * eventCount samples e ≤ q ^ k * samples.length := by
-          intro e he
-          exact eachTail e (by simp [he])
-        have htail := ih hrest
-        change factorial k *
-            (eventCount samples event + sumEventCounts samples events) ≤
-          Nat.succ events.length * (q ^ k * samples.length)
-        calc
-          factorial k *
-              (eventCount samples event + sumEventCounts samples events)
-              = factorial k * eventCount samples event +
-                  factorial k * sumEventCounts samples events := by
-                    simp [Nat.mul_add]
-          _ ≤ q ^ k * samples.length +
-                events.length * (q ^ k * samples.length) :=
-                  Nat.add_le_add hhead htail
-          _ = Nat.succ events.length * (q ^ k * samples.length) := by
-                rw [Nat.succ_mul]
-                omega
   calc
     factorial k * eventCount samples (eventAny events)
         ≤ factorial k * sumEventCounts samples events :=
           Nat.mul_le_mul_left (factorial k) hunion
-    _ ≤ events.length * (q ^ k * samples.length) := hsum
+    _ ≤ events.length * (q ^ k * samples.length) :=
+      factorial_mul_sumEventCounts_le samples events k q eachTail
 
 theorem totalValue_mono {Ω : Type} (samples : List Ω)
     (f g : Ω → Nat) (pointwise : ∀ x, f x ≤ g x) :
