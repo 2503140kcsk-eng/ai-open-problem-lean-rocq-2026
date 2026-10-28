@@ -168,7 +168,7 @@ Proof.
       intros draw.
       specialize (IH (history ++ [draw])).
       replace (length (history ++ [draw])) with (S (length history)) in IH
-        by (rewrite app_length; simpl; lia).
+        by (rewrite length_app; simpl; lia).
       unfold b. exact IH.
     }
     assert (Hpoint : forall draw,
@@ -223,16 +223,18 @@ Theorem weighted_future_bound_mul_factorial :
     weighted_future_bound n current * factorial (current + 1) =
     factorial (current + n + 1).
 Proof.
-  induction n as [|n IH]; intros current; simpl.
-  - simpl. lia.
-  - rewrite <- Nat.add_assoc.
-    rewrite <- (factorial_succ (current + 1)).
-    rewrite <- Nat.mul_assoc.
+  induction n as [|n IH]; intros current.
+  - simpl [weighted_future_bound].
+    replace (current + 0 + 1) with (current + 1) by lia.
+    reflexivity.
+  - simpl [weighted_future_bound].
+    replace (current + 2) with (S (current + 1)) by lia.
     rewrite (Nat.mul_comm (S (current + 1)) (weighted_future_bound n (S current))).
     rewrite Nat.mul_assoc.
-    rewrite IH.
-    replace (current + S n + 1) with (S (current + n + 1)) by lia.
-    rewrite factorial_succ. reflexivity.
+    rewrite <- (factorial_succ (current + 1)).
+    rewrite (IH (S current)).
+    replace (current + S n + 1) with (S current + n + 1) by lia.
+    reflexivity.
 Qed.
 
 Theorem weighted_future_le_factorial_succ :
