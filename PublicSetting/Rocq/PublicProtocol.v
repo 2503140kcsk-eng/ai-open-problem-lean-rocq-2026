@@ -471,7 +471,7 @@ Proof.
   induction N as [|N IH]; intros HN Hall.
   - lia.
   - change (S N * D < T * (NatPrefixMass mass N + mass N)).
-    rewrite Nat.mul_succ_l, Nat.mul_add.
+    rewrite Nat.mul_succ_l, Nat.mul_add_distr_l.
     assert (Hprev : N * D < T * NatPrefixMass mass N).
     {
       apply IH; [lia |].
