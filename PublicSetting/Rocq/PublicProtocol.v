@@ -15,10 +15,13 @@ Section PublicProtocol.
 
   Context {X D Y Omega : Type}.
 
+  (* The learner knows its own earlier draws, but not the hidden acceptable
+     sets or whether any of its predictions was correct. *)
   Record Observation := {
     observation_context : X;
     observation_policy : D;
-    observation_witness : Y
+    observation_witness : Y;
+    observation_prediction : Y
   }.
 
   Record PublicRound := {
@@ -31,7 +34,8 @@ Section PublicProtocol.
   Definition observation_of (r : PublicRound) : Observation :=
     {| observation_context := round_context r;
        observation_policy := round_policy r;
-       observation_witness := round_witness r |}.
+       observation_witness := round_witness r;
+       observation_prediction := round_prediction r |}.
 
   Definition learner_view (history : list PublicRound) : list Observation :=
     map observation_of history.

@@ -43,7 +43,7 @@ The last two are the open mathematical core. The source intentionally contains n
 
 ## Next mathematical step
 
-First formalize the public protocol operationally: contexts and visible labels are chosen before the current random draw; public history and the single global target family are specified exactly; regret is defined relative to the comparator in the paper. Then prove either a uniform randomized upper bound and a universal deterministic lower bound from one such model, or prove the corresponding specifications inconsistent. The profile definitions alone do not bridge this semantic gap.
+The protocol is now modeled operationally: contexts and visible labels are chosen before the current random draw; both the learner and public adversary can inspect completed previous predictions, but neither sees hidden sets or correctness bits; and one global target family constrains all rounds. This models the information order, but it does not yet define probability measures and minimax regret at the full generality of the paper. The next mathematical step remains to define that quantitative semantics and prove either a randomized o(T) upper bound plus a deterministic Ω(T) lower bound, or an impossibility theorem. The profile predicates alone do not bridge this semantic gap.
 
 ## Construction audit: why the obvious separation example does not transfer
 

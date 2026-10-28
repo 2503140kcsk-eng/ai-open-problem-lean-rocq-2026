@@ -22,12 +22,14 @@ namespace PublicSetting.Protocol
 
 universe u v w z
 
-/-- What the learner is shown after a round: context, chosen distribution/action,
-and one accepted witness, but not the hidden acceptable set. -/
+/-- What the learner knows after a round: context, its chosen distribution/action,
+the visible accepted witness, and its own sampled prediction. It does not observe the
+hidden acceptable set or a correctness bit. -/
 structure Observation (X : Type u) (D : Type v) (Y : Type w) where
   context : X
   policy : D
   witness : Y
+  prediction : Y
 
 /-- A completed round additionally records the prediction sampled after the
 visible witness has been chosen. -/
@@ -39,9 +41,9 @@ structure PublicRound (X : Type u) (D : Type v) (Y : Type w) where
 
 def observationOf {X : Type u} {D : Type v} {Y : Type w}
     (r : PublicRound X D Y) : Observation X D Y :=
-  ⟨r.context, r.policy, r.witness⟩
+  ⟨r.context, r.policy, r.witness, r.prediction⟩
 
-/-- The learner's paper-defined feedback history omits realized sampled labels. -/
+/-- The learner remembers its own past samples but receives no hidden-set or loss feedback. -/
 def learnerView {X : Type u} {D : Type v} {Y : Type w}
     (history : List (PublicRound X D Y)) : List (Observation X D Y) :=
   history.map observationOf
