@@ -1,0 +1,41 @@
+name: Public-setting formalization
+
+on:
+  push:
+    branches:
+      - main
+      - research/public-setting-separation
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: PublicSetting/Lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Lean toolchain
+        run: elan toolchain install leanprover/lean4:v4.35.0
+      - name: Build Lean proofs
+        run: lake build
+
+  rocq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show pinned Rocq version and compile
+        run: |
+          docker run --rm             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/work"             -w /work             rocq/rocq-prover:9.2.0             sh -lc 'rocq --version && rocq compile -Q . PublicSetting PublicSetting.v'
