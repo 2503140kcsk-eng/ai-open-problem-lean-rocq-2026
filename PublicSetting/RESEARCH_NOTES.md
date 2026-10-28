@@ -103,42 +103,54 @@ This rules out an attractive but incorrect heuristic: *finite parameter dimensio
 A candidate fails immediately if, for distinct queried contexts and each finite exclusion path \((p_s)_{s\in J}\), the family of hypotheses avoiding those exclusions still projects to \(\mathcal Y\setminus\{p_t\}\) at every excluded coordinate and to all of \(\mathcal Y\) elsewhere. A successful class must prevent this extension property while still permitting an adversary to preserve witness-realizability and exclude every deterministic learner's prediction on linearly many rounds. The affine and full-product examples do not meet that latter randomized requirement.
 
 
-## Audit: diagonal construction in the computable-policy model (randomized upper bound retracted)
+## Re-audit: computable diagonal candidate and the exact scope of its proof
 
-Date: 2026-10-28. An earlier draft claimed a separation after restricting learners to computable policies. **That randomized upper-bound claim is incorrect and is retracted here.** The deterministic diagonal lower was valid for the restricted learner class, but the randomized upper considered only target families of the special form \(\mathcal H\setminus\{h_B\}\).
-
-### What still works: the deterministic diagonal lower
-
-Let \(Y=\mathbb N\), enumerate total computable policy kernels by \(C\in\mathbb N\), and let contexts include the challenger index \(C\) and public history. At context \(x=(C,\eta)\), let \(p_C(x)\) be the deterministic prediction if \(C\) is a deterministic policy, and define
+Date: 2026-10-28. **Correction to the immediately preceding audit:** the alleged singleton-target counterexample was invalid for the construction as specified. That construction fixes the admissible set family to
 \[
-h_B(x)=
-\begin{cases}
-p_C(x),&B=C,\\
-\rho_{C,p_C(x)}(B),&B\ne C,
-\end{cases}
+\mathcal S(\mathbb N)=\{\mathbb N\setminus\{y\}:y\in\mathbb N\}.
 \]
-where \(\rho_{C,p}\) is a bijection from \(\mathbb N\setminus\{C\}\) to \(\mathbb N\setminus\{p\}\). For a deterministic computable learner \(A\), choose \(C_t=A\) every round. The target family \(\mathcal H\setminus\{h_A\}\) then induces \(\mathbb N\setminus\{p_A(x_t)\}\), so a different visible witness is acceptable and the learner loses every round. This proves the restricted deterministic lower.
+A target family \(F^\star=\{h_B\}\) induces a singleton label set, not a co-singleton, and is therefore *not a legal set-realizable target family* in this game. The earlier statement that this disproved the randomized upper bound is retracted.
 
-### Fatal gap: the target family is not required to be a co-singleton of hypotheses
+### Validity of the randomized upper in the restricted computable-policy model
 
-In the paper's set-realizable model, a valid target family is **any** fixed subset \(F^\star\subseteq\mathcal H\), not only \(\mathcal H\setminus\{h_B\}\). The value \(F^\star(x)\) is the image of that arbitrary subset. Therefore the earlier argument taking a union bound over the single omitted index \(B^\star\) did not bound the minimax regret.
-
-There is a direct counterexample to the claimed randomized upper. Let \(B\) index a deterministic policy whose prediction at round \(t\) is \(t+1\), and let the adversary choose \(C_t=B\) every round. Take the one-element target family
+In the bijective construction, every context \(x\) has an evaluation bijection
 \[
-F^\star=\{h_B\}.
+\phi_x:\mathbb N\to\mathbb N,\qquad \phi_x(B)=h_B(x).
 \]
-Then \(S_t=F^\star(x_t)=\{t+1\}\), and the visible witness \(y_t^{\rm vis}=t+1\) is legal on every round. A learner that samples uniformly from \(\{0,\ldots,t-1\}\) never predicts \(t+1\), so it suffers loss exactly \(T\). This \(F^\star\) is a *single fixed target family* throughout the horizon. Hence the proposed \(O(\log T)\) randomized upper fails even in the computable-policy restriction.
+If a fixed subfamily \(F^\star\subseteq\mathcal H\) induces an admissible set at even one visited context \(x_t\), then
+\[
+F^\star(x_t)=\phi_{x_t}(\{B:h_B\in F^\star\})
+\]
+must be a co-singleton. Since \(\phi_{x_t}\) is a bijection, the hypothesis-index set must itself be a co-singleton. Thus every legal fixed target family along a nonempty transcript is of the form
+\[
+F^\star=\{h_B:B\ne B^\star\}
+\]
+for one *fixed* index \(B^\star\). The earlier union bound over \(B^\star\) is therefore applicable; it is not missing singleton or arbitrary smaller target families, because those induce inadmissible sets.
 
-The attempted non-injective/fibre-surjection variation in the next section has the same unaddressed issue: showing that the special family \(F_A=\mathcal H\setminus\{h_A\}\) induces a co-singleton at challenger \(A\) and all labels elsewhere does not constrain other legal families, such as singleton families. Its deterministic lower and local fibre observations may be useful, but it does not establish condition 2.
+For the horizon-free learner \(R\) that samples independently and uniformly from \(\{0,\ldots,t-1\}\) at round \(t\), write \(M_B\) for the number of rounds on which its sampled label equals \(h_B(x_t)\). Conditional on the past and the current context, the match probability for every \(B\le T\) is at most \(1/t\). If \(H_T=\sum_{t=1}^T1/t\), then
+\[
+\Pr(M_B\ge k)\le H_T^k/k!\le(eH_T/k)^k,
+\]
+and a union bound over \(B\le T\) gives
+\[
+\mathbb E[\max_{B\le T}M_B]=O(\log(T+2)).
+\]
+For \(B>T\), a match is possible only on a round with challenger index \(C_t=B\), and the expected number of such exceptional matches is at most \(H_T\). Hence, for every legal terminally selected target family,
+\[
+\mathbb E[\operatorname{Regret}_T(R)]
+\le \mathbb E[\max_B M_B]=O(\log(T+2))=o(T).
+\]
+The same bound and Markov's inequality imply that linear-loss paths have probability tending to zero. The adversary may choose contexts adaptively from prior realized predictions; the bound conditions on the current context before the current draw.
 
-### Correct status
+### Exact scope: what this does and does not establish
 
-- Condition 1: the earlier diagonal mechanism supplies a lower bound only for its explicitly indexed computable-policy model.
-- Condition 2: **not proved**; the stated randomized upper is false for the specified learner because singleton target families yield linear loss.
-- Condition 3: a fixed-family deterministic lower example exists in the restricted construction, but that does not complete the separation.
+The construction is a valid separation **for total computable learner policies**, under the expressly co-singleton admissible set family and the stated public protocol:
+- For a deterministic computable learner with index \(A\), choosing \(C_t=A\) makes \(h_A(x_t)\) its deterministic prediction. The single fixed family \(\{h_B:B\ne A\}\) then makes the allowed set a co-singleton excluding that prediction at every round, so loss is \(T\).
+- For the randomized learner \(R\), the preceding argument gives expected regret \(O(\log T)\) against every legal target family.
 
-No unrestricted hypothesis class satisfying all three requirements has been found. The exact public-setting randomized-versus-deterministic separation remains the open question stated in Shao–Fang–Lin–Tao, *Partial Feedback Online Learning*, Section 5.3: https://arxiv.org/html/2601.21462v3.
+This is **not yet the requested unrestricted theorem**. The class enumerates computable policies as challenger indices, so it does not give condition 1 for arbitrary, possibly noncomputable deterministic policies. The countability/cardinality issue described in the next section blocks a direct extension that tries to encode every strategy as a context label. It does not prove that every conceivable hypothesis-class construction is impossible.
 
+The new construction and its probability tail proof remain mathematical arguments in this note, not yet Lean/Rocq formalizations. The unrestricted public-setting question remains explicitly open in Shao–Fang–Lin–Tao, *Partial Feedback Online Learning*, §5.3: https://arxiv.org/html/2601.21462v3.
 ## Audit: why the diagonal construction still does not cover every deterministic learner
 
 Date: 2026-10-28. This section records an attempted unrestricted extension of the computable-policy construction. It is an obstruction to that *particular construction method*, not a theorem ruling out the original separation.
