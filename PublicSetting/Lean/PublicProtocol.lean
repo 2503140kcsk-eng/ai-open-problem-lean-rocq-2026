@@ -127,6 +127,7 @@ theorem complement_value_iff (prediction : Nat → Nat) (t y : Nat) :
         simpa using hy
       · have hne : prediction s + 1 ≠ prediction s :=
           Nat.ne_of_gt (Nat.lt_succ_self (prediction s))
+        rw [ite_eq_right hst]
         exact hne
     · exact ite_eq_left (show t = t from rfl)
 
