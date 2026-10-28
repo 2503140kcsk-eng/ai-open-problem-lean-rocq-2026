@@ -53,7 +53,7 @@ theorem eventCount_eq_le_one (xs : List Nat) (hxs : xs.Nodup) (target : Nat) :
 
 theorem eventCount_range_eq_le_one (n target : Nat) :
     eventCount (List.range n) (fun x => decide (x = target)) ≤ 1 := by
-  exact eventCount_eq_le_one (List.range n) (List.nodup_range n) target
+  exact eventCount_eq_le_one (List.range n) (List.nodup_range) target
 
 def weightedFuture (target : Nat → List Nat → Nat) : Nat → List Nat → Nat
   | 0, _ => 1
@@ -117,17 +117,18 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
           _ = b * (history.length + 1) +
                 b * eventCount (List.range (history.length + 1)) hit := by
                 rw [totalValue_const, totalValue_indicator]
+                simp
       have hcount : eventCount (List.range (history.length + 1)) hit ≤ 1 := by
-        simpa [hit, hitAt] using
+        simpa [hit, hitAt, eq_comm] using
           eventCount_range_eq_le_one (history.length + 1)
             (target history.length history)
       have hfinal :
           b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1) hit) ≤
+              b * eventCount (List.range (history.length + 1)) hit) ≤
             (history.length + 2) * b := by
         calc
           b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1) hit)
+              b * eventCount (List.range (history.length + 1)) hit)
               ≤ b * (history.length + 1) + b :=
                 Nat.add_le_add_left (Nat.mul_le_mul_left b hcount) _
           _ = (history.length + 2) * b := by
@@ -142,7 +143,7 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
         _ ≤ totalValue (List.range (history.length + 1))
               (fun draw => b + (if hit draw then b else 0)) := hsum
         _ = b * (history.length + 1) +
-              b * eventCount (List.range (history.length + 1) hit) := hdecomp
+              b * eventCount (List.range (history.length + 1)) hit) := hdecomp
         _ ≤ (history.length + 2) * b := hfinal
         _ = weightedFutureBound (n + 1) history.length := by
               simp [weightedFutureBound, b, Nat.mul_comm]
