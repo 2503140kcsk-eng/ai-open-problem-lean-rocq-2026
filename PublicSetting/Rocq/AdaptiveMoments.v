@@ -226,7 +226,7 @@ Proof.
   induction n as [|n IH]; intros current.
   - cbn [weighted_future_bound].
     replace (current + 0 + 1) with (current + 1) by lia.
-    rewrite Nat.add_0_r. reflexivity.
+    reflexivity.
   - cbn [weighted_future_bound].
     replace (current + 2) with (S (current + 1)) by lia.
     rewrite (Nat.mul_comm (S (current + 1)) (weighted_future_bound n (S current))).
