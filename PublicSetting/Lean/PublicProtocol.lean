@@ -283,7 +283,7 @@ theorem visible_ne_terminalExclusion
   · have hx : terminalExclusion prediction visible t = visible t + 1 := by
       simp [terminalExclusion, h]
     rw [hx]
-    exact Nat.ne_of_gt (Nat.lt_succ_self (visible t))
+    exact Ne.symm (Nat.ne_of_gt (Nat.lt_succ_self (visible t)))
   · have hx : terminalExclusion prediction visible t = prediction t := by
       simp [terminalExclusion, h]
     rw [hx]
