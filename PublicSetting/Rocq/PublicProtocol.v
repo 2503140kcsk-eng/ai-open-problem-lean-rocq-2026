@@ -290,7 +290,9 @@ Proof.
   unfold terminal_exclusion.
   destruct (Nat.eq_dec (prediction t) (visible t)) as [Heq | Hneq].
   - split; [lia | congruence].
-  - split; [reflexivity | intros; congruence].
+  - split.
+    + intro _. exact Hneq.
+    + intro _. reflexivity.
 Qed.
 
 Definition TerminalFamily (prediction visible : nat -> nat) (f : nat -> nat) : Prop :=
@@ -338,8 +340,7 @@ Proof.
     {
       unfold terminal_exclusion.
       destruct (Nat.eq_dec (prediction T) (visible T)) as [Heq | Hneq].
-      - rewrite Heq.
-        destruct (Nat.eq_dec (visible T) (visible T + 1)); lia.
+      - destruct (Nat.eq_dec (prediction T) (visible T + 1)); lia.
       - destruct (Nat.eq_dec (prediction T) (prediction T)); [reflexivity | contradiction].
     }
     rewrite Hstep.
