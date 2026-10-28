@@ -61,4 +61,4 @@ jobs:
           docker run --rm \
             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
             rocq/rocq-prover:9.2.0 \
-            sh -lc 'set -eu; mkdir -p /tmp/rocq-check; cp /input/PublicSetting.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v'
+            sh -lc 'set -eu; mkdir -p /tmp/rocq-check; cp /input/PublicSetting.v /input/PublicProtocol.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v; rocq compile -Q . PublicSetting PublicProtocol.v'
