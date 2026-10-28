@@ -260,7 +260,10 @@ Theorem weighted_future_le_rounds_mul_factorial :
 Proof.
   intros target T.
   pose proof (weighted_future_le_factorial_succ target T) as Hmoment.
+  (* Normalize T + 1 to S T before rewriting the recursive factorial lemma. *)
+  replace (T + 1) with (S T) in Hmoment by lia.
   rewrite (factorial_succ T) in Hmoment.
+  replace (T + 1) with (S T) by lia.
   exact Hmoment.
 Qed.
 End AdaptiveMoments.
