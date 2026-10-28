@@ -200,7 +200,7 @@ theorem totalValue_indicator {Ω : Type} (samples : List Ω)
   | cons x xs ih =>
       cases hb : bad x <;>
         simp [totalValue, eventCount, hb, ih, Nat.mul_succ, Nat.mul_add,
-          Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+          Nat.add_comm]
 
 theorem totalValue_add {Ω : Type} (samples : List Ω)
     (f g : Ω → Nat) :
@@ -209,7 +209,7 @@ theorem totalValue_add {Ω : Type} (samples : List Ω)
   induction samples with
   | nil => simp [totalValue]
   | cons x xs ih =>
-      simp [totalValue, ih, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+      simp [totalValue, ih, Nat.add_assoc, Nat.add_left_comm]
 
 /-- A fully checked truncation lemma for uniform finite sample spaces.
 
