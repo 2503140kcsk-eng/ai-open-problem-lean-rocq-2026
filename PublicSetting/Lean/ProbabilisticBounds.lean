@@ -160,7 +160,7 @@ theorem badBudget_of_union_tail_bound {Ω : Type}
     calc
       factorial k * (T * eventCount samples (eventAny events))
           = T * (factorial k * eventCount samples (eventAny events)) := by
-              simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+              simp [Nat.mul_assoc, Nat.mul_comm]
       _ ≤ T * (events.length * (q ^ k * samples.length)) :=
             Nat.mul_le_mul_left T hunion
       _ = (T * events.length * q ^ k) * samples.length := by
