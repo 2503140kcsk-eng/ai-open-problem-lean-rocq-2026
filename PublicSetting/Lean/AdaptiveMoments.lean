@@ -190,4 +190,13 @@ theorem weightedFuture_le_factorial_succ
     simpa [factorial] using hfactor
   simpa [hboundEq] using hbound
 
+/-- Cross-multiplied expectation bound: the sum of 2^(number of matches)
+over the finite uniform path space is at most (T+1) times T!, the number
+of paths. Dividing by T! gives E[2^M] <= T+1 without introducing rationals. -/
+theorem weightedFuture_le_rounds_mul_factorial
+    (target : Nat → List Nat → Nat) (T : Nat) :
+    weightedFuture target T [] ≤ (T + 1) * factorial T := by
+  have h := weightedFuture_le_factorial_succ target T
+  rw [factorial_succ T] at h
+  exact h
 end PublicSetting.AdaptiveMoments
