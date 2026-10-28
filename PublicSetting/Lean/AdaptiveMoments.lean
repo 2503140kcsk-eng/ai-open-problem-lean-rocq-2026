@@ -157,7 +157,7 @@ theorem weightedFuture_le_bound (target : Nat → List Nat → Nat) :
               b * eventCount (List.range (history.length + 1)) hit := hdecomp
         _ ≤ (history.length + 2) * b := hfinal
         _ = weightedFutureBound (n + 1) history.length := by
-              simp [weightedFutureBound, b, Nat.mul_comm]
+              simp [weightedFutureBound, b]
 
 theorem factorial_succ (n : Nat) :
     factorial (n + 1) = (n + 1) * factorial n := rfl
