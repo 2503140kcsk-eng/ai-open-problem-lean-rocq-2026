@@ -452,6 +452,14 @@ theorem prefix_scaled_gt
           _ = (T : Rat) * prefixMass mass (Nat.succ n) := by
             simp [prefixMass, Rat.mul_add]
 
+/-- Naturals embed as nonnegative rational numbers. -/
+theorem natRat_nonneg (n : Nat) : (0 : Rat) ≤ (n : Rat) := by
+  induction n with
+  | zero => exact Rat.le_refl
+  | succ n ih =>
+      rw [show ((Nat.succ n : Nat) : Rat) = (n : Rat) + 1 by simp]
+      exact Rat.add_nonneg ih (Rat.le_of_lt (show (0 : Rat) < 1 by decide))
+
 /-- Every countable probability mass function has an atom of mass at most 1/T
 for any positive integer horizon T. This is the pre-draw low-mass witness fact. -/
 theorem exists_low_mass_label
@@ -470,12 +478,7 @@ theorem exists_low_mass_label
           (T : Rat) * prefixMass p.mass (Nat.succ T) := by
       exact prefix_scaled_gt p.mass T (Nat.succ T) (by omega)
         (fun i hi => hall i)
-    have hTnonneg : (0 : Rat) ≤ (T : Rat) := by
-      induction T with
-      | zero => exact Rat.le_refl
-      | succ n ih =>
-          rw [show ((Nat.succ n : Nat) : Rat) = (n : Rat) + 1 by simp]
-          exact Rat.add_nonneg ih (Rat.le_of_lt (show (0 : Rat) < 1 by decide))
+    have hTnonneg : (0 : Rat) ≤ (T : Rat) := natRat_nonneg T
     have hbound :
         (T : Rat) * prefixMass p.mass (Nat.succ T) ≤ (T : Rat) := by
       simpa using Rat.mul_le_mul_of_nonneg_left
@@ -484,8 +487,8 @@ theorem exists_low_mass_label
       Rat.le_trans (Rat.le_of_lt hsum) hbound
     have hsucc : (T : Rat) < (Nat.succ T : Rat) := by
       rw [show ((Nat.succ T : Nat) : Rat) = (T : Rat) + 1 by simp]
-      exact (Rat.add_lt_add_left (c := (T : Rat))).mpr
+      simpa using (Rat.add_lt_add_left (c := (T : Rat))).mpr
         (show (0 : Rat) < 1 by decide)
-    exact (Rat.not_le).mp hsucc hcontrle
+    exact ((Rat.not_le (a := (Nat.succ T : Rat)) (b := (T : Rat))).mpr hsucc) hcontrle
 
 end PublicSetting.Protocol
