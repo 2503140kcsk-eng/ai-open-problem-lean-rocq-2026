@@ -197,6 +197,16 @@ Qed.
 
 (* A proposition stating the requested asymptotic separation is only a
    specification here; no theorem in this file proves the randomized upper bound. *)
+Definition ProtocolIsSublinear (r : nat -> nat) : Prop :=
+  forall a b : nat,
+    0 < a -> 0 < b ->
+    exists N : nat, forall T : nat, N <= T -> b * r T < a * T.
+
+Definition ProtocolIsLinear (r : nat -> nat) : Prop :=
+  exists a b N : nat,
+    0 < a /\ 0 < b /\
+    forall T : nat, N <= T -> a * T <= b * r T.
+
 Definition PublicRandomizedDeterministicSeparation
     (randomizedRegret deterministicRegret : nat -> nat) : Prop :=
-  IsSublinear randomizedRegret /\ IsLinear deterministicRegret.
+  ProtocolIsSublinear randomizedRegret /\ ProtocolIsLinear deterministicRegret.
