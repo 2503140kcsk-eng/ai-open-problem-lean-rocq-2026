@@ -1,7 +1,7 @@
 From Stdlib Require Import Arith Lia List.
 Import ListNotations.
 
-(* Formalization of the information order in Section 5.3 of
+(* Formalization of the information order in Section 3.3 of
    Shao, Fang, Lin, and Tao, Partial Feedback Online Learning,
    arXiv:2601.21462v3.
 
