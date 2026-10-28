@@ -280,9 +280,13 @@ theorem visible_ne_terminalExclusion
     (prediction visible : Nat → Nat) (t : Nat) :
     visible t ≠ terminalExclusion prediction visible t := by
   by_cases h : prediction t = visible t
-  · simp only [terminalExclusion, ite_eq_left h]
+  · have hx : terminalExclusion prediction visible t = visible t + 1 := by
+      simp [terminalExclusion, h]
+    rw [hx]
     exact Nat.ne_of_gt (Nat.lt_succ_self (visible t))
-  · simp only [terminalExclusion, ite_eq_right h]
+  · have hx : terminalExclusion prediction visible t = prediction t := by
+      simp [terminalExclusion, h]
+    rw [hx]
     exact fun hv => h hv.symm
 
 theorem prediction_eq_terminalExclusion_iff
