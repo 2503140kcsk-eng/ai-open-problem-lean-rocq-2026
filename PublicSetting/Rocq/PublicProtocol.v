@@ -88,7 +88,7 @@ Section PublicProtocol.
   Definition GloballyRealizable
       (H F : (X -> Y) -> Prop) (trace : list PublicRound) : Prop :=
     (forall f, F f -> H f) /\
-    (forall r, In r trace -> AcceptedLabels F (round_context r) (round_witness r).
+    (forall r, In r trace -> AcceptedLabels F (round_context r) (round_witness r)).
 
   Lemma target_member_acceptable
       (F : (X -> Y) -> Prop) (f : X -> Y) (hF : F f) (x : X) :
