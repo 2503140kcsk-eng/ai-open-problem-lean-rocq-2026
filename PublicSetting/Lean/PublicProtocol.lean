@@ -461,23 +461,31 @@ theorem exists_low_mass_label
   · exact hsmall
   · have hall : ∀ y, 1 < (T : Rat) * p.mass y := by
       intro y
-      rcases lt_or_ge 1 ((T : Rat) * p.mass y) with hlt | hge
-      · exact hlt
-      · exact False.elim (hsmall ⟨y, hge⟩)
+      have hnot : ¬ ((T : Rat) * p.mass y ≤ 1) := by
+        intro hy
+        exact hsmall ⟨y, hy⟩
+      exact (Rat.not_le).mp hnot
     have hsum :
-        ((T + 1 : Nat) : Rat) <
-          (T : Rat) * prefixMass p.mass (T + 1) := by
-      exact prefix_scaled_gt p.mass T (T + 1) (by omega) (fun i hi => hall i)
+        (Nat.succ T : Rat) <
+          (T : Rat) * prefixMass p.mass (Nat.succ T) := by
+      exact prefix_scaled_gt p.mass T (Nat.succ T) (by omega)
+        (fun i hi => hall i)
+    have hTnonneg : (0 : Rat) ≤ (T : Rat) := by
+      induction T with
+      | zero => exact Rat.le_refl
+      | succ n ih =>
+          rw [show ((Nat.succ n : Nat) : Rat) = (n : Rat) + 1 by simp]
+          exact Rat.add_nonneg ih (Rat.le_of_lt (show (0 : Rat) < 1 by decide))
     have hbound :
-        (T : Rat) * prefixMass p.mass (T + 1) ≤ (T : Rat) := by
+        (T : Rat) * prefixMass p.mass (Nat.succ T) ≤ (T : Rat) := by
       simpa using Rat.mul_le_mul_of_nonneg_left
-        (p.prefix_le_one (T + 1)) (Nat.cast_nonneg T)
-    have hcontr : ((T + 1 : Nat) : Rat) < (T : Rat) :=
-      lt_of_lt_of_le hsum hbound
-    have hTle : (T : Rat) ≤ ((T + 1 : Nat) : Rat) := by
-      rw [Nat.cast_add, Nat.cast_one]
-      simpa using (Rat.add_le_add_left (c := (T : Rat))).mpr
-        (Rat.le_of_lt (show (0 : Rat) < 1 by decide))
-    exact (not_lt_of_ge hTle) hcontr
+        (p.prefix_le_one (Nat.succ T)) hTnonneg
+    have hcontrle : (Nat.succ T : Rat) ≤ (T : Rat) :=
+      Rat.le_trans (Rat.le_of_lt hsum) hbound
+    have hsucc : (T : Rat) < (Nat.succ T : Rat) := by
+      rw [show ((Nat.succ T : Nat) : Rat) = (T : Rat) + 1 by simp]
+      exact (Rat.add_lt_add_left (c := (T : Rat))).mpr
+        (show (0 : Rat) < 1 by decide)
+    exact (Rat.not_le).mp hsucc hcontrle
 
 end PublicSetting.Protocol
