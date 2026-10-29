@@ -248,4 +248,119 @@ theorem uniformPath_exponentialMoment_bound
   rw [uniformFuturePathCount_empty]
   exact weightedFuture_le_rounds_mul_factorial target T
 
+
+
+/-- Count future draw paths on which a predictable target is hit at least
+threshold times. A hit consumes one unit of the remaining threshold. -/
+def tailFutureCount (target : Nat → List Nat → Nat) :
+    Nat → List Nat → Nat → Nat
+  | 0, _, K => if K = 0 then 1 else 0
+  | n + 1, history, K =>
+      totalValue (List.range (history.length + 1)) (fun draw =>
+        tailFutureCount target n (history ++ [draw])
+          (if hitAt target history draw then K - 1 else K))
+
+theorem totalValue_mul_left {Ω : Type} (samples : List Ω)
+    (c : Nat) (f : Ω → Nat) :
+    totalValue samples (fun x => c * f x) =
+      c * totalValue samples f := by
+  induction samples with
+  | nil => simp [totalValue]
+  | cons x xs ih => simp [totalValue, ih, Nat.mul_add]
+
+/-- Recursive Markov inequality for the actual sequential uniform draw tree.
+The numerator counts complete paths reaching the threshold; the weighted
+future sum is the sum of 2^(hits) over the same tree. -/
+theorem tailFutureCount_exponentialMoment_le
+    (target : Nat → List Nat → Nat) :
+    ∀ n history K,
+      2 ^ K * tailFutureCount target n history K ≤
+        weightedFuture target n history := by
+  intro n
+  induction n with
+  | zero =>
+      intro history K
+      cases K <;> simp [tailFutureCount, weightedFuture]
+  | succ n ih =>
+      intro history K
+      let draws := List.range (history.length + 1)
+      let hit := hitAt target history
+      have hpoint : ∀ draw,
+          2 ^ K * tailFutureCount target n (history ++ [draw])
+              (if hit draw then K - 1 else K) ≤
+            (if hit draw then 2 else 1) *
+              weightedFuture target n (history ++ [draw]) := by
+        intro draw
+        by_cases hhit : hit draw
+        · cases K with
+          | zero =>
+              have hc := ih (history ++ [draw]) 0
+              have hchild :
+                  tailFutureCount target n (history ++ [draw]) 0 ≤
+                    weightedFuture target n (history ++ [draw]) := by
+                simpa using hc
+              have hscaled :
+                  tailFutureCount target n (history ++ [draw]) 0 ≤
+                    2 * weightedFuture target n (history ++ [draw]) := by
+                omega
+              simpa [hhit] using hscaled
+          | succ K =>
+              have hc := ih (history ++ [draw]) K
+              have hscaled :
+                  2 ^ (K + 1) *
+                      tailFutureCount target n (history ++ [draw]) K ≤
+                    2 * weightedFuture target n (history ++ [draw]) := by
+                calc
+                  2 ^ (K + 1) *
+                      tailFutureCount target n (history ++ [draw]) K =
+                    2 * (2 ^ K *
+                      tailFutureCount target n (history ++ [draw]) K) := by
+                        simp [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm,
+                          Nat.mul_left_comm]
+                  _ ≤ 2 * weightedFuture target n (history ++ [draw]) :=
+                    Nat.mul_le_mul_left 2 hc
+              simpa [hhit, Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm,
+                Nat.mul_left_comm] using hscaled
+        · have hc := ih (history ++ [draw]) K
+          simpa [hhit] using hc
+      have hsum := totalValue_mono draws
+        (fun draw => 2 ^ K *
+          tailFutureCount target n (history ++ [draw])
+            (if hit draw then K - 1 else K))
+        (fun draw => (if hit draw then 2 else 1) *
+          weightedFuture target n (history ++ [draw])) hpoint
+      calc
+        2 ^ K * tailFutureCount target (n + 1) history K
+            = 2 ^ K * totalValue draws
+                (fun draw => tailFutureCount target n (history ++ [draw])
+                  (if hit draw then K - 1 else K)) := by
+                    simp [tailFutureCount, draws]
+        _ = totalValue draws
+              (fun draw => 2 ^ K *
+                tailFutureCount target n (history ++ [draw])
+                  (if hit draw then K - 1 else K)) := by
+                    symm
+                    exact totalValue_mul_left draws (2 ^ K)
+                      (fun draw => tailFutureCount target n (history ++ [draw])
+                        (if hit draw then K - 1 else K))
+        _ ≤ totalValue draws
+              (fun draw => (if hit draw then 2 else 1) *
+                weightedFuture target n (history ++ [draw])) := hsum
+        _ = weightedFuture target (n + 1) history := by
+              simp [weightedFuture, draws, hit]
+
+/-- Per-fixed-predictable-target tail numerator bound. Since the uniform path
+space has T! equally likely paths, this is the integer-scaled tail-probability
+bound 2^K * P(M >= K) <= T+1. -/
+theorem tailFutureCount_tail_bound
+    (target : Nat → List Nat → Nat) (T K : Nat) :
+    2 ^ K * tailFutureCount target T [] K ≤
+      (T + 1) * factorial T := by
+  calc
+    2 ^ K * tailFutureCount target T [] K
+        ≤ weightedFuture target T [] :=
+          tailFutureCount_exponentialMoment_le target T [] K
+    _ ≤ (T + 1) * factorial T :=
+      weightedFuture_le_rounds_mul_factorial target T
+
 end PublicSetting.AdaptiveMoments
