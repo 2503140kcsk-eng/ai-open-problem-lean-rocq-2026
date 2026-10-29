@@ -289,7 +289,7 @@ Section ProbabilisticBounds.
       rewrite Nat.mul_add_distr_l.
       eapply Nat.le_trans.
       + apply Nat.add_le_mono; [exact Hhead|exact IH].
-      + rewrite Nat.succ_mul. nia.
+      + rewrite Nat.mul_succ_l. nia.
   Qed.
 
   Theorem scaled_mul_union_tail_le :
