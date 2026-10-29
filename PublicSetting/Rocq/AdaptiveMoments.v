@@ -374,7 +374,7 @@ Proof.
       * specialize (IH (history ++ [draw]) K).
         assert (Hpow : 2 ^ (S K) = 2 * 2 ^ K) by reflexivity.
         rewrite Hpow.
-        rewrite Nat.mul_assoc.
+        rewrite <- Nat.mul_assoc.
         apply Nat.mul_le_mono_l.
         exact IH.
     + simpl.
