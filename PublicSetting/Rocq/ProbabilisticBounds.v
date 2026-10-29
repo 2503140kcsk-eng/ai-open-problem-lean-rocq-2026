@@ -425,25 +425,34 @@ Section ProbabilisticBounds.
           (if event_any (map (score_tail_event K) scores) x then T else 0).
   Proof.
     induction scores as [|score scores IH]; intros K T Hbound x.
-    - simpl. lia.
+    - cbn [maximum_score event_any]. lia.
     - cbn [maximum_score].
-      assert (Hhead : score x <= T).
+      assert (HheadBound : score x <= T).
       { apply Hbound. left. reflexivity. }
-      assert (Hrest :
+      assert (HrestBound :
         forall s, In s scores -> forall y, s y <= T).
       { intros s Hs y. apply Hbound. right. exact Hs. }
-      specialize (IH K T Hrest x).
+      specialize (IH K T HrestBound x).
       destruct (score_tail_event K score x) eqn:HheadEvent;
-      destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent;
-      cbn [event_any score_tail_event] in *.
-      + apply Nat.max_lub. lia.
-      + apply Nat.max_lub. lia.
-      + change (Nat.leb K (score x) = false) in HheadEvent.
-        apply Nat.leb_gt in HheadEvent.
-        apply Nat.max_lub. lia.
-      + change (Nat.leb K (score x) = false) in HheadEvent.
-        apply Nat.leb_gt in HheadEvent.
-        apply Nat.max_lub. lia.
+      destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent.
+      + change (Nat.max (score x) (maximum_score scores x) <= K + T).
+        apply Nat.max_lub.
+        * lia.
+        * rewrite HrestEvent in IH. cbn in IH. exact IH.
+      + change (Nat.max (score x) (maximum_score scores x) <= K + T).
+        apply Nat.max_lub.
+        * lia.
+        * rewrite HrestEvent in IH. cbn in IH. lia.
+      + change (Nat.max (score x) (maximum_score scores x) <= K + T).
+        apply Nat.max_lub.
+        * unfold score_tail_event in HheadEvent.
+          apply Nat.leb_gt in HheadEvent. lia.
+        * rewrite HrestEvent in IH. cbn in IH. exact IH
+      + change (Nat.max (score x) (maximum_score scores x) <= K).
+        apply Nat.max_lub.
+        * unfold score_tail_event in HheadEvent.
+          apply Nat.leb_gt in HheadEvent. lia.
+        * rewrite HrestEvent in IH. cbn in IH. exact IH.
   Qed.
 
   Theorem total_value_maximum_score_le_from_exponential_moments :
