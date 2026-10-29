@@ -376,7 +376,7 @@ theorem badBudget_of_scaled_union_tail_bound {Ω : Type}
     calc
       scale * (T * eventCount samples (eventAny events))
           = T * (scale * eventCount samples (eventAny events)) := by
-              simp [Nat.mul_comm, Nat.mul_left_comm]
+              simp [Nat.mul_left_comm]
       _ ≤ T * (events.length * (bound * samples.length)) :=
             Nat.mul_le_mul_left T hunion
       _ = (T * events.length * bound) * samples.length := by
