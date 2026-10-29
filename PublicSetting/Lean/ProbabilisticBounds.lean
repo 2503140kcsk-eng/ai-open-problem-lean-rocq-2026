@@ -449,4 +449,78 @@ theorem totalValue_le_from_exponential_moments {Ω : Type}
       (momentBounds score hscore)
   · simpa using arithmeticBudget
 
+
+/-- Pointwise maximum of a finite collection of candidate scores. -/
+def maximumScore {Ω : Type} : List (Ω → Nat) → Ω → Nat
+  | [], _ => 0
+  | score :: scores, x => max (score x) (maximumScore scores x)
+
+/-- If no candidate score reaches K, their maximum is at most K; if some score
+reaches K, the maximum is still bounded by the horizon T. This is the
+loss-to-tail reduction needed to turn the union bound into expected regret. -/
+theorem maximumScore_le_threshold_plus_tail {Ω : Type}
+    (scores : List (Ω → Nat)) (K T : Nat)
+    (scoreBound : ∀ score, score ∈ scores → ∀ x, score x ≤ T) :
+    ∀ x, maximumScore scores x ≤
+      K + (if eventAny (scores.map (scoreTailEvent K)) x then T else 0) := by
+  induction scores with
+  | nil =>
+      intro x
+      simp [maximumScore, eventAny]
+  | cons score scores ih =>
+      intro x
+      have hHeadBound : score x ≤ T := scoreBound score (by simp) x
+      have hRestBound : ∀ s, s ∈ scores → ∀ y, s y ≤ T := by
+        intro s hs y
+        exact scoreBound s (by simp [hs]) y
+      have hRest := ih hRestBound x
+      cases hHeadEvent : scoreTailEvent K score x with
+      | true =>
+          have hRestLe : maximumScore scores x ≤ K + T := by
+            cases hRestEvent : eventAny (scores.map (scoreTailEvent K)) x <;>
+              simp [hRestEvent] at hRest <;> omega
+          have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = true := by
+            simp [eventAny, hHeadEvent]
+          simp [maximumScore, hUnion]
+          exact Nat.max_le.mpr ⟨by omega, hRestLe⟩
+      | false =>
+          have hHeadLe : score x ≤ K := by
+            have hnot : ¬ K ≤ score x := by
+              have hd : decide (K ≤ score x) = false := by
+                simpa [scoreTailEvent] using hHeadEvent
+              exact of_decide_eq_false hd
+            omega
+          cases hRestEvent : eventAny (scores.map (scoreTailEvent K)) x with
+          | true =>
+              have hRestLe : maximumScore scores x ≤ K + T := by
+                simpa [hRestEvent] using hRest
+              have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = true := by
+                simp [eventAny, hHeadEvent, hRestEvent]
+              simp [maximumScore, hUnion]
+              exact Nat.max_le.mpr ⟨by omega, hRestLe⟩
+          | false =>
+              have hRestLe : maximumScore scores x ≤ K := by
+                simpa [hRestEvent] using hRest
+              have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = false := by
+                simp [eventAny, hHeadEvent, hRestEvent]
+              simp [maximumScore, hUnion]
+              exact Nat.max_le.mpr ⟨hHeadLe, hRestLe⟩
+
+/-- Finite-candidate expected-regret theorem. Under a common exponential-moment
+bound for every candidate and a threshold satisfying the union-tail budget,
+the average maximum candidate score is at most K+1. On a concrete learning
+game, the scoreBound premise is the horizon bound and each score is its
+candidate-specific match count. -/
+theorem totalValue_maximumScore_le_from_exponential_moments {Ω : Type}
+    (samples : List Ω) (scores : List (Ω → Nat))
+    (K T C : Nat)
+    (momentBounds : ∀ score, score ∈ scores →
+      totalValue samples (fun x => 2 ^ score x) ≤ C * samples.length)
+    (arithmeticBudget : T * scores.length * C ≤ 2 ^ K)
+    (scoreBound : ∀ score, score ∈ scores → ∀ x, score x ≤ T) :
+    totalValue samples (maximumScore scores) ≤ (K + 1) * samples.length := by
+  exact totalValue_le_from_exponential_moments samples scores
+    (maximumScore scores) K T C momentBounds arithmeticBudget
+    (maximumScore_le_threshold_plus_tail scores K T scoreBound)
+
 end PublicSetting.ProbabilisticBounds
