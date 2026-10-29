@@ -372,7 +372,7 @@ Proof.
         simpl in IH.
         nia.
       * specialize (IH (history ++ [draw]) K).
-        have Hpow : 2 ^ (S K) = 2 * 2 ^ K := eq_refl.
+        assert (Hpow : 2 ^ (S K) = 2 * 2 ^ K) by reflexivity.
         rewrite Hpow.
         rewrite Nat.mul_assoc.
         apply Nat.mul_le_mono_l.
