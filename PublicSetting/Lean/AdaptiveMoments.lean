@@ -368,10 +368,14 @@ theorem tailFutureCount_tail_bound
 denominator rather than assumed as a probability axiom. -/
 theorem rat_div_le_of_le_mul {a b c : Rat}
     (hb : 0 < b) (h : a ≤ c * b) : a / b ≤ c := by
-  by_contra hnot
-  have hlt : c < a / b := lt_of_not_ge hnot
-  have hmul : c * b < a := (Rat.lt_div_iff hb).mp hlt
-  exact (not_lt_of_ge h) hmul
+  have hinv : 0 ≤ b⁻¹ := Rat.le_of_lt (Rat.inv_pos.mpr hb)
+  have hmul : a * b⁻¹ ≤ (c * b) * b⁻¹ :=
+    Rat.mul_le_mul_of_nonneg_right h hinv
+  calc
+    a / b = a * b⁻¹ := Rat.div_def a b
+    _ ≤ (c * b) * b⁻¹ := hmul
+    _ = c := by
+      rw [← Rat.mul_assoc, Rat.mul_inv_cancel _ (Rat.ne_of_gt hb)]
 
 /-- The rational-valued expectation of the exponential match score under the
 uniform distribution on complete paths. Every path has mass 1/T!, proved by
@@ -388,7 +392,7 @@ theorem uniformPathExponentialMoment_le
     (target : Nat → List Nat → Nat) (T : Nat) :
     uniformPathExponentialMoment target T ≤ (T + 1 : Nat) := by
   unfold uniformPathExponentialMoment
-  have hnat := uniformPath_exponential_moment_bound target T
+  have hnat := uniformPath_exponentialMoment_bound target T
   have hcast :
       (weightedFuture target T [] : Rat) ≤
         (((T + 1) * uniformFuturePathCount T 0 : Nat) : Rat) :=
@@ -425,7 +429,7 @@ theorem sumTailFutureCounts_bound
   | nil => simp [sumTailFutureCounts]
   | cons target targets ih =>
       have hhead := tailFutureCount_tail_bound target T K
-      have htail := ih T K
+      have htail := ih
       simp only [sumTailFutureCounts, List.length_cons]
       calc
         2 ^ K * (tailFutureCount target T [] K +
