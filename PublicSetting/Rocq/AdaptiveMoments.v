@@ -444,7 +444,7 @@ Lemma total_value_constant :
     total_value samples (fun _ => k) = k * length samples.
 Proof.
   induction samples as [|x xs IH]; intros k; simpl.
-  - reflexivity.
+  - rewrite Nat.mul_0_r. reflexivity.
   - rewrite IH. nia.
 Qed.
 
@@ -520,7 +520,7 @@ Lemma total_value_indicator :
       T * event_count samples event.
 Proof.
   induction samples as [|x xs IH]; intros T event; simpl.
-  - reflexivity.
+  - rewrite Nat.mul_0_r. reflexivity.
   - destruct (event x); simpl; rewrite IH; nia.
 Qed.
 
