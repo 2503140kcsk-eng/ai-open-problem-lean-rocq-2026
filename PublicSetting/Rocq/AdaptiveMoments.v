@@ -371,7 +371,8 @@ Proof.
         specialize (IH (history ++ [draw]) 0).
         simpl in IH.
         nia.
-      * specialize (IH (history ++ [draw]) K).
+      * cbn [Nat.sub].
+        specialize (IH (history ++ [draw]) K).
         assert (Hpow : 2 ^ (S K) = 2 * 2 ^ K) by reflexivity.
         rewrite Hpow.
         rewrite <- Nat.mul_assoc.
