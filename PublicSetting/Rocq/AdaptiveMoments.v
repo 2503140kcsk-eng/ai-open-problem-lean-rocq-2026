@@ -311,7 +311,9 @@ Proof.
   intro T.
   pose proof (uniform_future_path_count_mul_factorial T 0) as H.
   cbn [factorial] in H.
-  nia.
+  rewrite Nat.mul_1_r in H.
+  rewrite Nat.add_0_l in H.
+  exact H.
 Qed.
 
 (* The pre-existing weighted_future is the unnormalized sum of
