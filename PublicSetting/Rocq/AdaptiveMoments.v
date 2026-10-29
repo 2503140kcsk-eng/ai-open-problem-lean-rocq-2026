@@ -285,7 +285,9 @@ Theorem uniform_future_path_count_mul_factorial :
     factorial (current + n).
 Proof.
   induction n as [|n IH]; intros current.
-  - simpl [uniform_future_path_count]. reflexivity.
+  - cbn [uniform_future_path_count].
+    rewrite Nat.add_0_r.
+    reflexivity.
   - simpl [uniform_future_path_count].
     replace (current + 1) with (S current) by lia.
     replace (current + S n) with (S current + n) by lia.
