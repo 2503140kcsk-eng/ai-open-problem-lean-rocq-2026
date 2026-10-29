@@ -446,5 +446,6 @@ theorem sumTailFutureCounts_bound
                 Nat.add_le_add hhead htail
         _ = Nat.succ targets.length * ((T + 1) * factorial T) := by
               rw [Nat.succ_mul]
+              ac_rfl
 
 end PublicSetting.AdaptiveMoments
