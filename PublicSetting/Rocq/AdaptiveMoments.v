@@ -286,6 +286,7 @@ Theorem uniform_future_path_count_mul_factorial :
 Proof.
   induction n as [|n IH]; intros current.
   - cbn [uniform_future_path_count].
+    rewrite Nat.mul_1_l.
     rewrite Nat.add_0_r.
     reflexivity.
   - cbn [uniform_future_path_count].
