@@ -93,8 +93,7 @@ Lemma event_count_outcomes_eq_le_one :
     event_count (outcomes n) (fun x => Nat.eqb x target) <= 1.
 Proof.
   intros n target.
-  apply event_count_eq_le_one.
-  apply outcomes_nodup.
+  apply event_count_outcomes_eq_le_one.
 Qed.
 
 Lemma total_value_mono :
@@ -465,33 +464,6 @@ Proof.
     rewrite Heq.
     apply IH.
     intro Hin. apply Hnot. right. exact Hin.
-Qed.
-
-Lemma event_count_eq_le_one :
-  forall (xs : list nat), NoDup xs ->
-    forall target, event_count xs (fun x => Nat.eqb x target) <= 1.
-Proof.
-  induction xs as [|x xs IH]; intros Hnodup target; simpl.
-  - lia.
-  - inversion Hnodup as [|x' xs' Hnotin Htail]; subst.
-    destruct (Nat.eqb x target) eqn:Heq.
-    + apply Nat.eqb_eq in Heq. subst target.
-      pose proof (event_count_zero_if_not_in xs x Hnotin) as Hzero.
-      rewrite Hzero. simpl. lia.
-    + specialize (IH Htail target). simpl. rewrite Heq. exact IH.
-Qed.
-
-Lemma outcomes_nodup : forall n, NoDup (outcomes n).
-Proof.
-  induction n as [|n IH]; simpl.
-  - constructor.
-    + simpl. tauto.
-    + constructor.
-  - constructor.
-    + intro Hin.
-      pose proof (outcomes_mem_le n (S n) Hin).
-      lia.
-    + exact IH.
 Qed.
 
 Lemma event_count_outcomes_le_one :
