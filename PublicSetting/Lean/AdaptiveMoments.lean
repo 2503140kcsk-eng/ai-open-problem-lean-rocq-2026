@@ -375,7 +375,7 @@ theorem rat_div_le_of_le_mul {a b c : Rat}
     a / b = a * b⁻¹ := Rat.div_def a b
     _ ≤ (c * b) * b⁻¹ := hmul
     _ = c := by
-      rw [← Rat.mul_assoc, Rat.mul_inv_cancel _ (Rat.ne_of_gt hb)]
+      rw [Rat.mul_assoc, Rat.mul_inv_cancel (Rat.ne_of_gt hb), Rat.mul_one]
 
 /-- The rational-valued expectation of the exponential match score under the
 uniform distribution on complete paths. Every path has mass 1/T!, proved by
@@ -399,8 +399,12 @@ theorem uniformPathExponentialMoment_le
     (Rat.natCast_le_natCast).2 hnat
   have hmoment :
       (weightedFuture target T [] : Rat) ≤
-        (T + 1 : Rat) * (uniformFuturePathCount T 0 : Rat) := by
-    simpa only [Nat.cast_mul] using hcast
+        ((T + 1 : Nat) : Rat) * (uniformFuturePathCount T 0 : Rat) := by
+    calc
+      (weightedFuture target T [] : Rat) ≤
+          (((T + 1) * uniformFuturePathCount T 0 : Nat) : Rat) := hcast
+      _ = ((T + 1 : Nat) : Rat) * (uniformFuturePathCount T 0 : Rat) := by
+            rw [Rat.natCast_mul]
   have hdenom : 0 < (uniformFuturePathCount T 0 : Rat) := by
     rw [uniformFuturePathCount_empty]
     exact Rat.natCast_pos.mpr (factorial_pos T)
@@ -442,6 +446,6 @@ theorem sumTailFutureCounts_bound
                 Nat.add_le_add hhead htail
         _ = Nat.succ targets.length * ((T + 1) * factorial T) := by
               rw [Nat.succ_mul]
-              omega
+              simp [Nat.add_comm]
 
 end PublicSetting.AdaptiveMoments
