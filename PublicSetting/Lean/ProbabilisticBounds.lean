@@ -271,6 +271,7 @@ theorem pow_two_mono {a b : Nat} (hab : a ≤ b) : 2 ^ a ≤ 2 ^ b := by
   obtain ⟨d, hd⟩ := hex
   rw [hd, Nat.pow_add]
   have hp : 1 ≤ 2 ^ d := by
+    clear hd
     induction d with
     | zero => simp
     | succ d ih =>
@@ -375,7 +376,7 @@ theorem badBudget_of_scaled_union_tail_bound {Ω : Type}
     calc
       scale * (T * eventCount samples (eventAny events))
           = T * (scale * eventCount samples (eventAny events)) := by
-              simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+              simp [Nat.mul_comm, Nat.mul_left_comm]
       _ ≤ T * (events.length * (bound * samples.length)) :=
             Nat.mul_le_mul_left T hunion
       _ = (T * events.length * bound) * samples.length := by
