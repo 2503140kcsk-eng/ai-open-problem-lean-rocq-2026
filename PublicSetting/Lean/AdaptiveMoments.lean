@@ -402,4 +402,42 @@ theorem uniformPathExponentialMoment_le
     exact Rat.natCast_pos.mpr (factorial_pos T)
   exact rat_div_le_of_le_mul hdenom hmoment
 
+
+
+/-- Sum the per-candidate tail numerators. By the finite union bound, this is
+an upper budget for the number of paths on which at least one listed target
+has at least K matches. -/
+def sumTailFutureCounts :
+    List (Nat → List Nat → Nat) → Nat → Nat → Nat
+  | [], _, _ => 0
+  | target :: targets, T, K =>
+      tailFutureCount target T [] K + sumTailFutureCounts targets T K
+
+/-- Uniform tail budget over every member of any finite candidate list.
+The bound is independent of target policies: the only inputs are the horizon
+and the number of candidates. It is the count-space form of
+P(exists candidate with M >= K) <= |candidates| (T+1) / 2^K. -/
+theorem sumTailFutureCounts_bound
+    (targets : List (Nat → List Nat → Nat)) (T K : Nat) :
+    2 ^ K * sumTailFutureCounts targets T K ≤
+      targets.length * ((T + 1) * factorial T) := by
+  induction targets with
+  | nil => simp [sumTailFutureCounts]
+  | cons target targets ih =>
+      have hhead := tailFutureCount_tail_bound target T K
+      have htail := ih T K
+      simp only [sumTailFutureCounts, List.length_cons]
+      calc
+        2 ^ K * (tailFutureCount target T [] K +
+            sumTailFutureCounts targets T K)
+            = 2 ^ K * tailFutureCount target T [] K +
+                2 ^ K * sumTailFutureCounts targets T K := by
+                  rw [Nat.mul_add]
+        _ ≤ (T + 1) * factorial T +
+              targets.length * ((T + 1) * factorial T) :=
+                Nat.add_le_add hhead htail
+        _ = Nat.succ targets.length * ((T + 1) * factorial T) := by
+              rw [Nat.succ_mul]
+              omega
+
 end PublicSetting.AdaptiveMoments
