@@ -393,11 +393,14 @@ Section ProbabilisticBounds.
     - exact Hpoint.
     - apply bad_budget_of_scaled_union_tail_bound with
         (scale := 2 ^ K) (bound := C).
-      + induction K as [|K IH].
-        * simpl. lia.
-        * change (0 < 2 * 2 ^ K).
-          apply Nat.mul_pos.
-          exact IH.
+      + assert (Hpow : forall n : nat, 0 < 2 ^ n).
+        { intro n.
+          induction n as [|n IH].
+          - simpl. lia.
+          - change (0 < 2 * 2 ^ n).
+            nia.
+        }
+        exact Hpow K.
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
