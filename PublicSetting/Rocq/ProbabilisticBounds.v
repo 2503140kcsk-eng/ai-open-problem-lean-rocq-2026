@@ -470,7 +470,7 @@ Section ProbabilisticBounds.
         {
           change (score_tail_event K score x ||
             event_any (map (score_tail_event K) scores) x = false).
-          apply Bool.orb_false_iff. exact ⟨HheadEvent, HrestEvent⟩.
+          apply Bool.orb_false_iff. split; assumption.
         }
         rewrite Hunion.
         apply Nat.max_lub.
