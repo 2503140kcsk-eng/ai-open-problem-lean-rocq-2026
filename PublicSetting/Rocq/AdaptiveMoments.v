@@ -418,8 +418,7 @@ Proof.
     rewrite Nat.mul_add_distr_l.
     eapply Nat.le_trans.
     + apply Nat.add_le_mono; [exact Hhead | exact IH].
-    + simpl length.
-      rewrite Nat.succ_mul.
+    + cbn [length].
       nia.
 Qed.
 
