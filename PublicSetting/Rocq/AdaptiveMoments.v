@@ -288,7 +288,7 @@ Proof.
   - cbn [uniform_future_path_count].
     rewrite Nat.add_0_r.
     reflexivity.
-  - simpl [uniform_future_path_count].
+  - cbn [uniform_future_path_count].
     replace (current + 1) with (S current) by lia.
     replace (current + S n) with (S current + n) by lia.
     assert (Hprod :
@@ -309,7 +309,7 @@ Theorem uniform_future_path_count_empty :
 Proof.
   intro T.
   pose proof (uniform_future_path_count_mul_factorial T 0) as H.
-  simpl [factorial] in H.
+  cbn [factorial] in H.
   nia.
 Qed.
 
