@@ -362,4 +362,44 @@ theorem tailFutureCount_tail_bound
     _ ≤ (T + 1) * factorial T :=
       weightedFuture_le_rounds_mul_factorial target T
 
+
+
+/-- Order rule for rational quotients, derived from positivity of the
+denominator rather than assumed as a probability axiom. -/
+theorem rat_div_le_of_le_mul {a b c : Rat}
+    (hb : 0 < b) (h : a ≤ c * b) : a / b ≤ c := by
+  by_contra hnot
+  have hlt : c < a / b := lt_of_not_ge hnot
+  have hmul : c * b < a := (Rat.lt_div_iff hb).mp hlt
+  exact (not_lt_of_ge h) hmul
+
+/-- The rational-valued expectation of the exponential match score under the
+uniform distribution on complete paths. Every path has mass 1/T!, proved by
+uniformFuturePathCount_empty. -/
+def uniformPathExponentialMoment
+    (target : Nat → List Nat → Nat) (T : Nat) : Rat :=
+  (weightedFuture target T [] : Rat) /
+    (uniformFuturePathCount T 0 : Rat)
+
+/-- Exact normalized expectation bound for the concrete sequential sampler:
+E[2^M] <= T+1. This theorem turns the weighted path sum into an actual rational
+expectation by dividing by the verified number of equally likely paths. -/
+theorem uniformPathExponentialMoment_le
+    (target : Nat → List Nat → Nat) (T : Nat) :
+    uniformPathExponentialMoment target T ≤ (T + 1 : Nat) := by
+  unfold uniformPathExponentialMoment
+  have hnat := uniformPath_exponential_moment_bound target T
+  have hcast :
+      (weightedFuture target T [] : Rat) ≤
+        (((T + 1) * uniformFuturePathCount T 0 : Nat) : Rat) :=
+    (Rat.natCast_le_natCast).2 hnat
+  have hmoment :
+      (weightedFuture target T [] : Rat) ≤
+        (T + 1 : Rat) * (uniformFuturePathCount T 0 : Rat) := by
+    simpa only [Nat.cast_mul] using hcast
+  have hdenom : 0 < (uniformFuturePathCount T 0 : Rat) := by
+    rw [uniformFuturePathCount_empty]
+    exact Rat.natCast_pos.mpr (factorial_pos T)
+  exact rat_div_le_of_le_mul hdenom hmoment
+
 end PublicSetting.AdaptiveMoments
