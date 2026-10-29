@@ -393,9 +393,10 @@ Section ProbabilisticBounds.
     - exact Hpoint.
     - apply bad_budget_of_scaled_union_tail_bound with
         (scale := 2 ^ K) (bound := C).
-      + induction K as [|K IH]; simpl.
-        * lia.
-        * lia.
+      + induction K as [|K IH].
+        * simpl. lia.
+        * rewrite Nat.pow_succ.
+          apply Nat.mul_pos; [exact IH | lia].
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
