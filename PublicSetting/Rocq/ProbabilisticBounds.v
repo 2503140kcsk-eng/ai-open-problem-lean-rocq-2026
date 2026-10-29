@@ -396,7 +396,9 @@ Section ProbabilisticBounds.
       + induction K as [|K IH].
         * simpl. lia.
         * change (0 < 2 * 2 ^ K).
-          apply Nat.mul_pos; [lia | exact IH].
+          apply Nat.mul_pos.
+          + lia.
+          + exact IH.
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
