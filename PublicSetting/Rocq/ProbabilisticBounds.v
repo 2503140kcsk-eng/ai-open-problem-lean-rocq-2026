@@ -447,7 +447,7 @@ Section ProbabilisticBounds.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
           apply Nat.leb_gt in HheadEvent. lia.
-        * rewrite HrestEvent in IH. cbn in IH. exact IH
+        * rewrite HrestEvent in IH. cbn in IH. exact IH.
       + change (Nat.max (score x) (maximum_score scores x) <= K).
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
