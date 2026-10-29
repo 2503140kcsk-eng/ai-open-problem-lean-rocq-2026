@@ -348,7 +348,7 @@ Lemma total_value_mul_left :
       c * total_value samples f.
 Proof.
   induction samples as [|x xs IH]; intros c f; simpl.
-  - reflexivity.
+  - rewrite Nat.mul_0_r. reflexivity.
   - rewrite IH. rewrite Nat.mul_add_distr_l. reflexivity.
 Qed.
 
