@@ -395,7 +395,7 @@ Section ProbabilisticBounds.
         (scale := 2 ^ K) (bound := C).
       + induction K as [|K IH]; simpl.
         * lia.
-        * apply Nat.mul_pos; [lia | exact IH].
+        * omega.
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
