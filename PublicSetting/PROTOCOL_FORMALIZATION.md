@@ -6,7 +6,7 @@ Shao, Fang, Lin, and Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3
 - https://arxiv.org/html/2601.21462v3
 - https://arxiv.org/abs/2601.21462
 
-Section 1.1 introduces partial feedback and set-realizability. Section 3.3 specifies the public setting. In particular, the current round's order is:
+Section 1.1 introduces partial feedback and set-realizability. Section 5.3 specifies the public setting and states the unresolved randomized-versus-deterministic separation question. In particular, the current round's order is:
 
 1. the adversary chooses the instance/context;
 2. the learner chooses a distribution/action using its observable feedback history;
@@ -29,7 +29,7 @@ The bounded-support result is now stated as an explicit pathwise loss gap in bot
 
 ## The unresolved theorem
 
-The original paper explicitly leaves open whether, in the public setting, there exists a set-realizable hypothesis class with sublinear randomized minimax regret while every deterministic learner has linear minimax regret. The paper's Theorem 18 is a different separation: randomized learnability in the oblivious setting versus unlearnability in the public setting. These must not be conflated.
+The original paper explicitly leaves open whether, in the public setting, there exists a set-realizable hypothesis class with sublinear randomized minimax regret while every deterministic learner has linear minimax regret. The paper's Theorem 19 is a different separation: randomized learnability in the oblivious setting versus unlearnability in the public setting. These must not be conflated.
 
 A fresh search on 28 October 2026 did not find a later work resolving this exact question. This bounded search is not a proof that no resolution exists.
 
