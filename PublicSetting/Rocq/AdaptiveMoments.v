@@ -322,40 +322,6 @@ Qed.
 
 
 
-Fixpoint uniform_future_path_count (n current : nat) : nat :=
-  match n with
-  | 0 => 1
-  | S k => (current + 1) * uniform_future_path_count k (S current)
-  end.
-
-Theorem uniform_future_path_count_mul_factorial :
-  forall n current,
-    uniform_future_path_count n current * factorial current =
-    factorial (current + n).
-Proof.
-  induction n as [|n IH]; intros current.
-  - simpl. lia.
-  - simpl [uniform_future_path_count].
-    replace (current + 1) with (S current) by lia.
-    replace (current + S n) with (S current + n) by lia.
-    assert (Hprod :
-      (S current * uniform_future_path_count n (S current)) * factorial current =
-      uniform_future_path_count n (S current) * (S current * factorial current))
-      by nia.
-    rewrite Hprod.
-    rewrite <- factorial_succ.
-    apply IH.
-Qed.
-
-Theorem uniform_future_path_count_empty :
-  forall T, uniform_future_path_count T 0 = factorial T.
-Proof.
-  intro T.
-  pose proof (uniform_future_path_count_mul_factorial T 0) as H.
-  simpl [factorial] in H.
-  nia.
-Qed.
-
 (* Count complete future paths whose total number of hits is at least K. *)
 Fixpoint tail_future_count (target : nat -> list nat -> nat)
     (n : nat) (history : list nat) (K : nat) : nat :=
@@ -414,18 +380,6 @@ Proof.
   eapply Nat.le_trans.
   - apply tail_future_count_exponential_moment_le.
   - apply weighted_future_le_rounds_mul_factorial.
-Qed.
-
-(* The expected exponential moment equals the weighted path sum divided by T!.
-   The previous theorem establishes E[2^M] <= T+1 in division-free form. *)
-Theorem uniform_path_exponential_moment_bound :
-  forall (target : nat -> list nat -> nat) T,
-    weighted_future target T [] <=
-      (T + 1) * uniform_future_path_count T 0.
-Proof.
-  intros target T.
-  rewrite uniform_future_path_count_empty.
-  apply weighted_future_le_rounds_mul_factorial.
 Qed.
 
 End AdaptiveMoments.
