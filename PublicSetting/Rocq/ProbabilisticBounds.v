@@ -378,6 +378,13 @@ Section ProbabilisticBounds.
     exact Htail.
   Qed.
 
+  Lemma pow_two_positive : forall n : nat, 0 < 2 ^ n.
+  Proof.
+    induction n as [|n IH].
+    - simpl. lia.
+    - simpl. nia.
+  Qed.
+
   Theorem total_value_le_from_exponential_moments :
     forall (samples : list Omega) (scores : list (Omega -> nat))
       (loss : Omega -> nat) (K T C : nat),
@@ -393,14 +400,7 @@ Section ProbabilisticBounds.
     - exact Hpoint.
     - apply bad_budget_of_scaled_union_tail_bound with
         (scale := 2 ^ K) (bound := C).
-      + assert (Hpow : forall n : nat, 0 < 2 ^ n).
-        { intro n.
-          induction n as [|n IH].
-          - simpl. lia.
-          - change (0 < 2 * 2 ^ n).
-            nia.
-        }
-        exact Hpow K.
+      + exact pow_two_positive K.
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
