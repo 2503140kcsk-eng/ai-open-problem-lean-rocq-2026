@@ -428,16 +428,6 @@ Qed.
    policy pays at least c*T against the same target, then every uniform mixture
    over a finite list of those policies has the same lower bound in expectation,
    expressed without division. *)
-Lemma total_value_mono :
-  forall (samples : list nat) (f g : nat -> nat),
-    (forall x, f x <= g x) ->
-    total_value samples f <= total_value samples g.
-Proof.
-  induction samples as [|x xs IH]; intros f g Hpoint; simpl.
-  - lia.
-  - specialize (IH f g Hpoint). lia.
-Qed.
-
 Lemma total_value_constant :
   forall (samples : list nat) (k : nat),
     total_value samples (fun _ => k) = k * length samples.
