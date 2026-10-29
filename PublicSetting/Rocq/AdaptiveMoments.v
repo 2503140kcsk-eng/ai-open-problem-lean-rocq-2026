@@ -382,4 +382,31 @@ Proof.
   - apply weighted_future_le_rounds_mul_factorial.
 Qed.
 
+
+
+Fixpoint sum_tail_future_counts
+    (targets : list (nat -> list nat -> nat)) (T K : nat) : nat :=
+  match targets with
+  | [] => 0
+  | target :: rest =>
+      tail_future_count target T [] K + sum_tail_future_counts rest T K
+  end.
+
+Theorem sum_tail_future_counts_bound :
+  forall (targets : list (nat -> list nat -> nat)) T K,
+    2 ^ K * sum_tail_future_counts targets T K <=
+      length targets * ((T + 1) * factorial T).
+Proof.
+  induction targets as [|target targets IH]; intros T K; simpl.
+  - lia.
+  - pose proof (tail_future_count_tail_bound target T K) as Hhead.
+    specialize (IH T K).
+    rewrite Nat.mul_add_distr_l.
+    eapply Nat.le_trans.
+    + apply Nat.add_le_mono; [exact Hhead | exact IH].
+    + simpl length.
+      rewrite Nat.succ_mul.
+      nia.
+Qed.
+
 End AdaptiveMoments.
