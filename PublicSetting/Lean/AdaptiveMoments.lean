@@ -513,4 +513,64 @@ theorem sumTailFutureCounts_bound
                       symm
                       exact Nat.succ_mul targets.length ((T + 1) * factorial T)
 
+
+/-- Algebraic distribution of a rational factor over division. -/
+theorem rat_mul_div_eq_div_mul (a b c : Rat) :
+    a * (b / c) = (a * b) / c := by
+  calc
+    a * (b / c) = a * (b * c⁻¹) := by rw [Rat.div_def]
+    _ = (a * b) * c⁻¹ := by rw [← Rat.mul_assoc]
+    _ = (a * b) / c := by rw [Rat.div_def]
+
+/-- The sum of individual tail probabilities for a finite family of
+predictable target policies, under the sequential uniform path distribution.
+This is the numerator in the finite union bound; the target-specific tail
+counts may overlap, so this is an upper budget, not an equality for the union. -/
+def uniformPathCandidateTailBudget
+    (targets : List (Nat → List Nat → Nat)) (T K : Nat) : Rat :=
+  (sumTailFutureCounts targets T K : Rat) /
+    (uniformFuturePathCount T 0 : Rat)
+
+/-- Uniform finite-candidate union-bound budget:
+sum_i P(M_i >= K) <= |targets| (T+1) / 2^K.
+The proof is independent of target behavior; each individual tail numerator
+is controlled by the same exponential-moment theorem. -/
+theorem uniformPathCandidateTailBudget_scaled_le
+    (targets : List (Nat → List Nat → Nat)) (T K : Nat) :
+    (2 ^ K : Rat) * uniformPathCandidateTailBudget targets T K ≤
+      (targets.length * (T + 1) : Nat) := by
+  unfold uniformPathCandidateTailBudget
+  have hboundNat := sumTailFutureCounts_bound targets T K
+  have hboundCast :
+      ((2 ^ K * sumTailFutureCounts targets T K : Nat) : Rat) ≤
+        ((targets.length * ((T + 1) * factorial T) : Nat) : Rat) :=
+    (Rat.natCast_le_natCast).2 hboundNat
+  have hnum :
+      (2 ^ K : Rat) * (sumTailFutureCounts targets T K : Rat) ≤
+        ((targets.length * (T + 1) : Nat) : Rat) *
+          (uniformFuturePathCount T 0 : Rat) := by
+    calc
+      (2 ^ K : Rat) * (sumTailFutureCounts targets T K : Rat)
+          = ((2 ^ K * sumTailFutureCounts targets T K : Nat) : Rat) := by
+              simp
+      _ ≤ ((targets.length * ((T + 1) * factorial T) : Nat) : Rat) :=
+        hboundCast
+      _ = ((targets.length * (T + 1) : Nat) : Rat) *
+            (uniformFuturePathCount T 0 : Rat) := by
+              rw [uniformFuturePathCount_empty]
+              calc
+                ((targets.length * ((T + 1) * factorial T) : Nat) : Rat)
+                    = (targets.length : Rat) *
+                        ((T + 1 : Nat) : Rat) * (factorial T : Rat) := by
+                          rw [Rat.natCast_mul, Rat.natCast_mul]
+                          rw [← Rat.mul_assoc]
+                _ = ((targets.length * (T + 1) : Nat) : Rat) *
+                      (factorial T : Rat) := by
+                          rw [Rat.natCast_mul]
+  have hdenom : 0 < (uniformFuturePathCount T 0 : Rat) := by
+    rw [uniformFuturePathCount_empty]
+    exact Rat.natCast_pos.mpr (factorial_pos T)
+  rw [rat_mul_div_eq_div_mul]
+  exact rat_div_le_of_le_mul hdenom hnum
+
 end PublicSetting.AdaptiveMoments
