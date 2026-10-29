@@ -16,7 +16,7 @@ Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Fe
 - HTML source: https://arxiv.org/html/2601.21462v3
 - Related set-valued feedback paper: https://proceedings.mlr.press/v247/raman24b.html
 
-A fresh search on 2026-10-28 did not find a later publication resolving the exact public-setting question. Search absence is not mathematical proof of open status.
+A fresh search on 2026-10-29 did not find a later publication resolving the exact public-setting question. Search absence is not mathematical proof of open status.
 
 ## Why the global target matters
 
@@ -62,6 +62,12 @@ A low-mass witness obstruction is machine-checked in both proof assistants in tw
 For the full product class \(H=\mathbb N^{\mathbb N}\), the independently machine-checked Lean/Rocq terminal-target construction can then be selected from the completed prediction path. Its pathwise loss equals the number of rounds with \(\hat y_t\ne y_t^{\rm vis}\); because the witness is chosen before the current sample with mass at most (1/T), the conditional expected loss on each round is at least (1-1/T\), giving expected cumulative loss at least \(T-1\). The target family remains globally consistent, and the visible-witness comparator has zero loss. The probability-measure/conditional-expectation argument is not yet a machine-checked theorem; the discrete low-mass atom lemmas and the pathwise/global-consistency construction are checked in both provers, with different but corresponding rational/integer-scaled encodings.
 
 This reinforces the boundary diagnosis: neither the full product class nor the constant-function class is the desired separating class. A positive separation would need an intermediate hypothesis class whose global target constraint prevents the adversary from adapting the acceptable set to the sampled path, while still permitting linear deterministic lower bounds.
+
+## Formal finite-sampler moment-to-probability bridge (2026-10-29)
+
+`Lean/AdaptiveMoments.lean` explicitly defines the sequential sampler: at a history of length n, draw uniformly from 0,...,n. Its finite future-path count is proved to satisfy `uniformFuturePathCount T 0 = factorial T`, so each complete path has mass 1/T!. For every predictable target, the unnormalized sum of `2^(number of matches)` over the full path tree is at most `(T+1) * T!`; after division by the verified path count, Lean proves the rational expectation bound `E[2^M] <= T+1`. It then defines the actual rational tail probability and proves `2^K * P(M >= K) <= T+1`. For any finite candidate list, a union-bound budget is proved in rational form in Lean; Rocq independently checks the corresponding path count, integer-scaled per-target tail bound, and finite-candidate aggregate in Rocq 9.2.
+
+This is a fully checked moment-to-tail result for the explicit finite sampler, not a full conditional-expectation proof for arbitrary `NatSubprobability` learner distributions. It does not by itself establish the randomized o(T) upper bound for the public learning game; the adversary timing, target-family realizability, and loss-to-score reduction still have to be connected to the probability model.
 
 
 ## Generalized terminal-target boundary result
@@ -150,7 +156,7 @@ The construction is a valid separation **for total computable learner policies**
 
 This is **not yet the requested unrestricted theorem**. The class enumerates computable policies as challenger indices, so it does not give condition 1 for arbitrary, possibly noncomputable deterministic policies. The countability/cardinality issue described in the next section blocks a direct extension that tries to encode every strategy as a context label. It does not prove that every conceivable hypothesis-class construction is impossible.
 
-The new construction and its probability tail proof remain mathematical arguments in this note, not yet Lean/Rocq formalizations. The unrestricted public-setting question remains explicitly open in Shao–Fang–Lin–Tao, *Partial Feedback Online Learning*, §5.3: https://arxiv.org/html/2601.21462v3.
+The learner-specific construction and its full-game probability tail proof remain mathematical arguments, not yet a Lean/Rocq proof of the requested separation. Separately, the finite sequential-uniform sampler's moment-to-tail bridge is now machine-checked in `AdaptiveMoments`: the complete path count is T!, its exponential match moment is at most T+1, and each predictable target's tail probability is at most (T+1)/2^K; finite-candidate aggregation is proved as a rational bound in Lean and a cross-multiplied integer bound in Rocq. These generic sampler theorems are not yet connected to an o(T) minimax-regret theorem for the full public protocol. The unrestricted public-setting question remains explicitly open in Shao–Fang–Lin–Tao, *Partial Feedback Online Learning*, §5.3: https://arxiv.org/html/2601.21462v3.
 ## Audit: why the diagonal construction still does not cover every deterministic learner
 
 Date: 2026-10-28. This section records an attempted unrestricted extension of the computable-policy construction. It is an obstruction to that *particular construction method*, not a theorem ruling out the original separation.
