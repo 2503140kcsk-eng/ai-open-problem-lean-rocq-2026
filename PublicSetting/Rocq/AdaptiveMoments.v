@@ -93,7 +93,8 @@ Lemma event_count_outcomes_eq_le_one :
     event_count (outcomes n) (fun x => Nat.eqb x target) <= 1.
 Proof.
   intros n target.
-  apply event_count_outcomes_eq_le_one.
+  apply event_count_eq_le_one.
+  apply outcomes_nodup.
 Qed.
 
 Lemma total_value_mono :
