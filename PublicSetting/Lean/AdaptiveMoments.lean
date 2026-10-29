@@ -375,7 +375,7 @@ theorem rat_div_le_of_le_mul {a b c : Rat}
     a / b = a * b⁻¹ := Rat.div_def a b
     _ ≤ (c * b) * b⁻¹ := hmul
     _ = c := by
-      rw [Rat.mul_assoc, Rat.mul_inv_cancel (Rat.ne_of_gt hb), Rat.mul_one]
+      rw [Rat.mul_assoc, Rat.mul_inv_cancel b (Rat.ne_of_gt hb), Rat.mul_one]
 
 /-- The rational-valued expectation of the exponential match score under the
 uniform distribution on complete paths. Every path has mass 1/T!, proved by
@@ -446,6 +446,5 @@ theorem sumTailFutureCounts_bound
                 Nat.add_le_add hhead htail
         _ = Nat.succ targets.length * ((T + 1) * factorial T) := by
               rw [Nat.succ_mul]
-              simp [Nat.add_comm]
 
 end PublicSetting.AdaptiveMoments
