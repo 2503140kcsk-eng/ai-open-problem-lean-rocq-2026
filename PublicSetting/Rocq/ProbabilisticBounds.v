@@ -444,7 +444,7 @@ Section ProbabilisticBounds.
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
-        * rewrite HrestEvent in IH. cbn in IH. exact IH.
+        * cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
         {
           change (score_tail_event K score x ||
@@ -454,7 +454,7 @@ Section ProbabilisticBounds.
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
-        * rewrite HrestEvent in IH. cbn in IH. lia.
+        * cbn in IH. lia.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
         {
           change (score_tail_event K score x ||
@@ -465,7 +465,7 @@ Section ProbabilisticBounds.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
           apply Nat.leb_gt in HheadEvent. lia.
-        * rewrite HrestEvent in IH. cbn in IH. exact IH.
+        * cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = false).
         {
           change (score_tail_event K score x ||
@@ -476,7 +476,7 @@ Section ProbabilisticBounds.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
           apply Nat.leb_gt in HheadEvent. lia.
-        * rewrite HrestEvent in IH. cbn in IH. exact IH.
+        * cbn in IH. exact IH.
   Qed.
 
   Theorem total_value_maximum_score_le_from_exponential_moments :
