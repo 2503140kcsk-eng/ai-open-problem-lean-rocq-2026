@@ -284,8 +284,8 @@ Section ProbabilisticBounds.
           scale * event_count samples e <= bound * length samples).
       { intros e Hin. apply Htail. right. exact Hin. }
       specialize (IH scale bound Hrest).
-      change scale * (event_count samples event + sum_event_counts samples events)
-        <= S (length events) * (bound * length samples).
+      change (scale * (event_count samples event + sum_event_counts samples events)
+        <= S (length events) * (bound * length samples)).
       rewrite Nat.mul_add_distr_l.
       eapply Nat.le_trans.
       + apply Nat.add_le_mono; [exact Hhead|exact IH].
