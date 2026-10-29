@@ -372,6 +372,7 @@ Proof.
         simpl in IH.
         nia.
       * cbn [Nat.sub].
+        rewrite Nat.sub_0_r.
         specialize (IH (history ++ [draw]) K).
         assert (Hpow : 2 ^ (S K) = 2 * 2 ^ K) by reflexivity.
         rewrite Hpow.
