@@ -374,7 +374,7 @@ Section ProbabilisticBounds.
       apply exponential_moment_tail_count_le_of_bound.
       apply Hmoments. exact Hscore.
     }
-    rewrite map_length in Htail.
+    rewrite length_map in Htail.
     exact Htail.
   Qed.
 
@@ -393,14 +393,16 @@ Section ProbabilisticBounds.
     - exact Hpoint.
     - apply bad_budget_of_scaled_union_tail_bound with
         (scale := 2 ^ K) (bound := C).
-      + induction K; simpl; lia.
+      + induction K as [|K IH]; simpl.
+        * lia.
+        * apply Nat.mul_pos; [lia | exact IH].
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
         subst event.
         apply exponential_moment_tail_count_le_of_bound.
         apply Hmoments. exact Hscore.
-      + rewrite map_length. exact Hbudget.
+      + rewrite length_map. exact Hbudget.
   Qed.
 
 End ProbabilisticBounds.
