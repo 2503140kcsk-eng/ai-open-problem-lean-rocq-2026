@@ -192,3 +192,25 @@ One could parameterize a narrower family such as computable or suitably coded me
 - No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
 
 Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, Section 5.3 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
+
+
+## Formalized quantifier boundary: what can and cannot be ruled out
+
+Date: 2026-10-29.
+
+The Lean and Rocq adaptive-moment modules now include two complementary results.
+
+1. The theorem same_fixed_target_linear_lower_bound_survives_mixing proves the conditional no-go statement: if one and the same target induces loss at least c*T for every deterministic policy in the support of a randomized mixture, then the mixture's expected loss is also at least c*T. The code states the inequality after multiplying by the number of equally weighted sample outcomes, so there is no hidden division or probability axiom.
+2. The theorem diagonalTarget_uniform_sum_lt_sample_count / diagonal_target_uniform_sum_lt_sample_count formalizes a finite loss-matrix counterexample to an invalid quantifier inference. With T+1 deterministic policies and T+1 targets, policy i loses T against target i and zero against every other target. Each deterministic policy therefore has worst-target loss T, yet for every fixed target the sum over all equally likely policies is at most T, strictly less than the number of policies T+1. The uniform mixture's average loss is therefore at most T/(T+1) < 1 although every deterministic policy has linear worst-target loss.
+
+The second result is a countermodel for the quantifier logic, **not** a claim that this matrix is realizable as a legal partial-feedback online-learning game. It shows why the implication
+\[
+\forall A\ \exists F_A:\ \mathrm{Loss}(A,F_A,T)\ge cT
+\quad\Longrightarrow\quad
+\exists F\ \mathbb E_{A\sim\mu}[\mathrm{Loss}(A,F,T)]\ge cT
+\]
+is invalid in general. The first theorem rules out only the stronger interpretation where a single fixed target F, independent of the deterministic policy, gives the linear lower bound to every policy in the mixture support.
+
+Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
+
+As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 5.3 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact question. This is evidence about the state of the literature, not a proof of impossibility.
