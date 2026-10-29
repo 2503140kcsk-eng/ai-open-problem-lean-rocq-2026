@@ -479,9 +479,7 @@ theorem maximumScore_le_threshold_plus_tail {Ω : Type}
           have hRestLe : maximumScore scores x ≤ K + T := by
             cases hRestEvent : eventAny (scores.map (scoreTailEvent K)) x <;>
               simp [hRestEvent] at hRest <;> omega
-          have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = true := by
-            simp [eventAny, hHeadEvent]
-          simp [maximumScore, hUnion]
+          simp [maximumScore, eventAny, hHeadEvent]
           exact Nat.max_le.mpr ⟨by omega, hRestLe⟩
       | false =>
           have hHeadLe : score x ≤ K := by
@@ -494,16 +492,12 @@ theorem maximumScore_le_threshold_plus_tail {Ω : Type}
           | true =>
               have hRestLe : maximumScore scores x ≤ K + T := by
                 simpa [hRestEvent] using hRest
-              have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = true := by
-                simp [eventAny, hHeadEvent, hRestEvent]
-              simp [maximumScore, hUnion]
+              simp [maximumScore, eventAny, hHeadEvent, hRestEvent]
               exact Nat.max_le.mpr ⟨by omega, hRestLe⟩
           | false =>
               have hRestLe : maximumScore scores x ≤ K := by
                 simpa [hRestEvent] using hRest
-              have hUnion : eventAny ((score :: scores).map (scoreTailEvent K)) x = false := by
-                simp [eventAny, hHeadEvent, hRestEvent]
-              simp [maximumScore, hUnion]
+              simp [maximumScore, eventAny, hHeadEvent, hRestEvent]
               exact Nat.max_le.mpr ⟨hHeadLe, hRestLe⟩
 
 /-- Finite-candidate expected-regret theorem. Under a common exponential-moment
