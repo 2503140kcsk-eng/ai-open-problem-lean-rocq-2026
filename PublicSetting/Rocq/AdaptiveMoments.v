@@ -291,8 +291,16 @@ Proof.
     replace (current + S n) with (S current + n) by lia.
     assert (Hprod :
       (S current * uniform_future_path_count n (S current)) * factorial current =
-      uniform_future_path_count n (S current) * (S current * factorial current))
-      by nia.
+      uniform_future_path_count n (S current) * (S current * factorial current)).
+    {
+      calc
+        (S current * uniform_future_path_count n (S current)) * factorial current
+            = (uniform_future_path_count n (S current) * S current) * factorial current := by
+                rewrite Nat.mul_comm. reflexivity.
+        _ = uniform_future_path_count n (S current) *
+              (S current * factorial current) := by
+                rewrite Nat.mul_assoc. reflexivity.
+    }
     rewrite Hprod.
     rewrite <- factorial_succ.
     apply IH.
