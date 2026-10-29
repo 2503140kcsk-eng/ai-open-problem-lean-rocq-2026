@@ -418,4 +418,147 @@ Proof.
       nia.
 Qed.
 
+
+
+(* Fixed-target lower bounds commute with mixing: if every deterministic
+   policy pays at least c*T against the same target, then every uniform mixture
+   over a finite list of those policies has the same lower bound in expectation,
+   expressed without division. *)
+Lemma total_value_mono :
+  forall (samples : list nat) (f g : nat -> nat),
+    (forall x, f x <= g x) ->
+    total_value samples f <= total_value samples g.
+Proof.
+  induction samples as [|x xs IH]; intros f g Hpoint; simpl.
+  - lia.
+  - specialize (IH f g Hpoint). lia.
+Qed.
+
+Lemma total_value_constant :
+  forall (samples : list nat) (k : nat),
+    total_value samples (fun _ => k) = k * length samples.
+Proof.
+  induction samples as [|x xs IH]; intros k; simpl.
+  - reflexivity.
+  - rewrite IH. nia.
+Qed.
+
+Theorem same_fixed_target_linear_lower_bound_survives_mixing :
+  forall (samples : list nat) (loss : nat -> nat) (c T : nat),
+    (forall policy, c * T <= loss policy) ->
+    c * T * length samples <= total_value samples loss.
+Proof.
+  intros samples loss c T Hlower.
+  pose proof (total_value_mono samples (fun _ => c * T) loss Hlower) as Hmono.
+  pose proof (total_value_constant samples (c * T)) as Hconst.
+  rewrite Hconst in Hmono.
+  exact Hmono.
+Qed.
+
+Lemma event_count_zero_if_not_in :
+  forall (xs : list nat) target,
+    ~ In target xs ->
+    event_count xs (fun x => Nat.eqb x target) = 0.
+Proof.
+  induction xs as [|x xs IH]; intros target Hnot; simpl.
+  - reflexivity.
+  - assert (Heq : Nat.eqb x target = false).
+    {
+      destruct (Nat.eqb x target) eqn:E.
+      - apply Nat.eqb_eq in E. subst target. exfalso. apply Hnot. left. reflexivity.
+      - reflexivity.
+    }
+    rewrite Heq.
+    apply IH.
+    intro Hin. apply Hnot. right. exact Hin.
+Qed.
+
+Lemma event_count_eq_le_one :
+  forall (xs : list nat), NoDup xs ->
+    forall target, event_count xs (fun x => Nat.eqb x target) <= 1.
+Proof.
+  induction xs as [|x xs IH]; intros Hnodup target; simpl.
+  - lia.
+  - inversion Hnodup as [|x' xs' Hnotin Htail]; subst.
+    destruct (Nat.eqb x target) eqn:Heq.
+    + apply Nat.eqb_eq in Heq. subst target.
+      pose proof (event_count_zero_if_not_in xs x Hnotin) as Hzero.
+      rewrite Hzero. simpl. lia.
+    + specialize (IH Htail target). simpl. rewrite Heq. exact IH.
+Qed.
+
+Lemma outcomes_nodup : forall n, NoDup (outcomes n).
+Proof.
+  induction n as [|n IH]; simpl.
+  - constructor.
+    + simpl. tauto.
+    + constructor.
+  - constructor.
+    + intro Hin.
+      pose proof (outcomes_mem_le n (S n) Hin).
+      lia.
+    + exact IH.
+Qed.
+
+Lemma event_count_outcomes_le_one :
+  forall n target,
+    event_count (outcomes n) (fun policy => Nat.eqb policy target) <= 1.
+Proof.
+  intros n target.
+  apply event_count_eq_le_one.
+  apply outcomes_nodup.
+Qed.
+
+Lemma total_value_indicator :
+  forall (samples : list nat) (T : nat) (event : nat -> bool),
+    total_value samples (fun x => if event x then T else 0) =
+      T * event_count samples event.
+Proof.
+  induction samples as [|x xs IH]; intros T event; simpl.
+  - reflexivity.
+  - destruct (event x); simpl; rewrite IH; nia.
+Qed.
+
+Definition diagonal_target_loss (T policy target : nat) : nat :=
+  if Nat.eqb policy target then T else 0.
+
+Theorem diagonal_target_punishes_its_policy :
+  forall T policy, diagonal_target_loss T policy policy = T.
+Proof.
+  intros T policy.
+  unfold diagonal_target_loss.
+  rewrite Nat.eqb_refl.
+  reflexivity.
+Qed.
+
+(* A finite loss matrix that isolates the quantifier issue. Every deterministic
+   policy has its own target causing T loss, but for each fixed target the sum
+   over T+1 equally likely policies is at most T. The matrix is a logical
+   counterexample to the naive quantifier inference, not a claim that it is a
+   legal partial-feedback online-learning construction. *)
+Theorem diagonal_target_uniform_sum_le_horizon :
+  forall T target,
+    total_value (outcomes T)
+      (fun policy => diagonal_target_loss T policy target) <= T.
+Proof.
+  intros T target.
+  unfold diagonal_target_loss.
+  rewrite total_value_indicator.
+  pose proof (event_count_outcomes_le_one T target) as Hcount.
+  eapply Nat.le_trans.
+  - apply Nat.mul_le_mono_l. exact Hcount.
+  - rewrite Nat.mul_1_r. lia.
+Qed.
+
+Theorem diagonal_target_uniform_sum_lt_sample_count :
+  forall T target,
+    total_value (outcomes T)
+      (fun policy => diagonal_target_loss T policy target) < length (outcomes T).
+Proof.
+  intros T target.
+  pose proof (diagonal_target_uniform_sum_le_horizon T target) as Hsum.
+  rewrite outcomes_length.
+  lia.
+Qed.
+
 End AdaptiveMoments.
