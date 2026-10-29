@@ -293,13 +293,9 @@ Proof.
       (S current * uniform_future_path_count n (S current)) * factorial current =
       uniform_future_path_count n (S current) * (S current * factorial current)).
     {
-      calc
-        (S current * uniform_future_path_count n (S current)) * factorial current
-            = (uniform_future_path_count n (S current) * S current) * factorial current := by
-                rewrite Nat.mul_comm. reflexivity.
-        _ = uniform_future_path_count n (S current) *
-              (S current * factorial current) := by
-                rewrite Nat.mul_assoc. reflexivity.
+      rewrite (Nat.mul_comm (S current) (uniform_future_path_count n (S current))).
+      rewrite Nat.mul_assoc.
+      reflexivity.
     }
     rewrite Hprod.
     rewrite <- factorial_succ.
