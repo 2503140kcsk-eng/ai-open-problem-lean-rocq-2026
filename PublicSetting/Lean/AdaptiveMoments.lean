@@ -199,4 +199,53 @@ theorem weightedFuture_le_rounds_mul_factorial
   have h := weightedFuture_le_factorial_succ target T
   rw [factorial_succ T] at h
   exact h
+
+
+/-- Number of complete length-n future draw paths from a history of length
+current. At a history of length j, exactly j+1 next draws are available. -/
+def uniformFuturePathCount : Nat → Nat → Nat
+  | 0, _ => 1
+  | n + 1, current =>
+      (current + 1) * uniformFuturePathCount n (current + 1)
+
+/-- The number of future paths times the number of already-realized prefixes
+is the corresponding factorial. This pins down the finite uniform sample
+space without using an informal independence assumption. -/
+theorem uniformFuturePathCount_mul_factorial (n current : Nat) :
+    uniformFuturePathCount n current * factorial current =
+      factorial (current + n) := by
+  induction n generalizing current with
+  | zero =>
+      simp [uniformFuturePathCount]
+  | succ n ih =>
+      calc
+        uniformFuturePathCount (n + 1) current * factorial current
+            = uniformFuturePathCount n (current + 1) *
+                ((current + 1) * factorial current) := by
+                  simp [uniformFuturePathCount]
+                  ac_rfl
+        _ = uniformFuturePathCount n (current + 1) *
+              factorial (current + 1) := by
+                rw [factorial_succ]
+        _ = factorial ((current + 1) + n) := ih (current + 1)
+        _ = factorial (current + (n + 1)) := by
+              congr 1 <;> omega
+
+/-- There are exactly T! complete random paths from the empty history. -/
+theorem uniformFuturePathCount_empty (T : Nat) :
+    uniformFuturePathCount T 0 = factorial T := by
+  have h := uniformFuturePathCount_mul_factorial T 0
+  simpa [factorial] using h
+
+/-- The existing weighted path sum is now explicitly normalized by the
+cardinality of the uniform path space. Cross-multiplied form:
+E[2^(number of matches)] <= T+1. The denominator is the proven path count T!,
+so every complete draw sequence has mass 1/T!. -/
+theorem uniformPath_exponentialMoment_bound
+    (target : Nat → List Nat → Nat) (T : Nat) :
+    weightedFuture target T [] ≤
+      (T + 1) * uniformFuturePathCount T 0 := by
+  rw [uniformFuturePathCount_empty]
+  exact weightedFuture_le_rounds_mul_factorial target T
+
 end PublicSetting.AdaptiveMoments
