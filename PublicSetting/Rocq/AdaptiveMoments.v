@@ -320,4 +320,112 @@ Proof.
   apply weighted_future_le_rounds_mul_factorial.
 Qed.
 
+
+
+Fixpoint uniform_future_path_count (n current : nat) : nat :=
+  match n with
+  | 0 => 1
+  | S k => (current + 1) * uniform_future_path_count k (S current)
+  end.
+
+Theorem uniform_future_path_count_mul_factorial :
+  forall n current,
+    uniform_future_path_count n current * factorial current =
+    factorial (current + n).
+Proof.
+  induction n as [|n IH]; intros current.
+  - simpl. lia.
+  - simpl [uniform_future_path_count].
+    replace (current + 1) with (S current) by lia.
+    replace (current + S n) with (S current + n) by lia.
+    assert (Hprod :
+      (S current * uniform_future_path_count n (S current)) * factorial current =
+      uniform_future_path_count n (S current) * (S current * factorial current))
+      by nia.
+    rewrite Hprod.
+    rewrite <- factorial_succ.
+    apply IH.
+Qed.
+
+Theorem uniform_future_path_count_empty :
+  forall T, uniform_future_path_count T 0 = factorial T.
+Proof.
+  intro T.
+  pose proof (uniform_future_path_count_mul_factorial T 0) as H.
+  simpl [factorial] in H.
+  nia.
+Qed.
+
+(* Count complete future paths whose total number of hits is at least K. *)
+Fixpoint tail_future_count (target : nat -> list nat -> nat)
+    (n : nat) (history : list nat) (K : nat) : nat :=
+  match n with
+  | 0 => if Nat.eqb K 0 then 1 else 0
+  | S k =>
+      total_value (outcomes (length history)) (fun draw =>
+        tail_future_count target k (history ++ [draw])
+          (if hit_at target history draw then K - 1 else K))
+  end.
+
+Lemma total_value_mul_left :
+  forall (samples : list nat) (c : nat) (f : nat -> nat),
+    total_value samples (fun x => c * f x) =
+      c * total_value samples f.
+Proof.
+  induction samples as [|x xs IH]; intros c f; simpl.
+  - reflexivity.
+  - rewrite IH. rewrite Nat.mul_add_distr_l. reflexivity.
+Qed.
+
+(* Recursive Markov inequality for the actual sequential uniform draw tree. *)
+Theorem tail_future_count_exponential_moment_le :
+  forall (target : nat -> list nat -> nat) n history K,
+    2 ^ K * tail_future_count target n history K <=
+      weighted_future target n history.
+Proof.
+  intros target n.
+  induction n as [|n IH]; intros history K.
+  - destruct K; simpl; lia.
+  - cbn [tail_future_count weighted_future].
+    rewrite <- total_value_mul_left.
+    apply total_value_mono.
+    intros draw.
+    destruct (hit_at target history draw) eqn:Hhit.
+    + destruct K as [|K].
+      * simpl.
+        specialize (IH (history ++ [draw]) 0).
+        simpl in IH.
+        nia.
+      * simpl.
+        specialize (IH (history ++ [draw]) K).
+        simpl in IH.
+        nia.
+    + simpl.
+      specialize (IH (history ++ [draw]) K).
+      exact IH.
+Qed.
+
+Theorem tail_future_count_tail_bound :
+  forall (target : nat -> list nat -> nat) T K,
+    2 ^ K * tail_future_count target T [] K <=
+      (T + 1) * factorial T.
+Proof.
+  intros target T K.
+  eapply Nat.le_trans.
+  - apply tail_future_count_exponential_moment_le.
+  - apply weighted_future_le_rounds_mul_factorial.
+Qed.
+
+(* The expected exponential moment equals the weighted path sum divided by T!.
+   The previous theorem establishes E[2^M] <= T+1 in division-free form. *)
+Theorem uniform_path_exponential_moment_bound :
+  forall (target : nat -> list nat -> nat) T,
+    weighted_future target T [] <=
+      (T + 1) * uniform_future_path_count T 0.
+Proof.
+  intros target T.
+  rewrite uniform_future_path_count_empty.
+  apply weighted_future_le_rounds_mul_factorial.
+Qed.
+
 End AdaptiveMoments.
