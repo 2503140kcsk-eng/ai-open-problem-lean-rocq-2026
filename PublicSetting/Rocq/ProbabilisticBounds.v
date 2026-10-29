@@ -231,7 +231,7 @@ Section ProbabilisticBounds.
     assert (Hex : exists d, b = a + d) by (exists (b - a); lia).
     destruct Hex as [d Hd].
     subst b.
-    rewrite Nat.pow_add.
+    rewrite Nat.pow_add_r.
     assert (Hp : 1 <= 2 ^ d) by (induction d; simpl; lia).
     change 2 ^ a * 1 <= 2 ^ a * 2 ^ d.
     apply Nat.mul_le_mono_l. exact Hp.
