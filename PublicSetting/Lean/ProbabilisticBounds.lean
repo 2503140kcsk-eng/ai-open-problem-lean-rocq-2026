@@ -275,10 +275,9 @@ theorem pow_two_mono {a b : Nat} (hab : a ≤ b) : 2 ^ a ≤ 2 ^ b := by
     | zero => simp
     | succ d ih =>
         rw [Nat.pow_succ]
-        nlinarith
-  calc
-    2 ^ a = 2 ^ a * 1 := by simp
-    _ ≤ 2 ^ a * 2 ^ d := Nat.mul_le_mul_left (2 ^ a) hp
+        omega
+  have hmul := Nat.mul_le_mul_left (2 ^ a) hp
+  simpa using hmul
 
 /-- The score-threshold event used in Markov's inequality. -/
 def scoreTailEvent {Ω : Type} (K : Nat) (score : Ω → Nat) : Ω → Bool :=
@@ -412,12 +411,17 @@ theorem exponentialMoment_union_tail_count_le {Ω : Type}
     2 ^ K * eventCount samples
         (eventAny (scores.map (scoreTailEvent K))) ≤
       scores.length * (C * samples.length) := by
-  apply scaled_mul_union_tail_le samples (scores.map (scoreTailEvent K))
-    (2 ^ K) C
-  intro event he
-  rcases List.mem_map.mp he with ⟨score, hscore, rfl⟩
-  exact exponentialMoment_tail_count_le_of_bound samples score K C
-    (momentBounds score hscore)
+  have htail :
+      2 ^ K * eventCount samples
+          (eventAny (scores.map (scoreTailEvent K))) ≤
+        (scores.map (scoreTailEvent K)).length * (C * samples.length) := by
+    apply scaled_mul_union_tail_le samples (scores.map (scoreTailEvent K))
+      (2 ^ K) C
+    intro event he
+    rcases List.mem_map.mp he with ⟨score, hscore, rfl⟩
+    exact exponentialMoment_tail_count_le_of_bound samples score K C
+      (momentBounds score hscore)
+  simpa using htail
 
 /-- From candidate-wise exponential moments, derive a logarithmic-threshold
 expectation bound whenever the chosen threshold makes the union tail budget
@@ -442,6 +446,6 @@ theorem totalValue_le_from_exponential_moments {Ω : Type}
     rcases List.mem_map.mp he with ⟨score, hscore, rfl⟩
     exact exponentialMoment_tail_count_le_of_bound samples score K C
       (momentBounds score hscore)
-  · exact arithmeticBudget
+  · simpa using arithmeticBudget
 
 end PublicSetting.ProbabilisticBounds
