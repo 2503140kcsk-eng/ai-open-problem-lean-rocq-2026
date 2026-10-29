@@ -439,7 +439,7 @@ theorem uniformPathTailProbability_scaled_le
     calc
       (2 ^ K : Rat) * (tailFutureCount target T [] K : Rat)
           = ((2 ^ K * tailFutureCount target T [] K : Nat) : Rat) := by
-              rw [Rat.natCast_mul, Rat.natCast_pow]
+              simp
       _ ≤ (((T + 1) * factorial T : Nat) : Rat) := hboundCast
       _ = ((T + 1 : Nat) : Rat) * (uniformFuturePathCount T 0 : Rat) := by
             rw [uniformFuturePathCount_empty, Rat.natCast_mul]
