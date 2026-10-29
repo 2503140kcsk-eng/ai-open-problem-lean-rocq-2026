@@ -426,7 +426,7 @@ Section ProbabilisticBounds.
   Proof.
     induction scores as [|score scores IH]; intros K T Hbound x.
     - simpl. lia.
-    - simpl [maximum_score].
+    - cbn [maximum_score].
       assert (Hhead : score x <= T).
       { apply Hbound. left. reflexivity. }
       assert (Hrest :
@@ -435,7 +435,7 @@ Section ProbabilisticBounds.
       specialize (IH K T Hrest x).
       destruct (score_tail_event K score x) eqn:HheadEvent;
       destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent;
-      simpl [event_any, score_tail_event] in *.
+      cbn [event_any score_tail_event] in *.
       + apply Nat.max_lub. lia.
       + apply Nat.max_lub. lia.
       + change (Nat.leb K (score x) = false) in HheadEvent.
