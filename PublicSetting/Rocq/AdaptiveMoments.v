@@ -476,16 +476,6 @@ Proof.
   apply outcomes_nodup.
 Qed.
 
-Lemma total_value_indicator :
-  forall (samples : list nat) (T : nat) (event : nat -> bool),
-    total_value samples (fun x => if event x then T else 0) =
-      T * event_count samples event.
-Proof.
-  induction samples as [|x xs IH]; intros T event; simpl.
-  - rewrite Nat.mul_0_r. reflexivity.
-  - destruct (event x); simpl; rewrite IH; nia.
-Qed.
-
 Definition diagonal_target_loss (T policy target : nat) : nat :=
   if Nat.eqb policy target then T else 0.
 
