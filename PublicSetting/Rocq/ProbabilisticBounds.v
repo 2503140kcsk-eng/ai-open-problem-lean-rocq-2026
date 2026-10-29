@@ -361,13 +361,21 @@ Section ProbabilisticBounds.
         length scores * (C * length samples).
   Proof.
     intros samples scores K C Hmoments.
-    apply scaled_mul_union_tail_le with (scale := 2 ^ K) (bound := C).
-    intros event Hin.
-    apply in_map_iff in Hin.
-    destruct Hin as [score [Hevent Hscore]].
-    subst event.
-    apply exponential_moment_tail_count_le_of_bound.
-    apply Hmoments. exact Hscore.
+    assert (Htail :
+      2 ^ K * event_count samples
+        (event_any (map (score_tail_event K) scores)) <=
+        length (map (score_tail_event K) scores) * (C * length samples)).
+    {
+      apply scaled_mul_union_tail_le with (scale := 2 ^ K) (bound := C).
+      intros event Hin.
+      apply in_map_iff in Hin.
+      destruct Hin as [score [Hevent Hscore]].
+      subst event.
+      apply exponential_moment_tail_count_le_of_bound.
+      apply Hmoments. exact Hscore.
+    }
+    rewrite map_length in Htail.
+    exact Htail.
   Qed.
 
   Theorem total_value_le_from_exponential_moments :
@@ -392,7 +400,7 @@ Section ProbabilisticBounds.
         subst event.
         apply exponential_moment_tail_count_le_of_bound.
         apply Hmoments. exact Hscore.
-      + exact Hbudget.
+      + rewrite map_length. exact Hbudget.
   Qed.
 
 End ProbabilisticBounds.
