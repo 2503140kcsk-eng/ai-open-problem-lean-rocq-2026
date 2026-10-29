@@ -412,6 +412,65 @@ theorem uniformPathExponentialMoment_le
 
 
 
+/-- The actual tail probability in the finite uniform path space. Its
+numerator is the number of complete paths with at least K target matches; the
+denominator is the proved path count T!, so every path has equal probability. -/
+def uniformPathTailProbability
+    (target : Nat → List Nat → Nat) (T K : Nat) : Rat :=
+  (tailFutureCount target T [] K : Rat) /
+    (uniformFuturePathCount T 0 : Rat)
+
+/-- Markov's inequality in probability form for a fixed predictable target:
+2^K * P(M >= K) <= T+1. This connects the recursively counted tail event to
+the rational probability on the explicitly enumerated uniform path space. -/
+theorem uniformPathTailProbability_scaled_le
+    (target : Nat → List Nat → Nat) (T K : Nat) :
+    (2 ^ K : Rat) * uniformPathTailProbability target T K ≤
+      (T + 1 : Nat) := by
+  unfold uniformPathTailProbability
+  have hboundNat := tailFutureCount_tail_bound target T K
+  have hboundCast :
+      ((2 ^ K * tailFutureCount target T [] K : Nat) : Rat) ≤
+        (((T + 1) * factorial T : Nat) : Rat) :=
+    (Rat.natCast_le_natCast).2 hboundNat
+  have hnum :
+      (2 ^ K : Rat) * (tailFutureCount target T [] K : Rat) ≤
+        ((T + 1 : Nat) : Rat) * (uniformFuturePathCount T 0 : Rat) := by
+    calc
+      (2 ^ K : Rat) * (tailFutureCount target T [] K : Rat)
+          = ((2 ^ K * tailFutureCount target T [] K : Nat) : Rat) := by
+              rw [Rat.natCast_mul, Rat.natCast_pow]
+      _ ≤ (((T + 1) * factorial T : Nat) : Rat) := hboundCast
+      _ = ((T + 1 : Nat) : Rat) * (uniformFuturePathCount T 0 : Rat) := by
+            rw [uniformFuturePathCount_empty, Rat.natCast_mul]
+  have hdenom : 0 < (uniformFuturePathCount T 0 : Rat) := by
+    rw [uniformFuturePathCount_empty]
+    exact Rat.natCast_pos.mpr (factorial_pos T)
+  have hratio :
+      (2 ^ K : Rat) *
+          ((tailFutureCount target T [] K : Rat) /
+            (uniformFuturePathCount T 0 : Rat)) =
+        ((2 ^ K : Rat) * (tailFutureCount target T [] K : Rat)) /
+          (uniformFuturePathCount T 0 : Rat) := by
+    calc
+      (2 ^ K : Rat) *
+          ((tailFutureCount target T [] K : Rat) /
+            (uniformFuturePathCount T 0 : Rat))
+          = (2 ^ K : Rat) *
+              ((tailFutureCount target T [] K : Rat) *
+                (uniformFuturePathCount T 0 : Rat)⁻¹) := by
+                  rw [Rat.div_def]
+      _ = ((2 ^ K : Rat) * (tailFutureCount target T [] K : Rat)) *
+            (uniformFuturePathCount T 0 : Rat)⁻¹ := by
+              rw [← Rat.mul_assoc]
+      _ = ((2 ^ K : Rat) * (tailFutureCount target T [] K : Rat)) /
+            (uniformFuturePathCount T 0 : Rat) := by
+              rw [Rat.div_def]
+  rw [hratio]
+  exact rat_div_le_of_le_mul hdenom hnum
+
+
+
 /-- Sum the per-candidate tail numerators. By the finite union bound, this is
 an upper budget for the number of paths on which at least one listed target
 has at least K matches. -/
