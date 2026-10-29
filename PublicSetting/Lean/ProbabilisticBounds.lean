@@ -262,4 +262,186 @@ theorem totalValue_le_from_factorial_tails {Ω : Type}
     pointwise
     (badBudget_of_union_tail_bound samples events K q T eachTail arithmeticBudget)
 
+
+/-- Monotonicity of powers of two, proved in core Lean without Mathlib. -/
+theorem pow_two_mono {a b : Nat} (hab : a ≤ b) : 2 ^ a ≤ 2 ^ b := by
+  have hex : ∃ d, b = a + d := by
+    refine ⟨b - a, ?_⟩
+    omega
+  obtain ⟨d, hd⟩ := hex
+  rw [hd, Nat.pow_add]
+  have hp : 1 ≤ 2 ^ d := by
+    induction d with
+    | zero => simp
+    | succ d ih =>
+        rw [Nat.pow_succ]
+        nlinarith
+  calc
+    2 ^ a = 2 ^ a * 1 := by simp
+    _ ≤ 2 ^ a * 2 ^ d := Nat.mul_le_mul_left (2 ^ a) hp
+
+/-- The score-threshold event used in Markov's inequality. -/
+def scoreTailEvent {Ω : Type} (K : Nat) (score : Ω → Nat) : Ω → Bool :=
+  fun x => decide (K ≤ score x)
+
+/-- Finite-sample Markov inequality in integer-scaled form.
+If a score has exponential weight 2^score, then the number of samples with
+score at least K, multiplied by 2^K, is at most the sum of all exponential
+weights. Repeated sample entries count as distinct equiprobable outcomes. -/
+theorem exponentialMoment_tail_count_le {Ω : Type}
+    (samples : List Ω) (score : Ω → Nat) (K : Nat) :
+    2 ^ K * eventCount samples (scoreTailEvent K score) ≤
+      totalValue samples (fun x => 2 ^ score x) := by
+  have hpoint : ∀ x,
+      (if scoreTailEvent K score x then 2 ^ K else 0) ≤ 2 ^ score x := by
+    intro x
+    by_cases h : K ≤ score x
+    · simp [scoreTailEvent, h]
+      exact pow_two_mono h
+    · simp [scoreTailEvent, h]
+  have hmono := totalValue_mono samples
+    (fun x => if scoreTailEvent K score x then 2 ^ K else 0)
+    (fun x => 2 ^ score x) hpoint
+  calc
+    2 ^ K * eventCount samples (scoreTailEvent K score)
+        = totalValue samples
+            (fun x => if scoreTailEvent K score x then 2 ^ K else 0) := by
+              symm
+              exact totalValue_indicator samples (2 ^ K) (scoreTailEvent K score)
+    _ ≤ totalValue samples (fun x => 2 ^ score x) := hmono
+
+/-- Aggregate a common integer-scaled tail bound over a finite event family. -/
+theorem scaled_mul_sumEventCounts_le {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (scale bound : Nat)
+    (eachTail : ∀ event, event ∈ events →
+      scale * eventCount samples event ≤ bound * samples.length) :
+    scale * sumEventCounts samples events ≤
+      events.length * (bound * samples.length) := by
+  induction events with
+  | nil => simp [sumEventCounts]
+  | cons event events ih =>
+      have hhead := eachTail event (by simp)
+      have hrest : ∀ e, e ∈ events →
+          scale * eventCount samples e ≤ bound * samples.length := by
+        intro e he
+        exact eachTail e (by simp [he])
+      have htail := ih hrest
+      change scale *
+          (eventCount samples event + sumEventCounts samples events) ≤
+        Nat.succ events.length * (bound * samples.length)
+      calc
+        scale *
+            (eventCount samples event + sumEventCounts samples events)
+            = scale * eventCount samples event +
+                scale * sumEventCounts samples events := by
+                  rw [Nat.mul_add]
+        _ ≤ bound * samples.length +
+              events.length * (bound * samples.length) :=
+                Nat.add_le_add hhead htail
+        _ = Nat.succ events.length * (bound * samples.length) := by
+              rw [Nat.succ_mul]
+              omega
+
+/-- Union bound for finite-sample events from a common scaled tail estimate. -/
+theorem scaled_mul_union_tail_le {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (scale bound : Nat)
+    (eachTail : ∀ event, event ∈ events →
+      scale * eventCount samples event ≤ bound * samples.length) :
+    scale * eventCount samples (eventAny events) ≤
+      events.length * (bound * samples.length) := by
+  have hunion := eventCount_any_le_sumEventCounts samples events
+  calc
+    scale * eventCount samples (eventAny events)
+        ≤ scale * sumEventCounts samples events :=
+          Nat.mul_le_mul_left scale hunion
+    _ ≤ events.length * (bound * samples.length) :=
+      scaled_mul_sumEventCounts_le samples events scale bound eachTail
+
+/-- If the union's scaled tail mass is small enough, its contribution to a
+uniform finite-sample expectation is at most 1. The positivity premise keeps
+the division-free argument valid for arbitrary natural-number scales. -/
+theorem badBudget_of_scaled_union_tail_bound {Ω : Type}
+    (samples : List Ω) (events : List (Ω → Bool))
+    (scale bound T : Nat) (scalePos : 0 < scale)
+    (eachTail : ∀ event, event ∈ events →
+      scale * eventCount samples event ≤ bound * samples.length)
+    (arithmeticBudget : T * events.length * bound ≤ scale) :
+    T * eventCount samples (eventAny events) ≤ samples.length := by
+  have hunion := scaled_mul_union_tail_le samples events scale bound eachTail
+  have hscaled :
+      scale * (T * eventCount samples (eventAny events)) ≤
+        scale * samples.length := by
+    calc
+      scale * (T * eventCount samples (eventAny events))
+          = T * (scale * eventCount samples (eventAny events)) := by
+              simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+      _ ≤ T * (events.length * (bound * samples.length)) :=
+            Nat.mul_le_mul_left T hunion
+      _ = (T * events.length * bound) * samples.length := by
+            simp [Nat.mul_assoc, Nat.mul_comm, Nat.mul_left_comm]
+      _ ≤ scale * samples.length :=
+            Nat.mul_le_mul_right samples.length arithmeticBudget
+  apply Nat.le_of_not_gt
+  intro hlt
+  have hstrict :
+      scale * samples.length <
+        scale * (T * eventCount samples (eventAny events)) :=
+    Nat.mul_lt_mul_of_pos_left hlt scalePos
+  omega
+
+/-- Every candidate score inherits a tail bound from its exponential-moment
+bound. If the uniform mean of 2^score is at most C, then
+2^K * count(score >= K) <= C * sample-count, without using real division. -/
+theorem exponentialMoment_tail_count_le_of_bound {Ω : Type}
+    (samples : List Ω) (score : Ω → Nat) (K C : Nat)
+    (momentBound : totalValue samples (fun x => 2 ^ score x) ≤
+      C * samples.length) :
+    2 ^ K * eventCount samples (scoreTailEvent K score) ≤
+      C * samples.length :=
+  Nat.le_trans
+    (exponentialMoment_tail_count_le samples score K) momentBound
+
+/-- Union over all candidate score functions, each with its own exponential
+moment bound. This is the formal per-candidate-tail to all-candidates bridge. -/
+theorem exponentialMoment_union_tail_count_le {Ω : Type}
+    (samples : List Ω) (scores : List (Ω → Nat)) (K C : Nat)
+    (momentBounds : ∀ score, score ∈ scores →
+      totalValue samples (fun x => 2 ^ score x) ≤ C * samples.length) :
+    2 ^ K * eventCount samples
+        (eventAny (scores.map (scoreTailEvent K))) ≤
+      scores.length * (C * samples.length) := by
+  apply scaled_mul_union_tail_le samples (scores.map (scoreTailEvent K))
+    (2 ^ K) C
+  intro event he
+  rcases List.mem_map.mp he with ⟨score, hscore, rfl⟩
+  exact exponentialMoment_tail_count_le_of_bound samples score K C
+    (momentBounds score hscore)
+
+/-- From candidate-wise exponential moments, derive a logarithmic-threshold
+expectation bound whenever the chosen threshold makes the union tail budget
+small enough. The pointwise premise is the explicit loss-to-candidate-score
+reduction that must be proved for the concrete learning protocol. -/
+theorem totalValue_le_from_exponential_moments {Ω : Type}
+    (samples : List Ω) (scores : List (Ω → Nat))
+    (loss : Ω → Nat) (K T C : Nat)
+    (momentBounds : ∀ score, score ∈ scores →
+      totalValue samples (fun x => 2 ^ score x) ≤ C * samples.length)
+    (arithmeticBudget : T * scores.length * C ≤ 2 ^ K)
+    (pointwise : ∀ x,
+      loss x ≤ K +
+        (if eventAny (scores.map (scoreTailEvent K)) x then T else 0)) :
+    totalValue samples loss ≤ (K + 1) * samples.length := by
+  apply totalValue_le_threshold_plus_one samples loss
+    (eventAny (scores.map (scoreTailEvent K))) K T pointwise
+  apply badBudget_of_scaled_union_tail_bound samples
+    (scores.map (scoreTailEvent K)) (2 ^ K) C T
+  · exact Nat.pow_pos (by decide : 0 < 2)
+  · intro event he
+    rcases List.mem_map.mp he with ⟨score, hscore, rfl⟩
+    exact exponentialMoment_tail_count_le_of_bound samples score K C
+      (momentBounds score hscore)
+  · exact arithmeticBudget
+
 end PublicSetting.ProbabilisticBounds
