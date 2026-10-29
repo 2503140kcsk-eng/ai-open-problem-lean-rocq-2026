@@ -410,4 +410,56 @@ Section ProbabilisticBounds.
       + rewrite length_map. exact Hbudget.
   Qed.
 
+
+  Fixpoint maximum_score (scores : list (Omega -> nat)) (x : Omega) : nat :=
+    match scores with
+    | [] => 0
+    | score :: rest => Nat.max (score x) (maximum_score rest x)
+    end.
+
+  Lemma maximum_score_le_threshold_plus_tail :
+    forall (scores : list (Omega -> nat)) (K T : nat),
+      (forall score, In score scores -> forall x, score x <= T) ->
+      forall x,
+        maximum_score scores x <= K +
+          (if event_any (map (score_tail_event K) scores) x then T else 0).
+  Proof.
+    induction scores as [|score scores IH]; intros K T Hbound x.
+    - simpl. lia.
+    - simpl [maximum_score].
+      assert (Hhead : score x <= T).
+      { apply Hbound. left. reflexivity. }
+      assert (Hrest :
+        forall s, In s scores -> forall y, s y <= T).
+      { intros s Hs y. apply Hbound. right. exact Hs. }
+      specialize (IH K T Hrest x).
+      destruct (score_tail_event K score x) eqn:HheadEvent;
+      destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent;
+      simpl [event_any, score_tail_event] in *.
+      + apply Nat.max_lub. lia.
+      + apply Nat.max_lub. lia.
+      + change (Nat.leb K (score x) = false) in HheadEvent.
+        apply Nat.leb_gt in HheadEvent.
+        apply Nat.max_lub. lia.
+      + change (Nat.leb K (score x) = false) in HheadEvent.
+        apply Nat.leb_gt in HheadEvent.
+        apply Nat.max_lub. lia.
+  Qed.
+
+  Theorem total_value_maximum_score_le_from_exponential_moments :
+    forall (samples : list Omega) (scores : list (Omega -> nat))
+      (K T C : nat),
+      (forall score, In score scores ->
+        total_value samples (fun x => 2 ^ score x) <= C * length samples) ->
+      T * length scores * C <= 2 ^ K ->
+      (forall score, In score scores -> forall x, score x <= T) ->
+      total_value samples (maximum_score scores) <= (K + 1) * length samples.
+  Proof.
+    intros samples scores K T C Hmoments Hbudget HscoreBound.
+    eapply total_value_le_from_exponential_moments.
+    - exact Hmoments.
+    - exact Hbudget.
+    - apply maximum_score_le_threshold_plus_tail. exact HscoreBound.
+  Qed.
+
 End ProbabilisticBounds.
