@@ -400,7 +400,7 @@ Section ProbabilisticBounds.
     - exact Hpoint.
     - apply bad_budget_of_scaled_union_tail_bound with
         (scale := 2 ^ K) (bound := C).
-      + exact pow_two_positive K.
+      + exact (pow_two_positive K).
       + intros event Hin.
         apply in_map_iff in Hin.
         destruct Hin as [score [Hevent Hscore]].
