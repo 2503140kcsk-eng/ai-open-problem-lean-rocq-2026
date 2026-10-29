@@ -224,4 +224,175 @@ Section ProbabilisticBounds.
       + exact Harith.
   Qed.
 
+
+  Lemma pow_two_mono : forall a b, a <= b -> 2 ^ a <= 2 ^ b.
+  Proof.
+    intros a b Hab.
+    assert (Hex : exists d, b = a + d) by (exists (b - a); lia).
+    destruct Hex as [d Hd].
+    subst b.
+    rewrite Nat.pow_add.
+    assert (Hp : 1 <= 2 ^ d) by (induction d; simpl; lia).
+    change 2 ^ a * 1 <= 2 ^ a * 2 ^ d.
+    apply Nat.mul_le_mono_l. exact Hp.
+  Qed.
+
+  Definition score_tail_event (K : nat) (score : Omega -> nat) : Omega -> bool :=
+    fun x => Nat.leb K (score x).
+
+  (* Integer-scaled finite-sample Markov inequality:
+     2^K times the number of samples with score >= K is at most the sum of
+     the exponential weights. Repeated samples represent distinct outcomes. *)
+  Theorem exponential_moment_tail_count_le :
+    forall (samples : list Omega) (score : Omega -> nat) (K : nat),
+      2 ^ K * event_count samples (score_tail_event K score) <=
+        total_value samples (fun x => 2 ^ score x).
+  Proof.
+    intros samples score K.
+    assert (Hpoint : forall x,
+      (if score_tail_event K score x then 2 ^ K else 0) <= 2 ^ score x).
+    {
+      intros x. unfold score_tail_event.
+      destruct (K <=? score x) eqn:Hcmp.
+      - apply Nat.leb_le in Hcmp.
+        apply pow_two_mono. exact Hcmp.
+      - lia.
+    }
+    pose proof (total_value_mono samples
+      (fun x => if score_tail_event K score x then 2 ^ K else 0)
+      (fun x => 2 ^ score x) Hpoint) as Hmono.
+    rewrite total_value_indicator in Hmono.
+    exact Hmono.
+  Qed.
+
+  Lemma scaled_mul_sum_event_counts_le :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (scale bound : nat),
+      (forall event, In event events ->
+        scale * event_count samples event <= bound * length samples) ->
+      scale * sum_event_counts samples events <=
+        length events * (bound * length samples).
+  Proof.
+    intros samples events.
+    induction events as [|event events IH]; intros scale bound Htail; simpl.
+    - lia.
+    - assert (Hhead :
+        scale * event_count samples event <= bound * length samples).
+      { apply Htail. left. reflexivity. }
+      assert (Hrest :
+        forall e, In e events ->
+          scale * event_count samples e <= bound * length samples).
+      { intros e Hin. apply Htail. right. exact Hin. }
+      specialize (IH scale bound Hrest).
+      change scale * (event_count samples event + sum_event_counts samples events)
+        <= S (length events) * (bound * length samples).
+      rewrite Nat.mul_add_distr_l.
+      eapply Nat.le_trans.
+      + apply Nat.add_le_mono; [exact Hhead|exact IH].
+      + rewrite Nat.succ_mul. nia.
+  Qed.
+
+  Theorem scaled_mul_union_tail_le :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (scale bound : nat),
+      (forall event, In event events ->
+        scale * event_count samples event <= bound * length samples) ->
+      scale * event_count samples (event_any events) <=
+        length events * (bound * length samples).
+  Proof.
+    intros samples events scale bound Htail.
+    eapply Nat.le_trans.
+    - apply Nat.mul_le_mono_l.
+      apply event_count_any_le_sum.
+    - apply scaled_mul_sum_event_counts_le. exact Htail.
+  Qed.
+
+  Theorem bad_budget_of_scaled_union_tail_bound :
+    forall (samples : list Omega) (events : list (Omega -> bool))
+      (scale bound T : nat),
+      0 < scale ->
+      (forall event, In event events ->
+        scale * event_count samples event <= bound * length samples) ->
+      T * length events * bound <= scale ->
+      T * event_count samples (event_any events) <= length samples.
+  Proof.
+    intros samples events scale bound T Hscale Htail Hbudget.
+    pose proof (scaled_mul_union_tail_le samples events scale bound Htail) as Hunion.
+    assert (Hscaled :
+      scale * (T * event_count samples (event_any events)) <=
+      scale * length samples).
+    {
+      eapply Nat.le_trans.
+      - replace (scale * (T * event_count samples (event_any events)))
+          with (T * (scale * event_count samples (event_any events))) by nia.
+        apply Nat.mul_le_mono_l. exact Hunion.
+      - replace (T * (length events * (bound * length samples)))
+          with ((T * length events * bound) * length samples) by nia.
+        apply Nat.mul_le_mono_r. exact Hbudget.
+    }
+    destruct (le_gt_dec (T * event_count samples (event_any events)) (length samples))
+      as [Hle | Hgt].
+    - exact Hle.
+    - assert (Hlt : length samples < T * event_count samples (event_any events)) by lia.
+      pose proof
+        (proj1 (Nat.mul_lt_mono_pos_l scale (length samples)
+          (T * event_count samples (event_any events)) Hscale) Hlt) as Hstrict.
+      lia.
+  Qed.
+
+  Theorem exponential_moment_tail_count_le_of_bound :
+    forall (samples : list Omega) (score : Omega -> nat) (K C : nat),
+      total_value samples (fun x => 2 ^ score x) <= C * length samples ->
+      2 ^ K * event_count samples (score_tail_event K score) <=
+        C * length samples.
+  Proof.
+    intros samples score K C Hmoment.
+    eapply Nat.le_trans.
+    - apply exponential_moment_tail_count_le.
+    - exact Hmoment.
+  Qed.
+
+  Theorem exponential_moment_union_tail_count_le :
+    forall (samples : list Omega) (scores : list (Omega -> nat)) (K C : nat),
+      (forall score, In score scores ->
+        total_value samples (fun x => 2 ^ score x) <= C * length samples) ->
+      2 ^ K * event_count samples
+        (event_any (map (score_tail_event K) scores)) <=
+        length scores * (C * length samples).
+  Proof.
+    intros samples scores K C Hmoments.
+    apply scaled_mul_union_tail_le with (scale := 2 ^ K) (bound := C).
+    intros event Hin.
+    apply in_map_iff in Hin.
+    destruct Hin as [score [Hevent Hscore]].
+    subst event.
+    apply exponential_moment_tail_count_le_of_bound.
+    apply Hmoments. exact Hscore.
+  Qed.
+
+  Theorem total_value_le_from_exponential_moments :
+    forall (samples : list Omega) (scores : list (Omega -> nat))
+      (loss : Omega -> nat) (K T C : nat),
+      (forall score, In score scores ->
+        total_value samples (fun x => 2 ^ score x) <= C * length samples) ->
+      T * length scores * C <= 2 ^ K ->
+      (forall x, loss x <= K +
+        (if event_any (map (score_tail_event K) scores) x then T else 0)) ->
+      total_value samples loss <= (K + 1) * length samples.
+  Proof.
+    intros samples scores loss K T C Hmoments Hbudget Hpoint.
+    eapply total_value_le_threshold_plus_one.
+    - exact Hpoint.
+    - apply bad_budget_of_scaled_union_tail_bound with
+        (scale := 2 ^ K) (bound := C).
+      + induction K; simpl; lia.
+      + intros event Hin.
+        apply in_map_iff in Hin.
+        destruct Hin as [score [Hevent Hscore]].
+        subst event.
+        apply exponential_moment_tail_count_le_of_bound.
+        apply Hmoments. exact Hscore.
+      + exact Hbudget.
+  Qed.
+
 End ProbabilisticBounds.
