@@ -268,4 +268,56 @@ Proof.
   replace (T + 1) with (S T) by lia.
   exact Hmoment.
 Qed.
+
+
+(* Cardinality of the finite uniform draw tree. A history of length current
+   has current+1 possible next draws, so each complete T-round path has
+   probability 1/(T!) under the sequential uniform sampler. *)
+Fixpoint uniform_future_path_count (n current : nat) : nat :=
+  match n with
+  | 0 => 1
+  | S k => (current + 1) * uniform_future_path_count k (S current)
+  end.
+
+Theorem uniform_future_path_count_mul_factorial :
+  forall n current,
+    uniform_future_path_count n current * factorial current =
+    factorial (current + n).
+Proof.
+  induction n as [|n IH]; intros current.
+  - simpl. lia.
+  - simpl [uniform_future_path_count].
+    replace (current + 1) with (S current) by lia.
+    replace (current + S n) with (S current + n) by lia.
+    assert (Hprod :
+      (S current * uniform_future_path_count n (S current)) * factorial current =
+      uniform_future_path_count n (S current) * (S current * factorial current))
+      by nia.
+    rewrite Hprod.
+    rewrite <- factorial_succ.
+    apply IH.
+Qed.
+
+Theorem uniform_future_path_count_empty :
+  forall T, uniform_future_path_count T 0 = factorial T.
+Proof.
+  intro T.
+  pose proof (uniform_future_path_count_mul_factorial T 0) as H.
+  simpl [factorial] in H.
+  nia.
+Qed.
+
+(* The pre-existing weighted_future is the unnormalized sum of
+   2^(number of matches) over all leaves. Thus this theorem identifies its
+   denominator exactly and states E[2^M] <= T+1 in cross-multiplied form. *)
+Theorem uniform_path_exponential_moment_bound :
+  forall (target : nat -> list nat -> nat) T,
+    weighted_future target T [] <=
+      (T + 1) * uniform_future_path_count T 0.
+Proof.
+  intros target T.
+  rewrite uniform_future_path_count_empty.
+  apply weighted_future_le_rounds_mul_factorial.
+Qed.
+
 End AdaptiveMoments.
