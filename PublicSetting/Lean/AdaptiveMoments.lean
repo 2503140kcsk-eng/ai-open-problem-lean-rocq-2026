@@ -573,4 +573,64 @@ theorem uniformPathCandidateTailBudget_scaled_le
   rw [rat_mul_div_eq_div_mul]
   exact rat_div_le_of_le_mul hdenom hnum
 
+
+/-- A pointwise linear lower bound against one and the same target cannot be
+removed by randomizing over deterministic policies. Here samples lists the
+possible deterministic policies selected by a random seed, with equal weights.
+The conclusion is the cross-multiplied expectation inequality, so no informal
+probability axiom is used. -/
+theorem same_fixed_target_linear_lower_bound_survives_mixing {Ω : Type}
+    (samples : List Ω) (loss : Ω → Nat) (c T : Nat)
+    (fixedTargetLower : ∀ policy, c * T ≤ loss policy) :
+    (c * T) * samples.length ≤ totalValue samples loss := by
+  calc
+    (c * T) * samples.length =
+        totalValue samples (fun _ => c * T) := by
+          symm
+          exact totalValue_const samples (c * T)
+    _ ≤ totalValue samples loss :=
+      totalValue_mono samples (fun _ => c * T) loss fixedTargetLower
+
+/-- Finite matrix counterexample to the incorrect quantifier inference:
+for each deterministic policy there is a bad target, therefore one target is
+bad for a random mixture. This matrix is a logical countermodel, not claimed
+to be a legal partial-feedback online-learning game. -/
+def diagonalTargetLoss (T policy target : Nat) : Nat :=
+  if decide (policy = target) then T else 0
+
+/-- Every deterministic policy has a target that charges it the full horizon. -/
+theorem diagonalTarget_punishes_its_policy (T policy : Nat) :
+    diagonalTargetLoss T policy policy = T := by
+  simp [diagonalTargetLoss]
+
+/-- For every fixed target, the sum of losses across T+1 deterministic
+policies is at most T. Thus a uniform mixture over these policies has mean loss
+at most T/(T+1), strictly below one, despite every deterministic policy having
+worst-target loss T. -/
+theorem diagonalTarget_uniform_sum_le_horizon (T target : Nat) :
+    totalValue (List.range (T + 1))
+      (fun policy => diagonalTargetLoss T policy target) ≤ T := by
+  calc
+    totalValue (List.range (T + 1))
+        (fun policy => diagonalTargetLoss T policy target)
+        = totalValue (List.range (T + 1))
+            (fun policy => if decide (policy = target) then T else 0) := rfl
+    _ = T * eventCount (List.range (T + 1))
+          (fun policy => decide (policy = target)) :=
+        totalValue_indicator (List.range (T + 1)) T
+          (fun policy => decide (policy = target))
+    _ ≤ T * 1 :=
+        Nat.mul_le_mul_left T (eventCount_range_eq_le_one (T + 1) target)
+    _ = T := Nat.mul_one T
+
+/-- Cross-multiplied form of the randomized counterexample: the uniform
+average is below one because its total loss is strictly below its sample count. -/
+theorem diagonalTarget_uniform_sum_lt_sample_count (T target : Nat) :
+    totalValue (List.range (T + 1))
+      (fun policy => diagonalTargetLoss T policy target) <
+      (List.range (T + 1)).length := by
+  have hsum := diagonalTarget_uniform_sum_le_horizon T target
+  simp only [List.length_range]
+  omega
+
 end PublicSetting.AdaptiveMoments
