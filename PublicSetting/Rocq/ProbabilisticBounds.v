@@ -436,26 +436,42 @@ Section ProbabilisticBounds.
       destruct (score_tail_event K score x) eqn:HheadEvent;
       destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
-        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent. reflexivity. }
+        {
+          change (score_tail_event K score x ||
+            event_any (map (score_tail_event K) scores) x = true).
+          apply Bool.orb_true_iff. left. exact HheadEvent.
+        }
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
         * rewrite HrestEvent in IH. cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
-        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent. reflexivity. }
+        {
+          change (score_tail_event K score x ||
+            event_any (map (score_tail_event K) scores) x = true).
+          apply Bool.orb_true_iff. left. exact HheadEvent.
+        }
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
         * rewrite HrestEvent in IH. cbn in IH. lia.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
-        { unfold score_tail_event in HheadEvent. cbn [event_any]. rewrite HheadEvent, HrestEvent. reflexivity. }
+        {
+          change (score_tail_event K score x ||
+            event_any (map (score_tail_event K) scores) x = true).
+          apply Bool.orb_true_iff. right. exact HrestEvent.
+        }
         rewrite Hunion.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
           apply Nat.leb_gt in HheadEvent. lia.
         * rewrite HrestEvent in IH. cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = false).
-        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent, HrestEvent. reflexivity. }
+        {
+          change (score_tail_event K score x ||
+            event_any (map (score_tail_event K) scores) x = false).
+          apply Bool.orb_false_iff. exact ⟨HheadEvent, HrestEvent⟩.
+        }
         rewrite Hunion.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
