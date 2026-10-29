@@ -381,6 +381,7 @@ Proof.
         exact IH.
     + simpl.
       specialize (IH (history ++ [draw]) K).
+      rewrite Nat.add_0_r.
       exact IH.
 Qed.
 
