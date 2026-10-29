@@ -315,8 +315,7 @@ theorem tailFutureCount_exponentialMoment_le
                       tailFutureCount target n (history ++ [draw]) K =
                     2 * (2 ^ K *
                       tailFutureCount target n (history ++ [draw]) K) := by
-                        simp [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm,
-                          Nat.mul_left_comm]
+                        simp [Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm]
                   _ ≤ 2 * weightedFuture target n (history ++ [draw]) :=
                     Nat.mul_le_mul_left 2 hc
               simpa [hhit, Nat.pow_succ, Nat.mul_assoc, Nat.mul_comm,
@@ -334,7 +333,7 @@ theorem tailFutureCount_exponentialMoment_le
             = 2 ^ K * totalValue draws
                 (fun draw => tailFutureCount target n (history ++ [draw])
                   (if hit draw then K - 1 else K)) := by
-                    simp [tailFutureCount, draws]
+                    rfl
         _ = totalValue draws
               (fun draw => 2 ^ K *
                 tailFutureCount target n (history ++ [draw])
