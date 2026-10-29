@@ -371,10 +371,12 @@ Proof.
         specialize (IH (history ++ [draw]) 0).
         simpl in IH.
         nia.
-      * simpl.
-        specialize (IH (history ++ [draw]) K).
-        simpl in IH.
-        nia.
+      * specialize (IH (history ++ [draw]) K).
+        have Hpow : 2 ^ (S K) = 2 * 2 ^ K := eq_refl.
+        rewrite Hpow.
+        rewrite Nat.mul_assoc.
+        apply Nat.mul_le_mono_l.
+        exact IH.
     + simpl.
       specialize (IH (history ++ [draw]) K).
       exact IH.
