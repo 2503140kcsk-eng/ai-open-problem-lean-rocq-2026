@@ -436,13 +436,13 @@ Section ProbabilisticBounds.
       destruct (score_tail_event K score x) eqn:HheadEvent;
       destruct (event_any (map (score_tail_event K) scores) x) eqn:HrestEvent.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
-        { unfold score_tail_event in HheadEvent. cbn [event_any]. rewrite HheadEvent. reflexivity. }
+        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent. reflexivity. }
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
         * rewrite HrestEvent in IH. cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = true).
-        { cbn [event_any]. rewrite HheadEvent. reflexivity. }
+        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent. reflexivity. }
         rewrite Hunion.
         apply Nat.max_lub.
         * lia.
@@ -455,7 +455,7 @@ Section ProbabilisticBounds.
           apply Nat.leb_gt in HheadEvent. lia.
         * rewrite HrestEvent in IH. cbn in IH. exact IH.
       + assert (Hunion : event_any (map (score_tail_event K) (score :: scores)) x = false).
-        { cbn [event_any]. rewrite HheadEvent, HrestEvent. reflexivity. }
+        { unfold score_tail_event in HheadEvent. cbn [event_any score_tail_event]. rewrite HheadEvent, HrestEvent. reflexivity. }
         rewrite Hunion.
         apply Nat.max_lub.
         * unfold score_tail_event in HheadEvent.
