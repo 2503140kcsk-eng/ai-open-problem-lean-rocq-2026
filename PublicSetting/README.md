@@ -15,7 +15,7 @@ Here o(T) means sublinear regret: regret divided by T tends to zero. Ω(T) means
 
 ## Literature status
 
-The latest version found for this audit is Shao, Fang, Lin, and Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3 (posted 2026-04-02). Section 3.3 explicitly leaves open whether randomized and deterministic learnability can separate in the public setting. The paper's Theorem 18 proves a different separation: randomized learnability in the oblivious setting need not imply learnability in the public setting. That is not the same question.
+The latest version found for this audit is Shao, Fang, Lin, and Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3 (posted 2026-04-02). The final paragraph of Section 5.2 explicitly leaves open whether randomized and deterministic learnability can separate in the public setting. Theorem 18 in Section 5.3 establishes equality between oblivious and public settings for set-valued feedback. Theorem 19 establishes a different result: randomized learnability in the oblivious partial-feedback setting need not imply learnability in the public partial-feedback setting. Neither result answers the open randomized-versus-deterministic question within the public setting.
 
 Source: https://arxiv.org/html/2601.21462v3
 
