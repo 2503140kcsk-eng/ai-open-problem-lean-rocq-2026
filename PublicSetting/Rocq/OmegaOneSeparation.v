@@ -111,8 +111,7 @@ Section CountableCocountableMeasure.
     apply hn.
     pose proof (measurable_non_small_complement (A m) (hMeas m) hm) as hSmallComp.
     eapply small_mono; [|exact hSmallComp].
-    intros x hAn hAmComp.
-    apply hAmComp.
+    intros x hAn hAm.
     eapply hDisj; eauto.
   Qed.
 
@@ -130,6 +129,38 @@ Section CountableCocountableMeasure.
   Proof.
     intros a. unfold CountableSum01.
     destruct (excluded_middle_informative (exists n, a n = 1)); simpl; tauto.
+  Qed.
+
+  Definition AtMostOneOne (a : nat -> nat) : Prop :=
+    forall n m, n <> m -> a n = 1 -> a m = 1 -> False.
+
+  Lemma disjoint_mass_at_most_one :
+    forall A : nat -> Y -> Prop,
+      (forall n, Measurable (A n)) ->
+      PairwiseDisjoint A ->
+      AtMostOneOne (fun n => Mass (A n)).
+  Proof.
+    intros A hMeas hDisj n m hnm hMn hMm.
+    assert (hn : MeasureOne (A n)).
+    { unfold Mass in hMn.
+      destruct (excluded_middle_informative (MeasureOne (A n))) as [h | h].
+      - exact h.
+      - discriminate. }
+    assert (hm : MeasureOne (A m)).
+    { unfold Mass in hMm.
+      destruct (excluded_middle_informative (MeasureOne (A m))) as [h | h].
+      - exact h.
+      - discriminate. }
+    exact (disjoint_at_most_one_non_small A hMeas hDisj n m hnm hn hm).
+  Qed.
+
+  Lemma countable_sum01_is_series_for_disjoint :
+    forall A : nat -> Y -> Prop,
+      (forall n, Measurable (A n)) ->
+      PairwiseDisjoint A ->
+      AtMostOneOne (fun n => Mass (A n)).
+  Proof.
+    exact disjoint_mass_at_most_one.
   Qed.
 
   Lemma countable_additivity_zero_one :
