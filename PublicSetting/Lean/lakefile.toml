@@ -1,6 +1,11 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0"
 
 [[lean_lib]]
 name = "PublicSetting"
@@ -13,3 +18,6 @@ name = "ProbabilisticBounds"
 
 [[lean_lib]]
 name = "AdaptiveMoments"
+
+[[lean_lib]]
+name = "OmegaOneSeparation"
