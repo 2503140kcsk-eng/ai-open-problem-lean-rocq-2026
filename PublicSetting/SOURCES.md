@@ -22,3 +22,16 @@
    - https://ar5iv.labs.arxiv.org/html/2306.06247
 
 The literature search was performed through academic and web-search connectors. It is not an exhaustive proof of nonexistence of a later result.
+
+
+6. MathOverflow discussion, “Inner Regularity of probability measure on totally ordered sets” (2019-10-07). The answer by Andrés E. Caicedo explicitly describes the omega-one ordered label space, the sigma algebra of countable or cocountable sets, and the 0/1 probability measure used in the present candidate.
+   - https://mathoverflow.net/questions/343303/inner-regularity-of-probability-measure-on-totally-ordered-sets
+
+7. MathOverflow discussion, “Measure on omega_1” (2011-11-17). Gives the countable-cocountable sigma algebra on omega_1 and the probability measure assigning zero to countable sets and one to cocountable sets.
+   - https://mathoverflow.net/questions/81143/measure-on-omega-1
+
+8. Mathlib 4.35.0 source files used to select exact theorem/API names for the concrete Lean formalization.
+   - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/MeasureTheory/Measure/MeasureSpaceDef.lean
+   - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/Data/Set/Countable.lean
+   - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/SetTheory/Cardinal/Aleph.lean
+   - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/SetTheory/Cardinal/Regular.lean
