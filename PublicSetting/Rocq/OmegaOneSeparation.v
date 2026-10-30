@@ -242,6 +242,13 @@ Section OmegaOneGame.
   Hypothesis countable_bounded :
     forall seq : nat -> Y, exists b, forall n, le (seq n) b.
 
+  Lemma all_upper_tails_intersection_empty :
+    forall y, exists threshold, ~ Tail threshold y.
+  Proof.
+    intro y. exists (succ y). unfold Tail, le.
+    intro h. apply h. apply lt_succ.
+  Qed.
+
   Lemma le_refl_from_order : forall x, le x x.
   Proof.
     intro x. unfold le. apply lt_irrefl.
