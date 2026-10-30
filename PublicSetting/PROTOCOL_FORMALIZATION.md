@@ -57,3 +57,22 @@ The workflow verifies the existing foundational proofs and the public-protocol m
 ## General pathwise terminal-target lemma
 
 The protocol sources also define a terminal exclusion path from any pair of realized predictions and pre-draw visible witnesses: exclude the prediction when it differs from the witness; on a collision, exclude a different label. Both proof assistants establish that one global family of all functions avoiding that exclusion sequence accepts every visible witness, and that its pathwise loss equals the number of prediction/witness mismatches (the comparator witness path has zero loss). This applies to the full product class, not only bounded-support samplers. It is a *negative boundary result*: a randomized upper bound must rely on structural restrictions on the hypothesis class; the lemma does not supply that upper bound.
+
+
+## Omega-one candidate (added 31 October 2026)
+
+The new candidate uses the full label space omega_1 and the prescribed family of upper tails S_beta={y: beta<=y}, with the countable-cocountable sigma algebra and its 0/1 probability measure. This is distinct from the bounded-support natural-label construction above.
+
+For a fixed public witness w, every possible terminal upper tail compatible with that witness has threshold beta<=w. A mistake is therefore confined to the countable initial segment below w, independently of whether the terminal global target family is chosen after the current or complete prediction path. The countable-cocountable measure assigns that event probability zero.
+
+Conversely, for any deterministic path p_t, the public adversary can reveal p_t+1 and use one global target family consisting of all functions f with f(t)>=p_t+1 for every t. The coordinate image of that same family is exactly the tail S_(p_t+1), so every deterministic prediction is wrong on every round.
+
+Theorem 16's structural criterion does not cover this family: every countable sequence of upper tails has nonempty intersection by countable boundedness of omega_1, while the intersection of all upper tails is empty.
+
+### Verification caveat
+
+The Lean file PublicSetting/Lean/OmegaOneSeparation.lean is the concrete omega_1 development. The Rocq file PublicSetting/Rocq/OmegaOneSeparation.v is an independent generic theorem over an ordered type and a countable ideal with the omega-one properties; it does not construct the concrete ordinal type omega_1 in Rocq Stdlib. GitHub Actions for the new modules are still queued as of the latest inspection. Until completed logs are green, neither file may be described as independently machine-checked.
+
+The random upper-bound uses the paper's broad measurable-space model (arbitrary sigma algebra and probability measures). It is not a standard-Borel or usual-PRNG construction. Thus, if the intended setting imposes a standard Borel label space or ordinary algorithmically samplable randomness, the question is not settled by this candidate.
+
+The proof also still needs a single top-level public-game theorem that packages the conditional one-round zero-error lemma and the pathwise deterministic lower bound into the exact minimax regret semantics of the paper. This remains a required verification step.
