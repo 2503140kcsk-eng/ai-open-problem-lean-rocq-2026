@@ -55,6 +55,21 @@ theorem lowerSegment_countable (w : Label) : (lowerSegment w).Countable := by
     Cardinal.countable_Iio_of_lt_omega_one w.2
   exact h.preimage Subtype.val_injective
 
+/-- Every countable family of upper tails has a common label. This is the
+    cofinality-omega-one fact that prevents Theorem 16's nested-countable
+    intersection condition from applying to this tail family. -/
+theorem countableTails_intersect (thresholds : ℕ → Label) :
+    ∃ w : Label, ∀ n, thresholds n ≤ w := by
+  let b : Ordinal := ⨆ n, (thresholds n).1
+  have hb : b < Ordinal.omega 1 := by
+    apply Ordinal.iSup_lt_omega_one
+    intro n
+    exact (thresholds n).2
+  refine ⟨⟨b, hb⟩, ?_⟩
+  intro n
+  change (thresholds n).1 ≤ b
+  exact le_iSup (fun k => (thresholds k).1) n
+
 /-- The countable-cocountable sigma algebra on the label space. -/
 def countableCocountableMeasurableSpace : MeasurableSpace Label where
   MeasurableSet' s := s.Countable ∨ sᶜ.Countable
