@@ -4,12 +4,14 @@ Import ListNotations.
 (*
   Independent, abstract formalization of the omega-one construction.
 
-  Unlike the Lean development, Rocq's Stdlib has no ready-made concrete
-  omega_1 ordinal / countable-cocountable measure package.  This file proves
-  the full measure and game lemmas for any label order equipped with the
-  defining omega_1 properties: its countable initial segments are small, the
-  small sets form a countable ideal, and every countable sequence of labels
-  is bounded.  No axiom or admitted theorem is used.
+  Rocq's Stdlib has no ready-made concrete omega_1 ordinal / countable-cocountable
+  measure package. This file proves the full measure and game lemmas for any
+  label order equipped with the defining omega_1 properties: its countable
+  initial segments are small, the small sets form a countable ideal, and every
+  countable sequence of labels is bounded. The concrete ordinal instance is
+  constructed in the Lean/Mathlib development.
+
+  No axiom, Parameter, Admitted, or admit is used here.
 *)
 
 Section CountableCocountableMeasure.
@@ -90,7 +92,9 @@ Section CountableCocountableMeasure.
     forall A, Measurable A -> MeasureOne A ->
       Small I (fun x => ~ A x).
   Proof.
-    intros A [hA | hAc] hOne; [contradiction|exact hAc].
+    intros A [hA | hAc] hOne.
+    - contradiction.
+    - exact hAc.
   Qed.
 
   Definition PairwiseDisjoint (A : nat -> Y -> Prop) : Prop :=
@@ -105,8 +109,7 @@ Section CountableCocountableMeasure.
   Proof.
     intros A hMeas hDisj n m hnm hn hm.
     apply hn.
-    destruct (measurable_non_small_complement (A m) (hMeas m) hm)
-      as hSmallComp.
+    pose proof (measurable_non_small_complement (A m) (hMeas m) hm) as hSmallComp.
     eapply small_mono; [|exact hSmallComp].
     intros x hAn hAmComp.
     apply hAmComp.
@@ -114,10 +117,10 @@ Section CountableCocountableMeasure.
   Qed.
 
   (*
-    Since pairwise disjoint measurable sets have at most one cocountable
-    member, their countable sum in {0,1} is exactly 1 iff one term is 1.
-    CountableSum is the exact value of the nonnegative series for such a
-    zero-one sequence; at most one summand is nonzero.
+    A countable sum of zero-one terms with at most one nonzero term is 1
+    exactly when at least one term is 1. Pairwise disjoint measurable sets
+    have at most one cocountable member, so this is ordinary countable
+    additivity specialized to this {0,1}-valued measure.
   *)
   Definition CountableSum01 (a : nat -> nat) : nat :=
     if excluded_middle_informative (exists n, a n = 1) then 1 else 0.
@@ -137,33 +140,27 @@ Section CountableCocountableMeasure.
         CountableSum01 (fun n => Mass (A n)).
   Proof.
     intros A hMeas hDisj.
-    unfold Mass.
+    unfold Mass, CountableSum01.
     destruct (excluded_middle_informative
       (MeasureOne (fun x => exists n, A n x))) as [hUnion | hUnion].
     - destruct (measure_one_iff_union A hMeas) as [hForward _].
-      specialize (hForward hUnion) as [n hn].
-      unfold MeasureOne in hn.
-      destruct (excluded_middle_informative (MeasureOne (A n))) as [hMass | hMass].
-      + unfold CountableSum01.
-        destruct (excluded_middle_informative
-          (exists k, (if excluded_middle_informative (MeasureOne (A k)) then 1 else 0) = 1))
-          as [_ | hNone]; [reflexivity|].
-        exfalso. apply hNone. exists n.
-        destruct (excluded_middle_informative (MeasureOne (A n))); congruence.
-      + contradiction.
-    - destruct (excluded_middle_informative
-        (exists n, (if excluded_middle_informative (MeasureOne (A n))
-                    then 1 else 0) = 1)) as [[n hn] | hNone].
-      + destruct (excluded_middle_informative (MeasureOne (A n))) as [hMass | hMass].
+      destruct (hForward hUnion) as [n hn].
+      destruct (excluded_middle_informative (exists k,
+        (if excluded_middle_informative (MeasureOne (A k)) then 1 else 0) = 1))
+        as [hSome | hNone].
+      + reflexivity.
+      + exfalso. apply hNone. exists n.
+        destruct (excluded_middle_informative (MeasureOne (A n))); [reflexivity|contradiction].
+    - destruct (excluded_middle_informative (exists n,
+        (if excluded_middle_informative (MeasureOne (A n)) then 1 else 0) = 1))
+        as [hSome | hNone].
+      + destruct hSome as [n hn].
+        destruct (excluded_middle_informative (MeasureOne (A n))) as [hMass | hMass].
         * exfalso. apply hUnion.
           apply (proj2 (measure_one_iff_union A hMeas)).
           exists n. exact hMass.
         * simpl in hn. discriminate.
-      + unfold CountableSum01.
-        destruct (excluded_middle_informative
-          (exists n, (if excluded_middle_informative (MeasureOne (A n))
-                      then 1 else 0) = 1)); [congruence|].
-        reflexivity.
+      + reflexivity.
   Qed.
 
   Lemma mass_is_zero_or_one :
@@ -176,41 +173,48 @@ Section CountableCocountableMeasure.
   Lemma mass_universe_one : Mass (fun _ : Y => True) = 1.
   Proof.
     unfold Mass, MeasureOne.
-    destruct (excluded_middle_informative (universe_not_small I)); [|contradiction].
-    reflexivity.
+    destruct (excluded_middle_informative (universe_not_small I)) as [h | h].
+    - reflexivity.
+    - contradiction.
   Qed.
 
   Lemma mass_empty_zero : Mass (fun _ : Y => False) = 0.
   Proof.
     unfold Mass, MeasureOne.
-    destruct (excluded_middle_informative (not_small_empty I)); [contradiction|reflexivity].
+    destruct (excluded_middle_informative
+      (~ Small I (fun _ => False))) as [h | h].
+    - exfalso. apply h. exact (small_empty I).
+    - reflexivity.
   Qed.
 
 End CountableCocountableMeasure.
 
-(*
-  Ordered label spaces with omega-one properties.  The concrete Lean
-  instantiation uses the ordinal type Iio omega_1.  Rocq's independent generic
-  theorem is parameterized by an explicit order structure and small ideal.
-*)
 Section OmegaOneGame.
 
   Context {Y : Type}.
-
+  Variable I : @CountableIdeal Y.
   Variable lt : Y -> Y -> Prop.
+
   Definition le (x y : Y) : Prop := ~ lt y x.
 
   Hypothesis lt_irrefl : forall x, ~ lt x x.
   Hypothesis lt_trans : forall x y z, lt x y -> lt y z -> lt x z.
   Hypothesis lt_le_trans :
     forall x y z, lt x y -> le y z -> lt x z.
+
   Hypothesis succ : Y -> Y.
   Hypothesis lt_succ : forall y, lt y (succ y).
+
   Hypothesis initial_segments_small :
     forall y, Small I (fun x => lt x y).
-  Variable I : @CountableIdeal Y.
+
   Hypothesis countable_bounded :
     forall seq : nat -> Y, exists b, forall n, le (seq n) b.
+
+  Lemma le_refl_from_order : forall x, le x x.
+  Proof.
+    intro x. unfold le. apply lt_irrefl.
+  Qed.
 
   Definition Tail (threshold : Y) (y : Y) : Prop :=
     le threshold y.
@@ -243,6 +247,36 @@ Section OmegaOneGame.
     - apply initial_segments_small.
   Qed.
 
+  Lemma miss_set_measurable :
+    forall chooseThreshold witness,
+      (forall prediction, Tail (chooseThreshold prediction) witness) ->
+      @Measurable Y I (MissSet chooseThreshold witness).
+  Proof.
+    intros chooseThreshold witness hContains.
+    left. apply miss_set_small. exact hContains.
+  Qed.
+
+  Lemma miss_set_mass_zero :
+    forall chooseThreshold witness,
+      (forall prediction, Tail (chooseThreshold prediction) witness) ->
+      @Mass Y I (MissSet chooseThreshold witness) = 0.
+  Proof.
+    intros chooseThreshold witness hContains.
+    unfold Mass, MeasureOne.
+    destruct (excluded_middle_informative
+      (~ Small I (MissSet chooseThreshold witness))) as [h | h].
+    - exfalso. apply h. apply miss_set_small. exact hContains.
+    - reflexivity.
+  Qed.
+
+  Lemma every_countable_tail_family_has_common_member :
+    forall thresholds : nat -> Y,
+      exists y, forall n, Tail (thresholds n) y.
+  Proof.
+    intros thresholds.
+    apply countable_bounded.
+  Qed.
+
   Definition GlobalFamily (thresholds : nat -> Y) (f : nat -> Y) : Prop :=
     forall t, Tail (thresholds t) (f t).
 
@@ -261,7 +295,7 @@ Section OmegaOneGame.
       + intro s. unfold Tail.
         destruct (Nat.eq_dec s t) as [hs | hs].
         * subst s. exact hy.
-        * unfold Tail. apply le_refl_from_order.
+        * apply le_refl_from_order.
       + simpl. destruct (Nat.eq_dec t t); congruence.
   Qed.
 
@@ -280,7 +314,7 @@ Section OmegaOneGame.
       ~ Tail (DeterministicThresholds prediction t) (prediction t).
   Proof.
     intros prediction t. unfold Tail, DeterministicThresholds, le.
-    exact lt_succ (prediction t).
+    intro h. apply h. exact (lt_succ (prediction t)).
   Qed.
 
   Definition RoundLoss (prediction : nat -> Y) (t : nat) : nat :=
