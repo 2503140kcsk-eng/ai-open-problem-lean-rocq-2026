@@ -191,8 +191,8 @@ theorem upperTail_measure_one (threshold : Label) :
 /-- The intersection of all admissible upper tails is empty. -/
 theorem allUpperTails_intersection_empty (y : Label) :
     ∃ threshold : Label, ¬ upperTail threshold y := by
-  refine ⟨succLabel y, ?_⟩
-  exact not_le_of_gt (lt_succLabel y)
+  refine ⟨⟨Ordinal.succ y.1, (Cardinal.isSuccLimit_omega 1).succ_lt y.2⟩, ?_⟩
+  exact not_le_of_gt (Ordinal.lt_succ y.1)
 
 /-- The set of predictions rejected by a tail whose threshold may depend
 on the current sampled label. -/
