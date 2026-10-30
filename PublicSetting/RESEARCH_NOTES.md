@@ -220,3 +220,52 @@ is invalid in general. The first theorem rules out only the stronger interpretat
 Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
 
 As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 5.2 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact question. This is evidence about the state of the literature, not a proof of impossibility.
+
+
+## 2026-10-31: omega-one countable/cocountable candidate
+
+### Candidate game
+
+Take the label space Y to be the first uncountable ordinal omega_1. Give it the countable-cocountable sigma algebra:
+Sigma = {A subset Y : A is countable or Y minus A is countable}.
+Define mu(A)=0 for countable A and mu(A)=1 for cocountable A. Let the prescribed admissible family be the upper tails
+S_beta = {alpha < omega_1 : beta <= alpha}, for beta < omega_1.
+Let X=N and H=Y^N.
+
+The sigma algebra is closed under complements. For a countable union, if every member is countable then the union is countable; otherwise one member is cocountable, so the complement of the union is a subset of that member's countable complement. This proves closure under countable unions.
+
+The mass is countably additive on disjoint measurable sequences. If one member A_i is cocountable, every other disjoint member is contained in its countable complement, hence countable; the union is cocountable and exactly one summand has mass one. If there is no cocountable member, every member and their countable union are countable, so both sides are zero. Thus mu is a probability measure.
+
+For every beta < omega_1, the initial segment [0,beta) is countable. Hence mu([0,beta))=0 and mu(S_beta)=1.
+
+### Randomized upper bound under the paper's measurable-space model
+
+The learner chooses mu at every round. Consider any public history and its next visible witness w_t. The terminal target subfamily may be selected after the sampled predictions, but it must be globally consistent and its acceptable set at x_t must be an admissible upper tail S_{beta_t} containing w_t. Thus beta_t <= w_t. A mistake at round t implies
+prediction < beta_t <= w_t,
+so every possible miss is contained in [0,w_t), which has mu-measure zero. This is a pointwise containment, so it is unaffected by how the terminal target is selected after the predictions. Conditional on every pre-round public history and witness, the expected round loss is zero. Consequently the randomized regret is zero for every finite horizon T in the paper's abstract probability-measure strategy model.
+
+The formal lemma needed for this argument is stronger than fixing one threshold: for every function beta:Y->Y satisfying beta(y)<=w for all y, the miss set {y : not beta(y)<=y} is contained in [0,w). It therefore covers threshold selection depending on the current sampled label. Conditioning on the other sampled labels yields the same pointwise argument for a terminal family selected from the entire path.
+
+### Deterministic lower bound with one global target
+
+Fix an arbitrary deterministic learner and its induced prediction path p_t at contexts x_t=t. Let the adversary reveal the witness w_t=p_t+1, and let the target threshold at context t also be p_t+1. Define one target family
+F* = {f:N->omega_1 : for every t, p_t+1 <= f(t)}.
+This family is nonempty (take f(t)=p_t+1). Since H is the full product Y^N, its coordinate image at t is exactly S_{p_t+1}. Hence the same global F* induces all acceptable sets simultaneously. Each witness belongs to its tail, while p_t does not. The deterministic learner therefore loses exactly T rounds. Because the construction can be made against every deterministic learner, the deterministic minimax regret is T.
+
+### Why Theorem 16 does not apply
+
+For every countable sequence beta_n < omega_1, regularity/cofinality of omega_1 gives an upper bound beta < omega_1. The label beta then belongs to every S_{beta_n}, so the intersection is nonempty. This rules out a countable decreasing sequence of upper tails with empty intersection. Every finite family is also countable and has nonempty intersection. However the intersection over all beta < omega_1 is empty. The sufficient structural hypotheses in Theorem 16 are therefore both false for this admissible-set family.
+
+### Model boundary and foundations
+
+This candidate uses the paper's very general formulation in which the label space is equipped with an arbitrary sigma algebra and randomized actions may be arbitrary probability measures on that measurable space. The countable-cocountable space on omega_1 is not standard Borel and is not asserted to be realizable by an ordinary real-valued random-number generator. The result should not be generalized to standard Borel / countably generated / algorithmically samplable label spaces without a separate proof.
+
+### Formalization status
+
+- Lean: PublicSetting/Lean/OmegaOneSeparation.lean is a concrete Mathlib development of omega_1, the countable-cocountable sigma algebra, the probability measure via Measure.ofMeasurable, countable upper-tail intersection, adaptive miss-set nullity, and the one-global-target deterministic lower bound.
+- Rocq: PublicSetting/Rocq/OmegaOneSeparation.v proves the same measure/game lemmas abstractly for an ordered label type supplied with a countable ideal, small initial segments, successor, and countable boundedness. The Rocq Stdlib project does not supply a concrete omega_1 ordinal/measure instance in this project, so this is not yet a concrete duplicate of the Lean instantiation.
+- Both updated CI tracks are queued as of 2026-10-31 in GitHub Actions. Until the logs complete successfully, the sources are formalization drafts, not completed machine-checked proof artifacts.
+
+### Next formal verification boundary
+
+The current files formalize the central one-round measure lemma and the pathwise deterministic construction. A remaining improvement is a single theorem packaging the public sequential game, conditional expected losses over adaptive target selection, and minimax-regret quantifier order exactly as in equation (5) of Section 5.3 / the public-setting formulation in the paper. This wrapper must not weaken the fixed-global-target constraint or move the visible witness after the current sample.
