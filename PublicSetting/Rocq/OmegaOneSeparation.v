@@ -243,9 +243,9 @@ Section OmegaOneGame.
     forall seq : nat -> Y, exists b, forall n, le (seq n) b.
 
   Lemma all_upper_tails_intersection_empty :
-    forall y, exists threshold, ~ Tail threshold y.
+    forall y, exists threshold, ~ le threshold y.
   Proof.
-    intro y. exists (succ y). unfold Tail, le.
+    intro y. exists (succ y). unfold le.
     intro h. apply h. apply lt_succ.
   Qed.
 
