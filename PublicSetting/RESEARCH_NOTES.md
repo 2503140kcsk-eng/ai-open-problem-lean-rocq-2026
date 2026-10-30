@@ -197,7 +197,7 @@ One could parameterize a narrower family such as computable or suitably coded me
 - This cardinality argument is **not** a no-go theorem for every possible hypothesis class: a successful class might diagonalize along paths without literally indexing policies in the context.
 - No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
 
-Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, Section 5.3 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
+Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, The final paragraph of Section 5.2 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
 
 
 ## Formalized quantifier boundary: what can and cannot be ruled out
