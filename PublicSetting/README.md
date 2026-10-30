@@ -56,3 +56,37 @@ The GitHub Actions workflow runs both independent builds. A passing build verifi
 ## Reproducibility
 
 The Lean subproject pins its Lean toolchain. The Rocq workflow pins a versioned official prover image. The Lean and Rocq sources do not import, generate, or trust one another.
+
+
+## Omega-one candidate added on 2026-10-31
+
+A concrete candidate has been added to the Lean project.
+
+- Label space: Y = omega_1, the first uncountable ordinal.
+- Sigma algebra: all countable or cocountable subsets of Y.
+- Probability measure: zero on countable sets and one on cocountable sets.
+- Admissible acceptable sets: upper tails S_beta = {y : beta <= y}.
+- Instance space: natural numbers.
+- Hypothesis class: all functions from natural numbers to Y.
+
+Every initial segment below a countable ordinal is countable. Therefore every admissible upper tail has measure one.
+
+Randomized side: use this probability measure as the learner's distribution on every round. If the visible witness is w_t, every terminal acceptable tail compatible with that witness has threshold beta_t <= w_t. A mistake implies prediction < beta_t <= w_t. Thus the error event is contained in the countable null initial segment below w_t. This remains true when the terminal target family is selected after all sampled predictions, because the containment holds pointwise for every possible terminal choice.
+
+Deterministic side: for any deterministic prediction path p_t, choose the visible witness and tail threshold to be the successor p_t+1. One global target family F* consists of all functions f with f(t) >= p_t+1 at every coordinate. This family is nonempty and induces exactly the required upper tail at each context. It contains every visible witness while excluding the deterministic prediction, so the path incurs exactly T mistakes.
+
+Theorem 16 in the paper does not rule out this family: every countable sequence of countable ordinals is bounded below omega_1, so countably many upper tails have nonempty intersection; the intersection of all upper tails is empty.
+
+Model boundary: this uses the paper's abstract model allowing arbitrary probability measures on a measurable label space. The countable-cocountable space is not claimed to be standard Borel, countably generated, or implementable by an ordinary real-valued PRNG. A stronger standard-Borel or implementable-sampling restriction requires a separate analysis.
+
+## Current formal verification status
+
+- Lean/OmegaOneSeparation.lean contains the concrete omega_1 label space, countable-cocountable measurable space, 0/1 probability measure through Measure.ofMeasurable, null-miss result, countable tail-intersection result, and globally realizable deterministic lower-bound construction.
+- Rocq/OmegaOneSeparation.v proves the same measure and game lemmas for an abstract ordered label structure equipped with a countable ideal, countable initial segments, successors, and countable boundedness. It is an abstract theorem schema, not a concrete Rocq encoding of omega_1.
+- The latest GitHub Actions runs for these new modules remain queued. No completed CI result has yet been verified. Do not treat source upload or a queued workflow as a machine-checked proof.
+
+## Remaining tasks
+
+1. Obtain and inspect successful Lean and Rocq 9.2 CI runs for the new modules.
+2. Formalize the final wrapper connecting the roundwise zero-error lemma and deterministic pathwise lower bound to the exact public sequential minimax expression.
+3. Decide whether the intended problem permits arbitrary measurable label spaces and all countably additive measures. Under that model, the candidate implies randomized regret zero and deterministic regret T. Under additional standard-Borel or implementable-sampling restrictions, this result does not automatically apply.
