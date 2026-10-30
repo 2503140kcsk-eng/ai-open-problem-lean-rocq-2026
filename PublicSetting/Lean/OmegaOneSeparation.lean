@@ -188,6 +188,12 @@ theorem upperTail_measure_one (threshold : Label) :
   rw [countableCocountableMeasure_apply (upperTail threshold) (Or.inr hcomp)]
   simp [countableCocountableMass, hnot]
 
+/-- The intersection of all admissible upper tails is empty. -/
+theorem allUpperTails_intersection_empty (y : Label) :
+    ∃ threshold : Label, ¬ upperTail threshold y := by
+  refine ⟨succLabel y, ?_⟩
+  exact not_le_of_gt (lt_succLabel y)
+
 /-- The set of predictions rejected by a tail whose threshold may depend
 on the current sampled label. -/
 def adaptiveMissSet (chooseThreshold : Label → Label) (witness : Label) :
