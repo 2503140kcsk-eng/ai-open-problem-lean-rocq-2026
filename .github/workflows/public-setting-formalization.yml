@@ -16,7 +16,7 @@ permissions:
 jobs:
   lean:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: PublicSetting/Lean
@@ -36,6 +36,8 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Install pinned Lean toolchain
         run: elan toolchain install leanprover/lean4:v4.35.0
+      - name: Fetch pinned Mathlib cache
+        run: lake exe cache get
       - name: Build Lean proofs
         run: lake build
       - name: Check root VC-learning formalization
