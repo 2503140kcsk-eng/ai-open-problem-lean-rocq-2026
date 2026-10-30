@@ -101,8 +101,9 @@ instance : MeasurableSpace Label := countableCocountableMeasurableSpace
 
 /-- The 0/1 mass on measurable sets: countable sets have mass zero. -/
 noncomputable def countableCocountableMass
-    (s : Set Label) (_hs : MeasurableSet s) : ℝ≥0∞ :=
-  if s.Countable then 0 else 1
+    (s : Set Label) (_hs : MeasurableSet s) : ℝ≥0∞ := by
+  classical
+  exact if s.Countable then 0 else 1
 
 /-- Countable-cocountable probability measure on omega-one. -/
 noncomputable def countableCocountableMeasure : Measure Label := by
@@ -203,6 +204,19 @@ theorem adaptiveMiss_subset_lowerSegment
   change ¬ chooseThreshold prediction ≤ prediction at hmiss
   change prediction < witness
   exact lt_of_lt_of_le (lt_of_not_ge hmiss) (hcontains prediction)
+
+theorem adaptiveMiss_countable
+    (chooseThreshold : Label → Label) (witness : Label)
+    (hcontains : ∀ prediction, chooseThreshold prediction ≤ witness) :
+    (adaptiveMissSet chooseThreshold witness).Countable := by
+  apply (lowerSegment_countable witness).mono
+  exact adaptiveMiss_subset_lowerSegment chooseThreshold witness hcontains
+
+theorem adaptiveMiss_measurable
+    (chooseThreshold : Label → Label) (witness : Label)
+    (hcontains : ∀ prediction, chooseThreshold prediction ≤ witness) :
+    MeasurableSet (adaptiveMissSet chooseThreshold witness) :=
+  Or.inl (adaptiveMiss_countable chooseThreshold witness hcontains)
 
 /-- The one-round conditional expected mistake is zero for every public
 witness and every terminal adaptive tail containing that witness. -/
