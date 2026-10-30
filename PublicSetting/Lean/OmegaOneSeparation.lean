@@ -187,7 +187,7 @@ theorem adaptiveMiss_subset_lowerSegment
   intro prediction hmiss
   change ¬ chooseThreshold prediction ≤ prediction at hmiss
   change prediction < witness
-  exact (lt_of_not_ge hmiss).trans (hcontains prediction)
+  exact lt_of_lt_of_le (lt_of_not_ge hmiss) (hcontains prediction)
 
 /-- The one-round conditional expected mistake is zero for every public
 witness and every terminal adaptive tail containing that witness. -/
