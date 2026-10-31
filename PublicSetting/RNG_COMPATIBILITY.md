@@ -64,10 +64,11 @@ The theorem does not show that every imaginable set-theoretic map from an
 uncountable probability space into (\omega_1) is impossible. It rules out
 countably-supported samplers, including ordinary executable samplers with
 finite or countably many finite outputs. The PR now also contains a concrete
-Gaia-backed Rocq adapter for the set-theoretic object (\omega_1), in
-`Rocq/ConcreteOmegaOne.v`. The existing generic Rocq countable-ideal game
-lemmas have **not yet** been instantiated over Gaia's concrete carrier; the
-adapter and the RNG no-go theorem are separate verified modules.
+Gaia-backed Rocq adapter for the set-theoretic object (\\omega_1), in
+`Rocq/ConcreteOmegaOne.v`. The adapter states the `aleph_oneP`
+characterization, countable-supremum closure, and uncountability. The existing
+generic Rocq countable-ideal game lemmas have **not yet** been instantiated
+over that Gaia carrier; the adapter and RNG no-go theorem are separate modules.
 
 ## Verification
 
