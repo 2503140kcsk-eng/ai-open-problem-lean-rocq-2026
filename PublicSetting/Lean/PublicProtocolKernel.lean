@@ -106,6 +106,7 @@ noncomputable def drawAfterPolicy
     [MeasurableSpace Y]
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
+    [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L)) :
     ProbabilityTheory.Kernel (History X D Y) Y :=
   draw ∘ₖ ProbabilityTheory.Kernel.deterministic
@@ -132,6 +133,7 @@ noncomputable def jointHistoryDrawKernel
     [MeasurableSpace Y]
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
+    [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L)) :
     ProbabilityTheory.Kernel (History X D Y) (History X D Y × Y) := by
   letI : ProbabilityTheory.IsMarkovKernel (drawAfterPolicy A L draw hpolicy) :=
@@ -163,6 +165,7 @@ noncomputable def publicProtocolTransition
     [MeasurableSpace Y]
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
+    [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L))
     (_hupdate : Measurable (updateHistory A L)) :
     ProbabilityTheory.Kernel (History X D Y) (History X D Y) :=
@@ -195,6 +198,7 @@ noncomputable def publicProtocolPrefixKernel
     [MeasurableSpace Y]
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
+    [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L))
     (hupdate : Measurable (updateHistory A L))
     (n : ℕ) :
@@ -285,8 +289,7 @@ theorem publicProtocol_trajectory_tower
       (ProbabilityTheory.Kernel.traj
         (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)) :
     (ProbabilityTheory.Kernel.traj
-      (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)
-        [reward | MeasureTheory.Filtration.piLE b] =ᵐ[
+      (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)[reward | MeasureTheory.Filtration.piLE b] =ᵐ[
           ProbabilityTheory.Kernel.traj
             (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix]
       fun path ↦ ∫ future, reward future ∂
@@ -345,8 +348,7 @@ theorem finitePathLoss_tower
       (ProbabilityTheory.Kernel.traj
         (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)) :
     (ProbabilityTheory.Kernel.traj
-      (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)
-        [finitePathLoss T loss | MeasureTheory.Filtration.piLE b] =ᵐ[
+      (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)[finitePathLoss T loss | MeasureTheory.Filtration.piLE b] =ᵐ[
           ProbabilityTheory.Kernel.traj
             (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix]
       fun path ↦ ∫ future, finitePathLoss T loss future ∂
