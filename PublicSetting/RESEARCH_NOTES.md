@@ -285,7 +285,7 @@ The Lean public history is a list of triples (context, visible label, realized p
 
 ## 2026-10-31: full-path terminal-target audit
 
-The public protocol lets the adversary see previous realized predictions, and the acceptable sets may be chosen consistently after the complete path. Lean now defines a path-dependent terminal threshold rule on Fin T → Label and proves that any path with a mistake on any coordinate lies in the finite union of cylinders {path | path t < witness t}. Rocq proves the abstract corresponding coordinate-containment lemma. Each one-coordinate initial segment is countable and has marginal mass zero. The finite-product measure argument is standard but remains separately unformalized. The pointwise path-containment lemmas themselves have passed both Lean and Rocq CI.
+The public protocol lets the adversary see previous realized predictions, and the acceptable sets may be chosen consistently after the complete path. Lean now defines a path-dependent terminal threshold rule on Fin T → Label and proves that any path with a mistake on any coordinate lies in the finite union of cylinders {path | path t < witness t}. Rocq proves the abstract corresponding coordinate-containment lemma. Each one-coordinate initial segment is countable and has marginal mass zero. Lean now formally proves the finite-product measure step in `terminalPathMiss_pi_measure_zero`: the full-path terminal miss event is contained in a finite union of coordinate cylinders, and each coordinate cylinder has zero product measure by `Measure.pi_eval_preimage_null`; `measure_iUnion_null_iff` closes the finite union. It also proves `constantRandomizedLearner_zero_at_every_public_history`, which gives zero one-step conditional miss mass uniformly over every public history and every pre-sampling witness. The sequential transition-kernel/tower-property that assembles arbitrary history-dependent witnesses into a full public stochastic process remains a separate formalization boundary.
 
 ## Paper open-question locations
 
@@ -295,3 +295,11 @@ There are two distinct open questions in arXiv:2601.21462v3. The target in this 
 ## Final CI audit (2026-10-31)
 
 Code: Lean 4.35 commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a; Rocq 9.2 commit b5940c796e71800125625cbe61f5502f98902da9. CI push/PR runs 41160197913 and 41160201246 both succeeded. Final PR-head documentation runs 41160340096 and 41160343911 both succeeded. All four sets of job logs were inspected; zero compiler errors, warnings, deprecated/hint diagnostics, or sorry/admit/Admitted/Axiom/Parameter markers were found.
+
+
+## Final measure-bridge audit (2026-10-31)
+
+- Lean 4.35 commit `930be4f94d31b7c63ed1a4547a699d7ae5a9a902` added `terminalPathMiss_pi_measure_zero`, using Mathlib 4.35 `Measure.pi_eval_preimage_null` and `measure_iUnion_null_iff`.
+- Lean 4.35 commit `e9e731725fa84cf9e78306013d49e7ebce072538` added `constantRandomizedLearner_zero_at_every_public_history`.
+- Both push and PR workflows passed for both commits: 41162686492, 41162690428, 41162960823, 41162965658. All eight job logs were scanned; zero compiler errors, warning/deprecation/hint diagnostics, or sorry/admit/Admitted/Axiom/Parameter markers were found.
+- The finite-product result assumes a fixed sequence of visible witnesses, while the one-step theorem is uniform over all possible public histories and witnesses. A complete sequential-kernel/tower-property formalization for arbitrary history-dependent adversary policies and the exact minimax inf-sup remains outside the current checked core.
