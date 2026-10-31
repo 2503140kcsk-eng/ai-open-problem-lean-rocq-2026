@@ -55,6 +55,9 @@ theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
 /-- Every strict initial segment below a label is countable. -/
 def lowerSegment (w : Label) : Set Label := {x | x.1 < w.1}
 
+theorem ordinal_lt_succ (a : Ordinal) : a < Order.succ a :=
+  Order.lt_succ_of_not_isMax (not_isMax a)
+
 theorem lowerSegment_countable (w : Label) : (lowerSegment w).Countable := by
   have h : (Set.Iio w.1 : Set Ordinal).Countable :=
     Cardinal.countable_Iio_of_lt_omega_one w.2
@@ -121,7 +124,7 @@ theorem countableCocountableMass_empty :
 /-- Countable additivity of the 0/1 mass on pairwise-disjoint measurable sets. -/
 theorem countableCocountableMass_iUnion
     (f : ℕ → Set Label) (hf : ∀ i, MeasurableSet (f i))
-    (hdisj : Pairwise (Disjoint on f)) :
+    (hdisj : Pairwise (fun i j => Disjoint (f i) (f j))) :
     countableCocountableMass (⋃ i, f i) =
       ∑' i, countableCocountableMass (f i) := by
   classical
@@ -288,7 +291,7 @@ def succLabel (a : Label) : Label :=
   ⟨Order.succ a.1, (Cardinal.isSuccLimit_omega 1).succ_lt a.2⟩
 
 theorem lt_succLabel (a : Label) : a < succLabel a := by
-  exact lt_succ a.1
+  exact ordinal_lt_succ a.1
 
 /-- For a fixed deterministic prediction path, the adversary uses the next
 ordinal as the visible witness and as the tail threshold. -/
