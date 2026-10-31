@@ -1,6 +1,6 @@
 # Sources checked on 2026-10-28
 
-1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the open randomized-versus-deterministic public-setting question (final paragraph of Section 3.3), Theorem 15's sufficient inseparability criteria in Section 3.2, and, separately, the oblivious-versus-public comparison in Section 3.3. Theorem 17 proves equality for set-valued feedback; Theorem 18 proves the oblivious-versus-public separation for partial feedback.
+1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the inseparability necessity question at the end of Section 3.2 (finite Helly / nested inclusion), Theorem 15's sufficient inseparability criteria in Section 3.2, and, separately, the oblivious-versus-public comparison in Section 3.3. Theorem 17 proves equality for set-valued feedback; Theorem 18 proves the oblivious-versus-public separation for partial feedback.
    - https://arxiv.org/abs/2601.21462
    - https://arxiv.org/html/2601.21462v3
 
@@ -35,3 +35,10 @@ The literature search was performed through academic and web-search connectors. 
    - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/Data/Set/Countable.lean
    - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/SetTheory/Cardinal/Aleph.lean
    - https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/SetTheory/Cardinal/Regular.lean
+
+
+9. The exact protocol timing and public-history distinction were rechecked against Definition 1, Table 1, and Appendix G of arXiv:2601.21462v3. The current public history includes previous realized predictions; in the deterministic construction these are recorded alongside each context and visible label.
+   - https://arxiv.org/html/2601.21462v3
+
+10. GitHub Actions run 41157208222 completed successfully for both Lean 4.35 and Rocq 9.2 on commit 1168ded2065bc238a1f6978b5b48addfece2dee3.
+   - https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41157208222
