@@ -2,6 +2,7 @@ module
 
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Add
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
+public import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
 
 /-!
 # Appendix G: finite-horizon public/oblivious backward induction
