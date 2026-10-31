@@ -310,7 +310,7 @@ theorem comparatorTotalLoss_zero
     (thresholds : ℕ → Label) (f : ℕ → Label)
     (hf : GlobalTailFamily thresholds f) (T : ℕ) :
     comparatorTotalLoss thresholds f T = 0 := by
-  simp [comparatorTotalLoss, hf]
+  simp [comparatorTotalLoss, GlobalTailFamily, hf]
 
 
 /-- The successor of a countable ordinal is still below omega-one. -/
@@ -400,17 +400,19 @@ theorem deterministicLearner_global_separation_witness
   intro t y
   exact acceptedAt_iff_upperTail thresholds t y
 
-/-- The constant-measure randomized learner has zero expected loss on every
-finite sequence of upper-tail acceptable sets. The summand is the probability
-of the error event, using E[1_A] = measure(A). -/
-abbrev RandomizedLearner := List (Nat × Label × Label) → Nat → Measure Label
+/-- The constant-measure randomized learner: it outputs the same
+countable-cocountable probability measure after every public history. -/
+noncomputable def constantRandomizedLearner
+    (_history : List (Nat × Label × Label)) (_context : Nat) : Measure Label :=
+  countableCocountableMeasure
 
-noncomputable def constantRandomizedLearner : RandomizedLearner :=
-  fun _ _ => countableCocountableMeasure
-
+/-- The finite-horizon expected loss of this strategy on a sequence of
+upper-tail acceptable sets. For an indicator loss, expectation equals the
+measure of its error event. -/
 noncomputable def randomizedExpectedTotalLoss (thresholds : ℕ → Label) (T : ℕ) : ENNReal :=
   ∑ t ∈ Finset.range T,
-    constantRandomizedLearner [] t ((upperTail (thresholds t))ᶜ)
+    (constantRandomizedLearner ([] : List (Nat × Label × Label)) t)
+      ((upperTail (thresholds t))ᶜ)
 
 theorem constantRandomizedLearner_zero_expected_loss
     (thresholds : ℕ → Label) (T : ℕ) :
