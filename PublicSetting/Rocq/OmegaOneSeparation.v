@@ -534,4 +534,58 @@ Section OmegaOneGame.
     - simpl. rewrite IH, round_loss_one. lia.
   Qed.
 
+
+  (* A stagewise risk semantics: score each fixed history using only its
+     one-step error section. No event over the full sampled path is formed. *)
+
+  Fixpoint FiniteConditionalSum (f : nat -> nat) (T : nat) : nat :=
+    match T with
+    | 0 => 0
+    | S n => FiniteConditionalSum f n + f n
+    end.
+
+  Lemma finite_conditional_sum_zero :
+    forall T f, (forall n, f n = 0) -> FiniteConditionalSum f T = 0.
+  Proof.
+    induction T as [|T IH]; intros f hf.
+    - reflexivity.
+    - simpl. rewrite (IH f hf). rewrite (hf T). reflexivity.
+  Qed.
+
+  Definition ConditionalSectionRisk
+      (chooseThreshold : Y -> Y) (witness : Y) : nat :=
+    @Mass Y I (MissSet chooseThreshold witness).
+
+  Definition SequentialConditionalRisk
+      (T : nat) (H : Type) (history : nat -> H)
+      (witness : H -> Y) (chooseThreshold : H -> Y -> Y) : nat :=
+    FiniteConditionalSum
+      (fun t => ConditionalSectionRisk
+        (chooseThreshold (history t)) (witness (history t))) T.
+
+  Lemma conditional_section_risk_zero :
+    forall chooseThreshold witness,
+      (forall prediction,
+        Tail (chooseThreshold prediction) witness) ->
+      ConditionalSectionRisk chooseThreshold witness = 0.
+  Proof.
+    intros chooseThreshold witness hContains.
+    unfold ConditionalSectionRisk.
+    apply miss_set_mass_zero. exact hContains.
+  Qed.
+
+  Lemma sequential_conditional_risk_zero :
+    forall (T : nat) (H : Type) (history : nat -> H)
+      (witness : H -> Y) (chooseThreshold : H -> Y -> Y),
+      (forall h prediction,
+        Tail (chooseThreshold h prediction) (witness h)) ->
+      SequentialConditionalRisk T H history witness chooseThreshold = 0.
+  Proof.
+    intros T H history witness chooseThreshold hContains.
+    unfold SequentialConditionalRisk.
+    apply finite_conditional_sum_zero.
+    intro t. apply conditional_section_risk_zero.
+    intro prediction. apply hContains.
+  Qed.
+
 End OmegaOneGame.
