@@ -1,6 +1,6 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax"]
 
 [[require]]
 name = "mathlib"
@@ -21,3 +21,6 @@ name = "AdaptiveMoments"
 
 [[lean_lib]]
 name = "OmegaOneSeparation"
+
+[[lean_lib]]
+name = "SequentialKernelMinimax"
