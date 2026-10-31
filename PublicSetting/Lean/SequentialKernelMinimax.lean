@@ -123,6 +123,9 @@ structure SequentialKernelGame
   initial_measurable : Measurable initial
   transition_markov : ∀ n, ProbabilityTheory.IsMarkovKernel (transition n)
   reward : (Π n, States n) → ℝ
+  reward_integrable : ∀ x ∈ minimizing.carrier, ∀ y ∈ maximizing.carrier,
+    Integrable reward
+      (strategyPathKernel transition transition_markov initial initial_measurable (x, y))
 
 /-- Expected payoff of the sequential game. -/
 noncomputable def sequentialGamePayoff
@@ -140,10 +143,16 @@ noncomputable def sequentialGamePayoff
       G.initial G.initial_measurable)
     G.reward x y
 
-/-- Once the expected terminal payoff is lower-semicontinuous and quasiconvex
-in the minimizing strategy, upper-semicontinuous and quasiconcave in the
-maximizing strategy, and both strategy sets are nonempty compact convex sets,
-Sion's theorem proves the minimax equality. -/
+/-- Sion's minimax theorem for a sequential-kernel game.
+
+The values are stated as greatest lower bounds / least upper bounds rather
+than using a complete-lattice infimum or supremum on ℝ. This matters because
+ℝ is only conditionally complete: Sion's general linear-order theorem is the
+correct Mathlib result for real-valued payoffs.
+
+Here sup_y and inf_x are the pointwise extrema in the opponent's strategy,
+while inf_sup and sup_inf are respectively the GLB and LUB over the two
+strategy sets. -/
 theorem sequential_kernel_minimax
     {E F : Type*}
     [MeasurableSpace E] [MeasurableSpace F] [MeasurableSpace (E × F)]
@@ -162,24 +171,34 @@ theorem sequential_kernel_minimax
       UpperSemicontinuousOn (fun y => sequentialGamePayoff G x y)
         G.maximizing.carrier)
     (h_qconcave : ∀ x ∈ G.minimizing.carrier,
-      QuasiconcaveOn ℝ G.maximizing.carrier (fun y => sequentialGamePayoff G x y)) :
-    (⨅ x ∈ G.minimizing.carrier, ⨆ y ∈ G.maximizing.carrier,
-      sequentialGamePayoff G x y)
-      =
-    ⨆ y ∈ G.maximizing.carrier, ⨅ x ∈ G.minimizing.carrier,
-      sequentialGamePayoff G x y := by
-  exact Sion.minimax'
-    (β := ℝ)
-    (X := G.minimizing.carrier)
-    (Y := G.maximizing.carrier)
-    (f := fun x y => sequentialGamePayoff G x y)
+      QuasiconcaveOn ℝ G.maximizing.carrier (fun y => sequentialGamePayoff G x y))
+    (sup_y : E → ℝ)
+    (hsup_y : ∀ x ∈ G.minimizing.carrier,
+      IsLUB {sequentialGamePayoff G x y | y ∈ G.maximizing.carrier} (sup_y x))
+    (inf_sup : ℝ)
+    (hinf_sup : IsGLB {sup_y x | x ∈ G.minimizing.carrier} inf_sup)
+    (inf_x : F → ℝ)
+    (hinf_x : ∀ y ∈ G.maximizing.carrier,
+      IsGLB {sequentialGamePayoff G x y | x ∈ G.minimizing.carrier} (inf_x y))
+    (sup_inf : ℝ)
+    (hsup_inf : IsLUB {inf_x y | y ∈ G.maximizing.carrier} sup_inf) :
+    inf_sup = sup_inf := by
+  exact Sion.minimax
     G.minimizing.nonempty
-    G.minimizing.convex
     G.minimizing.compact
     h_lsc
     h_qconvex
     G.maximizing.convex
     h_usc
     h_qconcave
+    G.minimizing.convex
+    sup_y
+    hsup_y
+    inf_sup
+    hinf_sup
+    inf_x
+    hinf_x
+    sup_inf
+    hsup_inf
 
 end PublicSetting.SequentialKernelMinimax
