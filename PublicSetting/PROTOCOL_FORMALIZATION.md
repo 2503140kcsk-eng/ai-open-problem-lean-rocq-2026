@@ -94,7 +94,7 @@ The Lean strategy interface now records a list of public round triples (context,
 
 The exact target is the final paragraph of Section 3.3 in Shao–Fang–Lin–Tao, arXiv:2601.21462v3: whether randomized and deterministic learners can have distinct learnability in the public partial-feedback setting. The separate end-of-Section-3.2 question about necessity of finite Helly number / nested inclusion must not be substituted for it.
 
-Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation is now formalized by `terminalPathMiss_pi_measure_zero`: coordinate-preimage nullity plus `measure_iUnion_null_iff` proves the complete-path miss event has product outer-measure zero for a fixed visible-witness sequence. The literal Appendix G inf-sup operator is not a separately defined Lean object either. Keep those limits explicit.
+Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation is now formalized by `terminalPathMiss_pi_measure_zero`: coordinate-preimage nullity plus `measure_iUnion_null_iff` proves the complete-path miss event has product outer-measure zero for a fixed visible-witness sequence. `constantRandomizedLearner_zero_at_every_public_history` proves zero conditional one-step miss probability uniformly over all public histories and current witnesses. The single sequential-kernel/tower-property theorem for arbitrary history-dependent visible-witness policies and the literal Appendix G inf-sup operator are not separately encoded.
 
 
 ## Final validation (2026-10-31)
@@ -114,3 +114,8 @@ Not encoded as one Lean theorem: a sequential transition-kernel model in which t
 ## Documentation-head verification
 
 The final documentation-only branch head 001fa8b623e0326223658ac228f0f8f435460100 passed both Lean/Rocq workflows: push 41163413199 and pull request 41163416315. All four job logs were scanned; zero compiler errors, warning/deprecation/hint diagnostics, or unfinished-proof markers were found.
+
+
+## Latest documentation CI
+
+The docs-only head `f54efc8ec90333eb10eb03552d71532300ac910c` passed push run 41163749385 and PR run 41163752038. Lean and Rocq passed in both; all four job logs had zero compiler diagnostics, warnings, deprecations, hints, or unfinished-proof markers.
