@@ -465,6 +465,20 @@ noncomputable def constantRandomizedLearner
     (_history : PublicHistory) (_context : Nat) : Measure Label :=
   constantRandomizedAction
 
+/-- Uniform conditional guarantee in the public protocol: at every possible
+public history, for every visible label selected before the current draw, and
+for every terminal upper-tail choice (even one depending on the current
+sample) that still contains that visible label, the current miss probability
+is zero. -/
+theorem constantRandomizedLearner_zero_at_every_public_history
+    (history : PublicHistory) (context : Nat)
+    (chooseThreshold : Label → Label) (witness : Label)
+    (hcontains : ∀ prediction, chooseThreshold prediction ≤ witness) :
+    constantRandomizedLearner history context
+      (adaptiveMissSet chooseThreshold witness) = 0 := by
+  simpa [constantRandomizedLearner, constantRandomizedAction] using
+    (adaptiveMiss_measure_zero chooseThreshold witness hcontains)
+
 /-- The finite-horizon expected loss of this strategy on a sequence of
 upper-tail acceptable sets. For an indicator loss, expectation equals the
 measure of its error event. -/
