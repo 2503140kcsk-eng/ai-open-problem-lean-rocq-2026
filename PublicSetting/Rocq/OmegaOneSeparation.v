@@ -394,7 +394,7 @@ Section OmegaOneGame.
     unfold MissSet, Tail, le in *.
     apply lt_le_trans with (y := chooseThreshold prediction).
     - apply NNPP. exact hMiss.
-    - exact hContains.
+    - exact (hContains prediction).
   Qed.
 
   Lemma miss_set_small :
