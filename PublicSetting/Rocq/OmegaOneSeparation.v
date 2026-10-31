@@ -132,7 +132,13 @@ Section CountableCocountableMeasure.
     forall a, CountableSum01 a = 1 <-> exists n, a n = 1.
   Proof.
     intros a. unfold CountableSum01.
-    destruct (excluded_middle_informative (exists n, a n = 1)); simpl; tauto.
+    destruct (excluded_middle_informative (exists n, a n = 1)) as [h | h].
+    - split.
+      + intro _. exact h.
+      + intro _. reflexivity.
+    - split.
+      + intro hEq. discriminate.
+      + intro hExists. contradiction.
   Qed.
 
   Definition AtMostOneOne (a : nat -> nat) : Prop :=
