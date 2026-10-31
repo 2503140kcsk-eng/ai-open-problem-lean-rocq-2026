@@ -224,5 +224,14 @@ Gaia 2.4. From the repository root:
 cd PublicSetting/Lean && lake build
 ~~~
 
-The Rocq workflow installs the pinned Gaia package and compiles the Rocq
-modules in dependency order, followed by the root Rocq/VCLearning.v.
+The Rocq workflow uses the official rocq/rocq-prover:9.2.0 container.
+For a local reproduction, first install the pinned Gaia ordinal package in
+the active OPAM switch:
+
+~~~sh
+opam install coq-gaia-ordinals.2.4
+eval "$(opam env)"
+~~~
+
+Then compile the Rocq modules in dependency order, followed by the root
+Rocq/VCLearning.v.
