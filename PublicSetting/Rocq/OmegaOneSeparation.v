@@ -301,12 +301,12 @@ Section CountableCocountableMeasure.
       + intros b hb. lia.
   Qed.
 
-  (--
+  (*
     A zero-one probability measure is a probability measure with values in
     {0,1}; its countable sum is the supremum of its finite partial sums.
     For disjoint measurable sets, at most one summand can be one, and the
     preceding theorem verifies the exact series semantics of CountableSum01.
-  --)
+  *)
   Record ZeroOneProbabilityMeasure := {
     zpm_measurable : (Y -> Prop) -> Prop;
     zpm_mass : (Y -> Prop) -> nat;
