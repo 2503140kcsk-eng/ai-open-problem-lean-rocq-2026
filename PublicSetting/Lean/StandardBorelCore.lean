@@ -58,7 +58,7 @@ theorem exists_outgoingMass_gt_half
     (hcol : ∀ y, c₁ ≤ incomingMass μ R y) :
     ∃ x, (1 / 2 : ℝ≥0∞) < outgoingMass μ R x := by
   by_contra hnone
-  push_neg at hnone
+  push Not at hnone
   have hupper : (μ.prod μ) R ≤ (1 / 2 : ℝ≥0∞) := by
     rw [Measure.prod_apply hR]
     calc
@@ -84,8 +84,9 @@ theorem nonempty_inter_of_measure_gt_half
     (A ∩ B).Nonempty := by
   have hsum : (1 : ℝ≥0∞) < μ A + μ B := by
     calc
-      (1 : ℝ≥0∞) = (1 / 2 : ℝ≥0∞) + (1 / 2 : ℝ≥0∞) := by norm_num
-      _ < μ A + μ B := add_lt_add hA hB
+      (1 : ℝ≥0∞) = (1 / 2 : ℝ≥0∞) + (1 / 2 : ℝ≥0∞) :=
+        (ENNReal.add_halves (1 : ℝ≥0∞)).symm
+      _ < μ A + μ B := ENNReal.add_lt_add hA hB
   have hUnion : μ (A ∪ B) ≤ 1 := by
     calc
       μ (A ∪ B) ≤ μ Set.univ := measure_mono (Set.subset_univ _)
@@ -93,17 +94,19 @@ theorem nonempty_inter_of_measure_gt_half
   have hInterPos : 0 < μ (A ∩ B) := by
     by_contra hnot
     have hzero : μ (A ∩ B) = 0 :=
-      le_antisymm (le_of_not_gt hnot) (zero_le _)
+      le_antisymm (le_of_not_gt hnot) bot_le
     have hEq : μ (A ∪ B) = μ A + μ B := by
-      simpa [hzero] using (measure_union_add_inter A hBm)
+      calc
+        μ (A ∪ B) = μ (A ∪ B) + μ (A ∩ B) := by rw [hzero, add_zero]
+        _ = μ A + μ B := measure_union_add_inter A hBm
     have hbad : (1 : ℝ≥0∞) < μ (A ∪ B) := by
       rw [hEq]
       exact hsum
     exact (not_lt_of_ge hUnion) hbad
   by_contra hne
   have hempty : A ∩ B = ∅ := Set.not_nonempty_iff_eq_empty.mp hne
-  have hfalse : (0 : ℝ≥0∞) < 0 := by simpa [hempty] using hInterPos
-  exact (lt_irrefl 0) hfalse
+  have hfalse := hInterPos
+  simpa [hempty] using hfalse
 
 /-- Uniform-section core theorem: for a product-measurable transitive
 relation, if every incoming section has mass at least c₁ > 1/2, then
