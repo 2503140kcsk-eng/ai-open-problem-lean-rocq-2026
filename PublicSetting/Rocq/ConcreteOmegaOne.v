@@ -41,21 +41,23 @@ Module PublicSettingConcreteOmegaOne.
       ~ countable_set omegaOne.
   Proof.
     intro hCount.
-    have hSub : sub Ordinals4.Cantor_Omega omegaOne.
+    assert (hSub : sub Ordinals4.Cantor_Omega omegaOne).
     {
       move => z /setC_P [hz _].
       exact hz.
     }
-    have hCantorCount : countable_set Ordinals4.Cantor_Omega :=
-      countable_sub hSub hCount.
+    assert (hCantorCount : countable_set Ordinals4.Cantor_Omega).
+    {
+      exact (countable_sub hSub hCount).
+    }
     move /countableP : hCantorCount => hCardLe.
-    have hStrict : aleph0 <c omegaOne.
+    assert (hStrict : aleph0 <c omegaOne).
     {
       rewrite /omegaOne - Ordinals4.Cantor_omega_pr3.
       rewrite - Ordinals4.aleph0E.
       exact (Ordinals4.aleph_lt_ltc OS0 OS1).
     }
-    have hImpossible : omegaOne <=c aleph0.
+    assert (hImpossible : omegaOne <=c aleph0).
     {
       rewrite - Ordinals4.Cantor_omega_pr2.
       exact hCardLe.
