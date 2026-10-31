@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - research/public-setting-separation
   pull_request:
     branches:
       - main
@@ -12,6 +11,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: public-setting-formalization-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lean:
@@ -56,13 +59,26 @@ jobs:
       - uses: actions/checkout@v7
         env:
           GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+      - name: Detect pinned container OPAM root
+        id: opam-root
+        shell: bash
+        run: |
+          root="$(docker run --rm rocq/rocq-prover:9.2.0 sh -lc 'opam var root')"
+          echo "root=$root" >> "$GITHUB_OUTPUT"
+      - name: Cache Gaia and Rocq OPAM dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/rocq-opam-root
+          key: rocq-opam-${{ runner.os }}-9.2.0-gaia-2.4-v1
       - name: Show pinned Rocq version and compile with Gaia 2.4
         shell: bash
         run: |
-          # The official container runs as a non-root user. Keep the checked-out
-          # GitHub workspace mounted read-only and compile in the container's
-          # writable /tmp so Rocq can create .glob/.vo artifacts.
+          # The official container runs as a non-root user. Cache its OPAM
+          # root outside the container while keeping sources read-only.
+          mkdir -p "$RUNNER_TEMP/rocq-opam-root"
+          chmod -R a+rwX "$RUNNER_TEMP/rocq-opam-root"
           docker run --rm \
+            -v "$RUNNER_TEMP/rocq-opam-root:${{ steps.opam-root.outputs.root }}" \
             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
             -v "$GITHUB_WORKSPACE/Rocq:/input-root:ro" \
             rocq/rocq-prover:9.2.0 \
