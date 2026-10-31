@@ -366,12 +366,13 @@ theorem deterministicTotalLoss_eq_horizon
   | succ T ih =>
       simp [deterministicTotalLoss, ih, deterministicRoundLoss_eq_one]
 
-/-- A deterministic learner as a function of its public past and current context. -/
 /-- A public round records its context, the visible label, and the realized
 prediction. The latter is visible to the public adversary before the next
 round. -/
 abbrev PublicHistory := List (Nat × Label × Label)
 
+/-- A deterministic learner is a function of the complete public past and
+the current context. -/
 abbrev DeterministicLearner := PublicHistory → Nat → Label
 
 /-- The adversarial public trace: at context t, the learner's deterministic
