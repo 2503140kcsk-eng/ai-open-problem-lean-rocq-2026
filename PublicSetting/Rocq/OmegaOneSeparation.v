@@ -489,7 +489,9 @@ Section OmegaOneGame.
   Proof.
     intros prediction t. unfold RoundLoss.
     destruct (excluded_middle_informative
-      (Tail (DeterministicThresholds prediction t) (prediction t))); [contradiction|reflexivity].
+      (Tail (DeterministicThresholds prediction t) (prediction t))) as [h | h].
+    - exfalso. exact (deterministic_prediction_wrong prediction t h).
+    - reflexivity.
   Qed.
 
   Fixpoint TotalLoss (prediction : nat -> Y) (T : nat) : nat :=
