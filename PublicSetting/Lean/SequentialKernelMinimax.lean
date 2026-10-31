@@ -1,5 +1,6 @@
 import Mathlib.Probability.Kernel.IonescuTulcea.Traj
 import Mathlib.Topology.Sion
+import Mathlib.Probability.Process.Filtration
 
 /-!
 # Sequential-kernel / tower / minimax interface
@@ -77,7 +78,7 @@ theorem trajectory_tower
     (x₀ : Π i : Set.Iic a, States i)
     (f : (Π n, States n) → E)
     (hf : Integrable f (ProbabilityTheory.Kernel.traj κ a x₀)) :
-    (ProbabilityTheory.Kernel.traj κ a x₀)[f | ProbabilityTheory.Kernel.piLE b] =ᵐ[
+    (ProbabilityTheory.Kernel.traj κ a x₀)[f | ProbabilityTheory.piLE b] =ᵐ[
       ProbabilityTheory.Kernel.traj κ a x₀]
       fun x ↦ ∫ y, f y ∂ProbabilityTheory.Kernel.traj κ b
         (Preorder.frestrictLe b x) :=
