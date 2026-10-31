@@ -47,6 +47,28 @@ noncomputable def feasibleSets
     (h : H) (x : X) : Set (Set Y) :=
   {s | s ∈ admissible ∧ realizable h x s}
 
+/-- A public pair-history in the set-valued feedback game:
+the finite list of revealed context/acceptable-set pairs. -/
+abbrev PairHistory (X Y : Type*) := List (X × Set Y)
+
+/-- Append the next context and acceptable set to a public pair-history. -/
+def pairHistoryExtend {X Y : Type*}
+    (h : PairHistory X Y) (x : X) (s : Set Y) : PairHistory X Y :=
+  h ++ [(x, s)]
+
+/-- One hypothesis realizes an entire pair-history if it selects a label in
+each acceptable set at the corresponding context. -/
+def pairHistoryGloballyRealizable {X Y : Type*}
+    (hypotheses : Set (X → Y)) (h : PairHistory X Y) : Prop :=
+  ∃ f, f ∈ hypotheses ∧ ∀ entry ∈ h, f entry.1 ∈ entry.2
+
+/-- An extension is feasible exactly when the same single hypothesis realizes
+the previous pair-history and the new context/acceptable-set pair. -/
+def pairHistoryPrefixRealizable {X Y : Type*}
+    (hypotheses : Set (X → Y))
+    (h : PairHistory X Y) (x : X) (s : Set Y) : Prop :=
+  pairHistoryGloballyRealizable hypotheses (pairHistoryExtend h x s)
+
 /-- The oblivious continuation value V_t(h), with t rounds remaining.
 It is the exact sup_x inf_pi sup_{S admissible and prefix-realizable}
 Bellman recursion from Appendix G. -/
@@ -127,6 +149,24 @@ theorem publicValue_eq_obliviousValue
       rw [lintegral_indicator_const hs.compl (1 : ℝ≥0∞)]
       rw [lintegral_const]
       simp
+
+/-- Theorem 18 / Appendix G specialized to the paper's actual pair-history
+and set-realizability predicate. Every feasible extension must be witnessed
+by one global hypothesis f in the original class, simultaneously realizing
+all earlier pairs and the current pair. -/
+theorem appendixG_pairHistory_value_identity
+    {X Y : Type*} [MeasurableSpace Y]
+    (admissible : Set (Set Y))
+    (admissible_measurable : ∀ s ∈ admissible, MeasurableSet s)
+    (hypotheses : Set (X → Y)) :
+    ∀ n (h : PairHistory X Y) (ys : List Y),
+      publicValue admissible admissible_measurable
+        (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend n h ys =
+      obliviousValue admissible
+        (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend n h := by
+  exact publicValue_eq_obliviousValue
+    admissible admissible_measurable
+    (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend
 
 /-- The full public continuation value includes the losses already incurred.
 This is the left-hand side W_t(tau_t) of Eq. (26), with pastLoss standing
