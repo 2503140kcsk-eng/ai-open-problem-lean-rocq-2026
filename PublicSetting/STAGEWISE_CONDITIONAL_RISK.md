@@ -79,7 +79,7 @@ Verified by the Lean 4.35 / Mathlib 4.35 CI before the latest Rocq-only extensio
 - the Appendix G Bellman operator and the sample-independent-continuation reduction;
 - the existing sequential-kernel, finite-prefix, tower, and Sion interface modules.
 
-The new Rocq sequential conditional-risk counterpart is being checked by the current workflow. The concrete omega-one probability space is still Lean/Mathlib-specific; the Rocq development uses an abstract ordered type with countable-ideal / omega-one-like assumptions.
+The Rocq sequential conditional-risk counterpart now also passes CI (workflow run #599). The concrete omega-one probability space is still Lean/Mathlib-specific; the Rocq development uses an abstract ordered type with countable-ideal / omega-one-like assumptions. Lean and Rocq do not share a concrete ordinal implementation: Rocq verifies the abstract order/ideal theorem.
 
 Important model boundary: the countable-cocountable probability space on ω₁ is not asserted to be standard Borel or implementable by an ordinary real-valued PRNG. It belongs to the broad measurable-space model considered by the paper. A result under standard-Borel or algorithmic-sampling restrictions would need a separate construction or impossibility proof.
 
