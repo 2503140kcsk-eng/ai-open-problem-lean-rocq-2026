@@ -47,7 +47,7 @@ This is the precise finite-prefix-to-full-trajectory bridge. It is an almost-eve
 
 For a finite game, the intended concrete strategy domain is the probability simplex over a player's finite set of pure contingent plans. A pure contingent plan specifies an action at every information history; a mixed strategy is a probability vector over these plans. This normal-form representation makes the expected payoff bilinear in the two players' mixed-strategy vectors. In finite games with perfect recall, Kuhn's theorem additionally gives outcome-equivalence between mixed and behavioral strategies. Without perfect recall, this equivalence can fail.
 
-Important formalization boundary: the current Lean module defines the compact-convex strategy-space interface, but does not yet prove the finite-simplex instantiation or formalize the mixed/behavioral equivalence theorem. The fields should not be mistaken for that missing proof.
+Finite-strategy formalization now includes `finiteMixedStrategyCarrier` and `finiteMixedStrategySpace`: for any nonempty finite set of pure contingent plans, the corresponding probability-vector simplex is proved nonempty, convex, and compact using Mathlib's `Convexity.StdSimplex` and its compactness theorem. This is a mixed strategy over full pure plans. Kuhn's mixed/behavioral equivalence theorem for finite perfect-recall extensive games is not formalized here; the behavioral product-of-local-simplexes representation is therefore not identified with this mixed simplex by an unproved assertion.
 
 ## 4. Minimax conclusion
 
