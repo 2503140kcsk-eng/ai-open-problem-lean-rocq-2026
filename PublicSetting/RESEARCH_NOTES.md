@@ -10,7 +10,7 @@ The horizon quantifier matters. A result for one finite T does not establish asy
 
 ## Literature audit
 
-Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 5.2 explicitly leaves open whether randomized and deterministic learnability can separate under the public setting. Section 5.3 studies the separate distinction between oblivious and public adversaries. The same paper proves a different result, Theorem 19: randomized learnability under the oblivious setting can fail to persist under the public setting. The two statements must not be conflated.
+Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 3.3 explicitly leaves open whether randomized and deterministic learnability can separate under the public setting. Section 5.3 studies the separate distinction between oblivious and public adversaries. The same paper proves a different result, Theorem 19: randomized learnability under the oblivious setting can fail to persist under the public setting. The two statements must not be conflated.
 
 - Paper: https://arxiv.org/abs/2601.21462
 - HTML source: https://arxiv.org/html/2601.21462v3
@@ -197,7 +197,7 @@ One could parameterize a narrower family such as computable or suitably coded me
 - This cardinality argument is **not** a no-go theorem for every possible hypothesis class: a successful class might diagonalize along paths without literally indexing policies in the context.
 - No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
 
-Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, The final paragraph of Section 5.2 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
+Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, The final paragraph of Section 3.3 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 19 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
 
 
 ## Formalized quantifier boundary: what can and cannot be ruled out
@@ -219,7 +219,7 @@ is invalid in general. The first theorem rules out only the stronger interpretat
 
 Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
 
-As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 5.2 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact question. This is evidence about the state of the literature, not a proof of impossibility.
+As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 3.3 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact question. This is evidence about the state of the literature, not a proof of impossibility.
 
 
 ## 2026-10-31: omega-one countable/cocountable candidate
@@ -252,9 +252,9 @@ Fix an arbitrary deterministic learner and its induced prediction path p_t at co
 F* = {f:N->omega_1 : for every t, p_t+1 <= f(t)}.
 This family is nonempty (take f(t)=p_t+1). Since H is the full product Y^N, its coordinate image at t is exactly S_{p_t+1}. Hence the same global F* induces all acceptable sets simultaneously. Each witness belongs to its tail, while p_t does not. The deterministic learner therefore loses exactly T rounds. Because the construction can be made against every deterministic learner, the deterministic minimax regret is T.
 
-### Why Theorem 16 does not apply
+### Why Theorem 15 does not apply
 
-For every countable sequence beta_n < omega_1, regularity/cofinality of omega_1 gives an upper bound beta < omega_1. The label beta then belongs to every S_{beta_n}, so the intersection is nonempty. This rules out a countable decreasing sequence of upper tails with empty intersection. Every finite family is also countable and has nonempty intersection. However the intersection over all beta < omega_1 is empty. The sufficient structural hypotheses in Theorem 16 are therefore both false for this admissible-set family.
+For every countable sequence beta_n < omega_1, regularity/cofinality of omega_1 gives an upper bound beta < omega_1. The label beta then belongs to every S_{beta_n}, so the intersection is nonempty. This rules out a countable decreasing sequence of upper tails with empty intersection. Every finite family is also countable and has nonempty intersection. However the intersection over all beta < omega_1 is empty. The sufficient structural hypotheses in Theorem 15 are therefore both false for this admissible-set family.
 
 ### Model boundary and foundations
 
@@ -268,4 +268,4 @@ This candidate uses the paper's very general formulation in which the label spac
 
 ### Next formal verification boundary
 
-The current files formalize the central one-round measure lemma and the pathwise deterministic construction. A remaining improvement is a single theorem packaging the public sequential game, conditional expected losses over adaptive target selection, and minimax-regret quantifier order exactly as in equation (5) of Section 5.3 / the public-setting formulation in the paper. This wrapper must not weaken the fixed-global-target constraint or move the visible witness after the current sample.
+The current files formalize the central one-round measure lemma and the pathwise deterministic construction. A remaining improvement is a single theorem packaging the public sequential game, conditional expected losses over adaptive target selection, and minimax-regret quantifier order exactly as in the public minimax expression (12) in Appendix G / the public-setting formulation in the paper. This wrapper must not weaken the fixed-global-target constraint or move the visible witness after the current sample.
