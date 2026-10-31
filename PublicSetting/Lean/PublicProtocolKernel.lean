@@ -311,7 +311,7 @@ def roundLoss
 def finitePathLoss
     {X : Type u} {D : Type v} [MeasurableSpace D] {Y : Type w}
     (T : ℕ) (loss : History X D Y → History X D Y → ℝ)
-    (path : Π n, History X D Y) : ℝ :=
+    (path : Π n : ℕ, History X D Y) : ℝ :=
   ∑ t : Fin T, roundLoss loss (path t.1) (path (t.1 + 1))
 
 theorem finitePathLoss_measurable
