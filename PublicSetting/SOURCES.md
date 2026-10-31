@@ -1,6 +1,6 @@
 # Sources checked on 2026-10-28
 
-1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the open randomized-versus-deterministic public-setting question (end of Section 5.2) and, separately, the oblivious-versus-public comparison in Section 5.3. Theorem 18 proves equality for set-valued feedback; Theorem 19 proves the oblivious-versus-public separation for partial feedback.
+1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the open randomized-versus-deterministic public-setting question (final paragraph of Section 3.3), Theorem 15's sufficient inseparability criteria in Section 3.2, and, separately, the oblivious-versus-public comparison in Section 3.3. Theorem 17 proves equality for set-valued feedback; Theorem 18 proves the oblivious-versus-public separation for partial feedback.
    - https://arxiv.org/abs/2601.21462
    - https://arxiv.org/html/2601.21462v3
 
