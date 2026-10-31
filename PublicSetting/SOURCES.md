@@ -52,3 +52,13 @@ The literature search was performed through academic and web-search connectors. 
    - Lean source commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160197913; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160201246.
    - Rocq source commit b5940c796e71800125625cbe61f5502f98902da9: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41159597912; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41159600483.
    - Final PR documentation head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160340096; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160343911.
+
+
+13. Mathlib 4.35 product-measure API used for the completed path miss probability theorem:
+   - `Measure.pi_eval_preimage_null` in https://github.com/leanprover-community/mathlib4/blob/v4.35.0/Mathlib/MeasureTheory/Constructions/Pi.lean
+   - `measure_iUnion_null_iff` in Mathlib's measure/outer-measure API; the finite index `Fin T` is countable.
+
+14. New public-history and full-product verification:
+   - Lean commit 930be4f94d31b7c63ed1a4547a699d7ae5a9a902: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41162686492; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41162690428.
+   - Lean commit e9e731725fa84cf9e78306013d49e7ebce072538: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41162960823; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41162965658.
+   - Across both CI tracks and both commits, all 8 Lean/Rocq jobs passed with zero error, warning, hint, deprecation, or unfinished-proof diagnostics.
