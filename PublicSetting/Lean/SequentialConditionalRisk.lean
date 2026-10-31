@@ -2,6 +2,12 @@ import OmegaOneSeparation
 
 open Set MeasureTheory
 open scoped ENNReal
+open PublicSetting.OmegaOne
+
+-- Make the nonstandard subtype instances explicit in this extension module.
+local instance : MeasurableSpace Label := countableCocountableMeasurableSpace
+local instance : LE Label :=
+  ⟨fun a b => (a : Ordinal) ≤ (b : Ordinal)⟩
 
 namespace PublicSetting.SequentialConditionalRisk
 
@@ -38,8 +44,6 @@ theorem all_measurable_self_policies_iff
     simpa [adaptiveErrorGraph] using hid
   · intro hR policy hpolicy
     exact adaptiveErrorGraph_measurable R hR policy hpolicy
-
-open PublicSetting.OmegaOne
 
 /-- The conditional risk of a one-step error section at a fixed public
 history. The section is evaluated under the draw distribution at that history;
