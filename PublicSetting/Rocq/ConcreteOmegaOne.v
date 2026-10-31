@@ -1,4 +1,4 @@
-From gaia Require Import sset11.
+From gaia Require Import sset11 sset14.
 
 (**
  Concrete first uncountable ordinal adapter, based on Gaia's Bourbaki set
@@ -31,6 +31,37 @@ Module PublicSettingConcreteOmegaOne.
       isCountableOrdinal (\osup E).
   Proof.
     exact (Ordinals1.countable_ordinal_sup hE hE_ord).
+  Qed.
+
+
+  (* The first uncountable ordinal is genuinely uncountable.  Gaia proves
+     that deleting the finite initial segment from aleph_one still has
+     cardinal aleph_one; this contradicts countability of aleph_one. *)
+  Theorem omegaOne_not_countable :
+      ~ countable_set omegaOne.
+  Proof.
+    intro hCount.
+    have hSub : sub Ordinals4.Cantor_Omega omegaOne.
+    {
+      move => z /setC_P [hz _].
+      exact hz.
+    }
+    have hCantorCount : countable_set Ordinals4.Cantor_Omega :=
+      countable_sub hSub hCount.
+    move /countableP : hCantorCount => hCardLe.
+    have hAlephLe : aleph0 <=c aleph0 := cleR CS_aleph0.
+    have hStrict : aleph0 <c omegaOne.
+    {
+      rewrite /omegaOne - Ordinals4.Cantor_omega_pr3.
+      rewrite - Ordinals4.aleph0E.
+      exact (Ordinals4.aleph_lt_ltc OS0 OS1).
+    }
+    have hImpossible : omegaOne <=c aleph0.
+    {
+      rewrite - Ordinals4.Cantor_omega_pr2.
+      exact hCardLe.
+    }
+    exact (ocltNge hStrict hImpossible).
   Qed.
 
 End PublicSettingConcreteOmegaOne.
