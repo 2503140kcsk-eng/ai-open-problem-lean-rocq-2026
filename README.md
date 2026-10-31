@@ -1,83 +1,166 @@
 # ai-open-problem-lean-rocq-2026
 
-This repository contains independent, machine-checked Lean 4 and Rocq developments for two related research tracks: public-setting partial-feedback online learning, and the information-complexity question for VC learning.
+A research formalization repository with two tracks:
+1. public partial-feedback online learning and sequential stochastic games;
+2. a separate VC-learning / information-complexity exercise.
 
-## Research background
+The second track does **not** prove the 2026 evaluated-CMI result discussed
+below. The public-setting track contains significant Lean/Rocq infrastructure,
+but it does **not** claim to have resolved the original open randomized-vs-
+deterministic learnability question in every model.
 
-Thomas Steinke and Lydia Zakynthinou posed the information-complexity question for VC classes in COLT 2020: https://proceedings.mlr.press/v125/steinke20b.html
+## Research references
 
-Steve Hanneke and Juexiao Wang's paper, *The optimal information complexity of VC learning* (arXiv:2610.10600, submitted 2026-10-06; v2 revised 2026-10-15), reports an (O(d)) evaluated-CMI/eCMI result in the realizable case using a randomized Majority-of-5 construction: https://arxiv.org/abs/2610.10600v2
+- Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3:
+  https://arxiv.org/html/2601.21462v3
+- Steinke and Zakynthinou, COLT 2020 VC information-complexity question:
+  https://proceedings.mlr.press/v125/steinke20b.html
+- Hanneke and Wang, *The optimal information complexity of VC learning*,
+  arXiv:2610.10600v2: https://arxiv.org/abs/2610.10600v2
 
-That mathematical result is **not proved by this repository's source files**. The code below only checks threshold shattering lemmas; it does not encode the information-theoretic definitions, PAC guarantee, Majority-of-5 construction, or the eCMI bound.
+The Hanneke–Wang information-theoretic result is not encoded by this
+repository. The root Lean/Rocq files prove a limited threshold-shattering
+characterization only.
 
-## Files and what is verified
+## Public-setting formalization: what is encoded
 
-- `Lean/VCLearning.lean`: Lean 4 core-only definitions for Boolean concepts and natural-number thresholds, plus proofs that every singleton can be shattered and no ordered pair (a<b) can be shattered.
-- `Rocq/VCLearning.v`: independent Rocq 9.2 proofs of the corresponding singleton/pair shattering facts. These files contain no `sorry`, `admit`, or `Admitted`.
-- `PublicSetting/Lean/OmegaOneSeparation.lean`: concrete Mathlib 4.35 development of the countable-cocountable probability space on ω₁, with a finite-horizon randomized zero-loss upper and a deterministic public-history lower bound of exactly T using one global target family.
-- `PublicSetting/Rocq/OmegaOneSeparation.v`: independent abstract Rocq 9.2 counterpart for omega-one-like ordered label structures; it does not instantiate concrete ω₁.
-- The literal inf-sup minimax operator is not separately defined in Lean, and the measurable space is not standard Borel; these boundaries are documented in PublicSetting/README.md.
+### Omega-one candidate
 
-The threshold results are a checked pair/singleton shattering characterization, not a separately defined global `VCDim = 1` theorem or a proof of the information-complexity result.
+- PublicSetting/Lean/OmegaOneSeparation.lean constructs the countable-
+  cocountable measurable space and 0–1 probability measure on the concrete
+  Mathlib ordinal Ordinal.omega 1. It includes upper-tail/null-section
+  lemmas, adaptive one-round miss nullity, fixed-witness finite-path
+  containment, the finite-product probability-zero bridge, and the
+  deterministic globally realizable target-family loss construction.
+- PublicSetting/Rocq/OmegaOneSeparation.v independently formalizes an
+  abstract countable-ideal / ordered-label counterpart, including a
+  countably additive 0–1 mass and stagewise risk lemmas. It is not itself a
+  concrete encoding of the full omega-one measure/game.
 
-## Verify
+### Sequential processes and tower property
 
-From the repository root, with the pinned Lean toolchain installed:
+PublicSetting/Lean/SequentialKernelMinimax.lean uses Mathlib's
+Ionescu–Tulcea trajectory kernels. For every fixed strategy pair (x,y),
+strategyDependentPathMeasure accepts its own sequence of transition kernels
+kappa_{x,y,n}; each transition input is the full preceding history.
+The module wraps finite-prefix consistency and the condExp_traj tower
+identity, and applies that tower identity separately to each strategy pair
+under an integrability assumption.
 
-```bash
-lean Lean/VCLearning.lean
-```
+The same file contains a Sion minimax interface. Compactness, convexity,
+lower/upper semicontinuity, quasi-convexity/quasi-concavity, and real
+extremum hypotheses are explicit inputs; they are not consequences of
+kernel measurability alone.
 
-Rocq 9.2:
+### Appendix G
 
-```bash
-rocq compile Rocq/VCLearning.v
-```
+PublicSetting/Lean/AppendixGBackwardInduction.lean formalizes the
+finite-horizon public/oblivious value recursion corresponding to equations
+(24)–(26) of Appendix G. PairHistory stores context/acceptable-set pairs.
+Its pairHistoryGloballyRealizable predicate requires one and the same
+hypothesis to satisfy every pair in the history. Backward induction proves
+that the public continuation value is independent of the realized
+sample-label list under the paper's information structure.
 
-Public-setting Lean proofs:
+The key exported theorems are:
+- pairHistoryGloballyRealizable_extend_iff;
+- appendixG_pairHistory_value_identity;
+- appendixG_public_eq_oblivious_minimax;
+- appendixG_equation_26.
 
-```bash
+The next pair-history update deliberately depends on the selected context
+and acceptable set, not on the just-drawn current sample. This is the
+information structure of the Appendix G / Theorem 18 public-vs-oblivious
+set-valued result. It is not a theorem for a stronger adversary whose
+next hidden acceptable set depends on the current fresh draw.
+
+### Rocq omega-one object and exact RNG boundary
+
+- PublicSetting/Rocq/ConcreteOmegaOne.v imports Gaia 2.4 and defines
+  omegaOne := Ordinals1.aleph_one (cnext omega0). It proves the
+  characterization by countable ordinals, closure under countable
+  suprema, and non-countability of the carrier.
+- PublicSetting/Rocq/PRNGNoGo.v proves that a sampler with finite or
+  countably enumerable output range cannot push any source probability
+  forward to the countable-cocountable 0–1 measure on omega-one. The
+  push-forward gives mass one to the countable range, while the target
+  gives that range mass zero.
+
+The Gaia adapter uses Gaia's Bourbaki-style set theory, which has classical
+and set-theoretic foundation assumptions; it is not presented as bare,
+axiom-free constructive type theory. The generic Rocq countable-ideal game
+theorems have not yet been instantiated over the Gaia carrier.
+
+An ideal Lebesgue-real source is a different mathematical question:
+a measurable push-forward from [0,1] to the countable-cocountable
+omega-one law exists iff cov(N) <= aleph_1. CH suffices; models with
+cov(N) > aleph_1 preclude it. This is not an ordinary finite-bit PRNG.
+Details are in PublicSetting/RNG_COMPATIBILITY.md.
+
+## What remains open in this repository
+
+1. Instantiate the full Rocq countable-ideal / measure / game development on
+   Gaia's concrete omegaOne carrier.
+2. Instantiate the generic sequential kernel and Appendix G framework with
+   the full public partial-feedback strategy correspondence.
+3. Address product measurability of unrestricted adaptive pathwise losses.
+   In the countable-cocountable omega-one sigma algebra, sectionwise nullity
+   does not imply product measurability of the global error relation.
+   The ordinary tower theorem cannot be applied to a nonmeasurable reward.
+4. Prove the concrete strategy-space compactness and Sion regularity
+   hypotheses for the chosen public game.
+5. Do not claim the original Section 3.3 randomized-vs-deterministic
+   learnability open question is solved until the above application theorem
+   is proved in the intended model.
+
+These are explicit mathematical/model boundaries, not hidden unfinished
+proofs. The source files and CI determine which individual claims are
+kernel-checked.
+
+## Supporting repositories and tools
+
+The additional repositories are assigned sidecar roles; they are not all
+dependencies of the trusted build.
+
+- Mathlib4 — primary Lean measure theory, probability kernels, ordinals,
+  conditional expectation, convexity, and Sion library.
+- Gaia 2.4 — Rocq set-theoretic ordinals and aleph_one.
+- LeanDojo-v2 — theorem retrieval and proof-search assistance; all
+  suggestions must be rechecked by Lean.
+- Naproche — structured natural-language proof/exposition checking.
+- cvc5 — finite SMT counterexample search and arithmetic side conditions.
+- SageMath / SymPy / Wolfram — exact finite examples and symbolic checks.
+- GAP — finite group actions and symmetry reduction when applicable.
+- Macaulay2 — commutative algebra / polynomial-ideal calculations if a
+  finite algebraic strategy model arises.
+- Context7 — current library/API documentation.
+- Parallel Search / Sider Scholar — source-paper and literature retrieval.
+- GitHub Actions — pinned Lean/Rocq compilation on the exact commit.
+
+## Reproducing the proof builds
+
+Pinned workflow:
+- Lean 4.35.0 with Mathlib 4.35.0;
+- Rocq 9.2.0 with Gaia 2.4.
+
+Lean:
+~~~sh
 cd PublicSetting/Lean
 lake build
-```
+~~~
 
-Public-setting Rocq proofs:
-
-```bash
+Rocq:
+~~~sh
 cd PublicSetting/Rocq
 rocq compile -Q . PublicSetting PublicSetting.v
 rocq compile -Q . PublicSetting PublicProtocol.v
-```
+rocq compile -Q . PublicSetting ProbabilisticBounds.v
+rocq compile -Q . PublicSetting AdaptiveMoments.v
+rocq compile -Q . PublicSetting OmegaOneSeparation.v
+rocq compile -Q . PublicSetting PRNGNoGo.v
+rocq compile -Q . PublicSetting ConcreteOmegaOne.v
+~~~
 
-GitHub Actions checks all four source modules. A green build means only that the exact statements encoded in those files have been checked; it does not validate unformalized claims in the research papers.
-
-## Tracking and sources
-
-- Original VC information-complexity question: https://proceedings.mlr.press/v125/steinke20b.html
-- Hanneke–Wang 2026 preprint: https://arxiv.org/abs/2610.10600v2
-- Public-setting partial-feedback question: https://arxiv.org/html/2601.21462v3
-- Related set-valued feedback work: https://proceedings.mlr.press/v247/raman24b.html
-
-## Status
-
-The formalization is deliberately limited and explicit about its boundaries. The omega-one strategy-level finite-horizon separation is now machine-checked in Lean and its abstract counterpart in Rocq. The eCMI (O(d)) result is not proved in this repository.
-
-
-## Public partial-feedback omega-one construction
-
-The target open question is the final paragraph of Section 3.3 of arXiv:2601.21462v3. Section 3.2 contains a different finite-Helly/nested-inclusion necessity question. The Lean module concretely formalizes the countable-cocountable probability space on omega_1, zero-mass miss sets, path-dependent terminal-threshold error containment, and deterministic global-target lower bound. Rocq proves an abstract order/ideal counterpart. The full finite-product probability and literal minimax inf-sup are not yet formalized; details and CI status are in PublicSetting/README.md.
-
-
-## Final verification (2026-10-31)
-
-The latest Lean/Rocq code commits are 4ebc89d95a6deb59bf658c2e2c26bac897701f2a and b5940c796e71800125625cbe61f5502f98902da9. The final PR documentation head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e passed both Lean and Rocq CI. The exact run links and remaining formalization scope boundaries are recorded in PublicSetting/README.md.
-
-
-## Public partial-feedback omega-one status (2026-10-31)
-
-Lean now formally proves both the pointwise full-path miss containment and the finite-product probability-zero bridge for fixed visible-label sequences, plus a uniform zero one-step miss probability at every public history. The current checked proof boundary still excludes a single joint sequential-kernel/tower-property theorem for arbitrary history-dependent adversary policies and the literal minimax inf-sup. See `PublicSetting/README.md` and `PublicSetting/PROTOCOL_FORMALIZATION.md` for exact theorem names, CI runs, and limitations.
-
-
-## Final branch CI
-
-Final documentation head 001fa8b623e0326223658ac228f0f8f435460100 passed push run 41163413199 and PR run 41163416315. Lean and Rocq passed in both; all four job logs were scanned and were free of compiler errors, warnings, and unfinished-proof markers.
+The GitHub Actions workflow installs the pinned Gaia package and checks the
+root Rocq/VCLearning.v file as well. A green build certifies only the
+statements encoded in those exact source files.
