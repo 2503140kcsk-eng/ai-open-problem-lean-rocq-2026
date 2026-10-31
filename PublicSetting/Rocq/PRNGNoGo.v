@@ -89,7 +89,7 @@ Section CountableSupportObstruction.
       intro seed.
       apply propositional_extensionality.
       split.
-      - intros _. exact I.
+      - intros _. constructor.
       - intros _. exists seed. reflexivity.
     }
     rewrite hpre.
