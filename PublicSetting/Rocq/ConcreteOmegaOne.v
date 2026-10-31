@@ -28,7 +28,7 @@ Module PublicSettingConcreteOmegaOne.
   Theorem omegaOne_countable_sup (E : Set) :
       countable_set E ->
       (forall a, inc a E -> isCountableOrdinal a) ->
-      isCountableOrdinal (\\osup E).
+      isCountableOrdinal (\osup E).
   Proof.
     exact (Ordinals1.countable_ordinal_sup E).
   Qed.
