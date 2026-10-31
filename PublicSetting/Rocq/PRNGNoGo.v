@@ -125,3 +125,6 @@ Section CountableSupportObstruction.
     exact (seed_range_small_of_enumeration enum covers sample).
   Qed.
 End CountableSupportObstruction.
+ 
+Print Assumptions no_enumerable_seed_sampler_realizes_target.
+Print Assumptions target_mass_of_sampler_range_is_zero.
