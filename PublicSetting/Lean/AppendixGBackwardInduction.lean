@@ -109,7 +109,7 @@ theorem publicValue_eq_obliviousValue
       intro p
       apply iSup_congr
       intro s
-      letI : IsProbabilityMeasure p.law := p.isProbability
+      haveI : IsProbabilityMeasure p.law := p.isProbability
       have hs : MeasurableSet s.1 := admissible_measurable s.1 s.2.1
       have hfun :
           (fun y : Y =>
@@ -124,7 +124,7 @@ theorem publicValue_eq_obliviousValue
       rw [hfun]
       rw [lintegral_add_left'
         ((measurable_const.indicator hs.compl).aemeasurable)]
-      rw [lintegral_indicator_one hs.compl]
+      rw [lintegral_indicator_const hs.compl (1 : ℝ≥0∞)]
       rw [lintegral_const]
       simp
 
