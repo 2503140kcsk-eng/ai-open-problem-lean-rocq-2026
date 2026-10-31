@@ -1,0 +1,79 @@
+name: Public-setting formalization
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-setting-formalization-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: PublicSetting/Lean
+    steps:
+      # Configure Git before checkout to suppress init.defaultBranch advice from git init.
+      - name: Configure Git default branch
+        working-directory: ${{ runner.temp }}
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@v7
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+      - name: Install elan
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Lean toolchain
+        run: elan toolchain install leanprover/lean4:v4.35.0
+      - name: Fetch pinned Mathlib cache
+        run: lake exe cache get
+      - name: Build Lean proofs
+        run: lake build
+      - name: Check root VC-learning formalization
+        run: lean ../../Lean/VCLearning.lean
+
+  rocq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # Configure Git before checkout to suppress init.defaultBranch advice from git init.
+      - name: Configure Git default branch
+        working-directory: ${{ runner.temp }}
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+        run: git config --global init.defaultBranch main
+      - uses: actions/checkout@v7
+        env:
+          GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
+      - name: Cache Gaia and Rocq OPAM dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/rocq-opam-root
+          key: rocq-opam-${{ runner.os }}-9.2.0-gaia-2.4-v1
+      - name: Show pinned Rocq version and compile with Gaia 2.4
+        shell: bash
+        run: |
+          # The official container runs as a non-root user. Cache its OPAM
+          # root outside the container while keeping sources read-only.
+          mkdir -p "$RUNNER_TEMP/rocq-opam-root"
+          chmod -R a+rwX "$RUNNER_TEMP/rocq-opam-root"
+          docker run --rm \
+            -v "$RUNNER_TEMP/rocq-opam-root:/opam-cache:rw" \
+            -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
+            -v "$GITHUB_WORKSPACE/Rocq:/input-root:ro" \
+            rocq/rocq-prover:9.2.0 \
+            sh -lc 'set -eu; mkdir -p /opam-cache/opam-root; if [ ! -f /opam-cache/opam-root/config ]; then cp -a /home/rocq/.opam/. /opam-cache/opam-root/; fi; export OPAMROOT=/opam-cache/opam-root; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; opam --version; opam update; opam install --yes coq-gaia-ordinals.2.4; eval "$(opam env)"; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v; rocq compile -Q . PublicSetting PublicProtocol.v; rocq compile -Q . PublicSetting ProbabilisticBounds.v; rocq compile -Q . PublicSetting AdaptiveMoments.v; rocq compile -Q . PublicSetting OmegaOneSeparation.v; rocq compile -Q . PublicSetting PRNGNoGo.v; rocq compile -Q . PublicSetting ConcreteOmegaOne.v; cp /input-root/VCLearning.v /tmp/rocq-root-check/; cd /tmp/rocq-root-check; rocq compile VCLearning.v'

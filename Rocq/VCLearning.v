@@ -1,55 +1,61 @@
-(* Formalization skeleton for Information Complexity of VC Learning
-   Independently checkable in Rocq (Coq)
-   Problem: Steinke & Zakynthinou COLT 2020; progress Hanneke & Wang arXiv:2610.10600 (2026)
-*)
+(* Machine-checked threshold shattering lemmas in Rocq 9.2.
+   The information-complexity / eCMI result remains an open research target and
+   is deliberately not represented as a theorem with a missing proof or vacuous conclusion here. *)
 
-Require Import List.
-Require Import Arith.
-Require Import Reals.
+From Stdlib Require Import Arith Bool Lia.
 
-(* A concept is a predicate on the instance space. *)
 Definition Concept (X : Type) := X -> bool.
 
-(* Simplified shattering for finite sets. *)
-Definition shatters {X : Type} (H : Concept X -> Prop) (S : list X) : Prop :=
-  forall labeling : list bool,
-    length labeling = length S ->
-    exists h, H h /\ Forall2 (fun x b => h x = b) S labeling.
+(* Initial-segment threshold on nat: x is positive iff x < t. *)
+Definition thresholdConcept (t : nat) : Concept nat :=
+  fun x => Nat.ltb x t.
 
-(* VC-dimension (upper approximation via sSup style; simplified). *)
-Definition VCDim_approx {X : Type} (H : Concept X -> Prop) (n : nat) : Prop :=
-  exists S : list X, length S = n /\ shatters H S.
+Definition ThresholdClass (h : Concept nat) : Prop :=
+  exists t : nat, h = thresholdConcept t.
 
-(* Threshold concepts. *)
-Definition thresholdConcept (t : R) : Concept R :=
-  fun x => Rle_dec x t.
+Definition ShattersSingleton (H : Concept nat -> Prop) (a : nat) : Prop :=
+  forall label : bool, exists h, H h /\ h a = label.
 
-Definition ThresholdClass (h : Concept R) : Prop :=
-  exists t, h = thresholdConcept t.
+Definition ShattersPair (H : Concept nat -> Prop) (a b : nat) : Prop :=
+  forall first second : bool,
+    exists h, H h /\ h a = first /\ h b = second.
 
-(* Classic fact: no set of size 2 is shattered by thresholds. *)
-Lemma thresholds_not_shatter_2 :
-  forall a b : R, a < b ->
-  ~ shatters ThresholdClass (a :: b :: nil).
+(* Any label on a singleton is realized by a threshold. *)
+Lemma thresholds_shatter_singleton :
+  forall a, ShattersSingleton ThresholdClass a.
 Proof.
-  intros a b Hab labeling Hlen.
-  (* The labeling true,false cannot be realized by any threshold. *)
-  intros [h [Hh Hfa]].
-  destruct Hh as [t Ht].
-  rewrite Ht in Hfa.
-  inversion Hfa as [|x1 b1 l1 lab1 Hx1 Hrest].
-  inversion Hrest as [|x2 b2 l2 lab2 Hx2 Hnil].
-  (* Case analysis on the bits would show contradiction for (true, false). *)
-  admit. (* Full case analysis left as exercise; standard result. *)
-Admitted.
-
-(* Placeholder for the existence of a low eCMI learner for d=1. *)
-Theorem exists_low_eCMI_for_thresholds :
-  exists learner : list (R * bool) -> Concept R,
-    True. (* stand-in for eCMI bound O(1) + optimal risk *)
-Proof.
-  exists (fun _ => thresholdConcept 0).
-  exact I.
+  intros a label.
+  destruct label.
+  - exists (thresholdConcept (S a)).
+    split.
+    + exists (S a). reflexivity.
+    + unfold thresholdConcept. apply Nat.ltb_lt. lia.
+  - exists (thresholdConcept a).
+    split.
+    + exists a. reflexivity.
+    + unfold thresholdConcept. apply Nat.ltb_ge. lia.
 Qed.
 
-(* End of independent Rocq development. Third parties can check with coqc. *)
+(* If a < b, the forbidden labeling false,true cannot be realized by a threshold. *)
+Lemma thresholds_not_shatter_pair :
+  forall a b, a < b -> ~ ShattersPair ThresholdClass a b.
+Proof.
+  intros a b Hab Hshatters.
+  destruct (Hshatters false true) as [h [Hclass [Ha Hb]]].
+  destruct Hclass as [t Ht].
+  subst h.
+  unfold thresholdConcept in Ha, Hb.
+  apply Nat.ltb_ge in Ha.
+  apply Nat.ltb_lt in Hb.
+  lia.
+Qed.
+
+Theorem threshold_class_dimension_one_pairwise :
+  (forall a, ShattersSingleton ThresholdClass a) /\
+  (forall a b, a < b -> ~ ShattersPair ThresholdClass a b).
+Proof.
+  split.
+  - exact thresholds_shatter_singleton.
+  - exact thresholds_not_shatter_pair.
+Qed.
+
