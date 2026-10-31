@@ -84,8 +84,9 @@ Section CountableCocountableMeasure.
       destruct (classic (exists n, ~ Small I (A n))) as [h | h].
       + exact h.
       + exfalso. apply hUnion. apply small_countable_union.
-        intro n. destruct (hA n) as [hs | hsc]; [exact hs|].
-        exfalso. apply h. exists n. exact hsc.
+        intro n. destruct (hA n) as [hs | _]; [exact hs|].
+        apply NNPP. intro hns.
+        apply h. exists n. exact hns.
     - intros [n hn] hUnion.
       apply hn. eapply small_mono; [|exact hUnion].
       intros x hx. exists n. exact hx.
