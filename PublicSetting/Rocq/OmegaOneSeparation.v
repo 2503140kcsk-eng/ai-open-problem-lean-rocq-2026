@@ -258,7 +258,7 @@ Section CountableCocountableMeasure.
       forall n, PartialSum01 a n <= 1.
   Proof.
     intros a hbin hone n. induction n as [|n IH].
-    - lia.
+    - exact (le_S 0 0 (le_n 0)).
     - simpl.
       destruct (hbin n) as [hzero | hone_n].
       + rewrite hzero. lia.
