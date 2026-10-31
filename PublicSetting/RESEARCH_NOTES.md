@@ -264,7 +264,7 @@ This candidate uses the paper's very general formulation in which the label spac
 
 - Lean: PublicSetting/Lean/OmegaOneSeparation.lean is a concrete Mathlib development of omega_1, the countable-cocountable sigma algebra, the probability measure via Measure.ofMeasurable, countable upper-tail intersection, adaptive miss-set nullity, and the one-global-target deterministic lower bound.
 - Rocq: PublicSetting/Rocq/OmegaOneSeparation.v proves the same measure/game lemmas abstractly for an ordered label type supplied with a countable ideal, small initial segments, successor, and countable boundedness. The Rocq Stdlib project does not supply a concrete omega_1 ordinal/measure instance in this project, so this is not yet a concrete duplicate of the Lean instantiation.
-- Both updated CI tracks are queued as of 2026-10-31 in GitHub Actions. Until the logs complete successfully, the sources are formalization drafts, not completed machine-checked proof artifacts.
+- Both proof assistants have now checked the omega-one path-containment additions: Lean code commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a and Rocq code commit b5940c796e71800125625cbe61f5502f98902da9. Both push and PR workflows succeeded, and the documentation-complete PR head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e also passed both workflows. Four current Lean/Rocq job logs were inspected; zero compiler errors, warnings, deprecation/hint messages, or unfinished-proof markers were found. The full-path set-containment theorem is checked; the finite-product integration and literal minimax operator remain unformalized.
 
 ### Next formal verification boundary
 
@@ -285,8 +285,13 @@ The Lean public history is a list of triples (context, visible label, realized p
 
 ## 2026-10-31: full-path terminal-target audit
 
-The public protocol lets the adversary see previous realized predictions, and the acceptable sets may be chosen consistently after the complete path. Lean now defines a path-dependent terminal threshold rule on Fin T → Label and proves that any path with a mistake on any coordinate lies in the finite union of cylinders {path | path t < witness t}. Rocq proves the abstract corresponding coordinate-containment lemma. Each one-coordinate initial segment is countable and has marginal mass zero. The finite-product measure argument is standard but remains separately unformalized; the latest source CI must pass before describing the new path lemmas as machine-checked.
+The public protocol lets the adversary see previous realized predictions, and the acceptable sets may be chosen consistently after the complete path. Lean now defines a path-dependent terminal threshold rule on Fin T → Label and proves that any path with a mistake on any coordinate lies in the finite union of cylinders {path | path t < witness t}. Rocq proves the abstract corresponding coordinate-containment lemma. Each one-coordinate initial segment is countable and has marginal mass zero. The finite-product measure argument is standard but remains separately unformalized. The pointwise path-containment lemmas themselves have passed both Lean and Rocq CI.
 
 ## Paper open-question locations
 
 There are two distinct open questions in arXiv:2601.21462v3. The target in this PR is the final paragraph of Section 3.3 (public-setting randomized versus deterministic learnability). The final paragraph of Section 3.2 instead asks whether finite Helly number or the nested-inclusion property is necessary for inseparability. Theorem 18 in Section 3.3 is an oblivious-versus-public separation and is also distinct from the target question.
+
+
+## Final CI audit (2026-10-31)
+
+Code: Lean 4.35 commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a; Rocq 9.2 commit b5940c796e71800125625cbe61f5502f98902da9. CI push/PR runs 41160197913 and 41160201246 both succeeded. Final PR-head documentation runs 41160340096 and 41160343911 both succeeded. All four sets of job logs were inspected; zero compiler errors, warnings, deprecated/hint diagnostics, or sorry/admit/Admitted/Axiom/Parameter markers were found.
