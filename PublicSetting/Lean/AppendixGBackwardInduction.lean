@@ -77,7 +77,22 @@ theorem pairHistoryGloballyRealizable_extend_iff
     pairHistoryGloballyRealizable hypotheses (pairHistoryExtend h x s) ↔
       ∃ f, f ∈ hypotheses ∧
         (∀ entry ∈ h, f entry.1 ∈ entry.2) ∧ f x ∈ s := by
-  simp [pairHistoryGloballyRealizable, pairHistoryExtend, List.mem_append]
+  constructor
+  · rintro ⟨f, hf, hReal⟩
+    refine ⟨f, hf, ?_, ?_⟩
+    · intro entry hentry
+      apply hReal entry
+      exact List.mem_append.mpr (Or.inl hentry)
+    · apply hReal (x, s)
+      exact List.mem_append.mpr (Or.inr (by simp))
+  · rintro ⟨f, hf, hOld, hNew⟩
+    refine ⟨f, hf, ?_⟩
+    intro entry hentry
+    rcases List.mem_append.mp hentry with hOldEntry | hLast
+    · exact hOld entry hOldEntry
+    · have hEq : entry = (x, s) := by simpa using hLast
+      cases hEq
+      exact hNew
 
 /-- The oblivious continuation value V_t(h), with t rounds remaining.
 It is the exact sup_x inf_pi sup_{S admissible and prefix-realizable}
@@ -141,7 +156,7 @@ theorem publicValue_eq_obliviousValue
       intro p
       apply iSup_congr
       intro s
-      haveI : IsProbabilityMeasure p.law := p.isProbability
+      have hprob : IsProbabilityMeasure p.law := p.isProbability
       have hs : MeasurableSet s.1 := admissible_measurable s.1 s.2.1
       have hfun :
           (fun y : Y =>
@@ -157,7 +172,7 @@ theorem publicValue_eq_obliviousValue
       rw [lintegral_add_left'
         ((measurable_const.indicator hs.compl).aemeasurable)]
       rw [lintegral_indicator_const hs.compl (1 : ℝ≥0∞)]
-      rw [lintegral_const]
+      rw [lintegral_const, hprob.measure_univ]
       simp
 
 /-- Theorem 18 / Appendix G specialized to the paper's actual pair-history
