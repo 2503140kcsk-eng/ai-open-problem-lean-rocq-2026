@@ -294,7 +294,8 @@ Section CountableCocountableMeasure.
           destruct (hbin k) as [hzero | hone_k].
           - exact hzero.
           - exfalso.
-            exact (hone k n (Nat.ne_of_lt hk) hone_k hn). }
+            assert (hkn : k <> n) by lia.
+            exact (hone k n hkn hone_k hn). }
         specialize (hb (S n)).
         simpl in hb. rewrite hprefix, hn in hb. lia.
     - simpl. split.
