@@ -1,6 +1,6 @@
 module
 
-import Mathlib
+public import Mathlib
 
 public section
 
