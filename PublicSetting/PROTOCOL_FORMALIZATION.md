@@ -94,9 +94,18 @@ The Lean strategy interface now records a list of public round triples (context,
 
 The exact target is the final paragraph of Section 3.3 in Shao–Fang–Lin–Tao, arXiv:2601.21462v3: whether randomized and deterministic learners can have distinct learnability in the public partial-feedback setting. The separate end-of-Section-3.2 question about necessity of finite Helly number / nested inclusion must not be substituted for it.
 
-Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation converting this containment into a joint probability-zero theorem is not separately formalized. The literal Appendix G inf-sup operator is not a separately defined Lean object either. Keep those limits explicit.
+Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation is now formalized by `terminalPathMiss_pi_measure_zero`: coordinate-preimage nullity plus `measure_iUnion_null_iff` proves the complete-path miss event has product outer-measure zero for a fixed visible-witness sequence. The literal Appendix G inf-sup operator is not a separately defined Lean object either. Keep those limits explicit.
 
 
 ## Final validation (2026-10-31)
 
 All four latest CI job logs (push and PR at source commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a, plus push and PR at final PR head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e) were scanned. Lean and Rocq all succeeded; there were zero compiler error, warning, deprecation, hint, or unfinished-proof markers.
+
+
+## Public-history conditional bound and finite-product bridge (2026-10-31)
+
+`constantRandomizedLearner_zero_at_every_public_history` proves that for every public history, every current visible witness fixed before the current draw, and every sample-dependent terminal tail that contains that witness, the constant countable-cocountable learner assigns zero mass to the miss set. The statement is uniform over histories; the learner action does not vary with the history.
+
+For a fixed finite vector of visible witnesses, `terminalPathMiss_pi_measure_zero` additionally proves that even an arbitrary terminal threshold rule depending on the complete sampled path yields a miss event of product measure zero. Its proof uses Mathlib 4.35's `Measure.pi_eval_preimage_null` for each coordinate and `measure_iUnion_null_iff` for the finite union.
+
+Not encoded as one Lean theorem: a sequential transition-kernel model in which the adversary's visible witness at round t is a measurable function of the random prefix, the tower-property argument over that adaptive process, and the literal Appendix G minimax inf-sup operator. These remain clearly separated from the proved pointwise conditional lemma and the fixed-witness product theorem.
