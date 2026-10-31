@@ -134,3 +134,45 @@ lake build SequentialKernelMinimax
 The Rocq workflow uses Rocq 9.2 and installs the pinned Gaia 2.4 ordinal package before compiling `Rocq/ConcreteOmegaOne.v`. The adapter emits `Print Assumptions` output for its ordinal characterization and countable-supremum theorem; review this output when auditing the foundational assumptions.
 
 The package default build now includes `SequentialKernelMinimax`. Record the exact commit and both Lean/Rocq CI results when reporting verification.
+
+## 8. Appendix G backward induction now formalized
+
+The new Lean module `Lean/AppendixGBackwardInduction.lean` formalizes the
+finite-horizon recursion of Appendix G, equations (24)–(26), in an abstract
+game signature:
+
+- `admissible : Set (Set Y)` is the prescribed family of acceptable sets;
+- `realizable h x S` is the prefix-extension predicate saying that appending
+  `(x,S)` to the current pair-history still admits one global comparator
+  `f^*\in H`;
+- `RandomizedAction Y` carries an actual probability measure on the label
+  measurable space;
+- `next h x S` updates the pair-history and deliberately does not take the
+  sampled label as an argument.
+
+`obliviousValue` is the recursion
+
+[
+V_0(h)=0,\qquad
+V_{n+1}(h)=\sup_x\inf_\pi\sup_{\substack{S\in\mathcal S(Y)\\
+\operatorname{Realizable}(h,x,S)}}
+\bigl(\pi(Y\setminus S)+V_n(\operatorname{next}(h,x,S))\bigr).
+]
+
+`publicValue` stores the realized sampled-label list and integrates the
+current indicator loss and next public continuation against the selected
+probability measure. The proved theorem
+`publicValue_eq_obliviousValue` shows by induction that this value is
+independent of the sampled-label list. `appendixG_equation_26` then states
+the paper's Eq. (26): accumulated past loss plus the public continuation
+equals accumulated past loss plus the oblivious continuation.
+
+This is a **generic, kernel-checked Appendix G theorem** for the exact
+information structure in Theorem 18. It is not merely the earlier one-step
+Bellman identity. The remaining application work is to define the paper's
+concrete pair-history type and prove that its prefix-realizability relation
+is exactly the supplied `realizable` predicate. Nor does this theorem cover
+an adversary whose next hidden acceptable-set choice depends on the just-drawn
+sample; that is a different information structure and is ruled out from the
+current theorem by the type of `next`.
+
