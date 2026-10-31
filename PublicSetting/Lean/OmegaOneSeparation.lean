@@ -2,6 +2,8 @@ module
 
 import Mathlib
 
+public section
+
 /-!
 # The omega-one countable/cocountable measure construction
 
