@@ -27,7 +27,7 @@ The learner returns the same countable-cocountable probability measure after eve
 \]
 Hence the miss set is contained in the countable null initial segment below \(w_t\), so the one-round expected mistake is zero.
 
-The terminal global target subfamily can be selected after the complete prediction path. Lean now formalizes the stronger pointwise statement: for any full-path threshold rule \(\beta_t(\hat y_1,\ldots,\hat y_T)\) with \(\beta_t\le w_t\), every path with at least one mistake belongs to the finite union of coordinate cylinders where \(\hat y_t<w_t\). Each coordinate cylinder is null under the corresponding marginal measure. The finite-product measure step converting this finite union into a joint probability-zero event is a standard mathematical consequence, but is not yet encoded as a separate Lean theorem.
+The terminal global target subfamily may be chosen after the complete prediction path. Lean proves (i) the pointwise full-path inclusion: for any threshold rule depending on the complete path, if each selected upper tail contains its fixed pre-sampling witness \(w_t\), then every path with a mistake lies in the finite union of cylinders \(\{\hat y:\hat y_t<w_t\}\); and (ii) the finite-product probability theorem `terminalPathMiss_pi_measure_zero`, using Mathlib 4.35's `Measure.pi_eval_preimage_null` and `measure_iUnion_null_iff`, showing that this entire miss event has product outer-measure zero. In addition, `constantRandomizedLearner_zero_at_every_public_history` proves the conditional one-round miss probability is zero for every public history and every visible witness selected before the current draw, even when the final threshold depends on the current sample.
 
 ### Deterministic side
 
@@ -54,9 +54,9 @@ Latest code commits: Lean 4ebc89d95a6deb59bf658c2e2c26bac897701f2a and Rocq b594
 
 ### Scope boundaries
 
-1. The finite-product probability calculation for a terminal target selected as a function of the complete sampled path is not yet separately encoded; the pointwise path-event containment is encoded.
+1. The sequential transition-kernel / tower-property proof for a visible witness chosen as an arbitrary measurable function of the entire preceding random history is not encoded as one joint stochastic-process theorem. The file does prove the current-round miss probability is zero uniformly for every history and witness, and separately proves the finite-product result for any fixed witness sequence with arbitrary full-path terminal thresholds.
 2. The literal minimax inf-sup operator from Appendix G is not separately declared as a Lean definition/theorem. The file formalizes the finite-horizon strategy-level witnesses and loss statements.
-3. The construction uses the paper's unrestricted measurable-space model. The countable-cocountable space on omega_1 is not standard Borel or countably generated, and the measure is not claimed to be implemented by a usual real-valued PRNG.
+3. The construction uses the paper's abstract probability-measure model on the label sigma-algebra. The concrete countable-cocountable space on omega_1 is not standard Borel or countably generated, and the measure is not claimed to be sampled by a usual real-valued PRNG. No standard-Borel or PRNG implementation claim is made.
 4. Rocq verifies the corresponding abstract order/ideal schema rather than a concrete ordinal omega_1.
 
 These are formalization and model boundaries, not compiler failures.
