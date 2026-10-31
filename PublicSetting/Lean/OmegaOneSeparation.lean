@@ -297,6 +297,27 @@ theorem terminalPathMiss_subset_badCoordinateCylinders
   change path t < witnesses t
   exact lt_of_lt_of_le (lt_of_not_ge hmiss) (hcontains path t)
 
+/-- The finite product of the roundwise countable-cocountable laws assigns
+zero probability to every path on which a path-dependent terminal target
+causes a mistake, provided each target tail contains its pre-sampling
+visible witness. The key inclusion is pathwise; the probability-zero step
+uses the product-coordinate null-preimage theorem. -/
+theorem terminalPathMiss_pi_measure_zero
+    (T : ℕ) (witnesses : Fin T → Label)
+    (chooseThreshold : (Fin T → Label) → Fin T → Label)
+    (hcontains : ∀ path t, chooseThreshold path t ≤ witnesses t) :
+    Measure.pi (fun _ : Fin T => countableCocountableMeasure)
+      (terminalPathMissSet T chooseThreshold) = 0 := by
+  apply MeasureTheory.Measure.mono_null
+    (terminalPathMiss_subset_badCoordinateCylinders T witnesses chooseThreshold hcontains)
+  rw [measure_iUnion_null_iff]
+  intro t
+  exact Measure.pi_eval_preimage_null
+    (μ := fun _ : Fin T => countableCocountableMeasure)
+    (i := t)
+    (s := lowerSegment (witnesses t))
+    (lowerSegment_measure_zero (witnesses t))
+
 /-- A single global target family of functions from naturals to labels. -/
 def GlobalTailFamily (thresholds : ℕ → Label) (f : ℕ → Label) : Prop :=
   ∀ t, thresholds t ≤ f t
