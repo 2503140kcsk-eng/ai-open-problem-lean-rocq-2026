@@ -273,6 +273,30 @@ theorem adaptiveMiss_measure_zero
     (adaptiveMiss_subset_lowerSegment chooseThreshold witness hcontains)
   exact lowerSegment_measure_zero witness
 
+
+/-- The full finite prediction path may determine every terminal threshold.
+If each selected upper tail still contains its pre-sampling witness, then any
+round with a mistake has its sampled coordinate below that fixed witness. -/
+def terminalPathMissSet (T : ℕ) (witnesses : Fin T → Label)
+    (chooseThreshold : (Fin T → Label) → Fin T → Label) :
+    Set (Fin T → Label) :=
+  {path | ∃ t, ¬ chooseThreshold path t ≤ path t}
+
+/-- Even when the terminal global target family is selected after the complete
+prediction path, the pathwise error event is contained in a finite union of
+coordinate cylinders over the null initial segments. -/
+theorem terminalPathMiss_subset_badCoordinateCylinders
+    (T : ℕ) (witnesses : Fin T → Label)
+    (chooseThreshold : (Fin T → Label) → Fin T → Label)
+    (hcontains : ∀ path t, chooseThreshold path t ≤ witnesses t) :
+    terminalPathMissSet T witnesses chooseThreshold ⊆
+      ⋃ t : Fin T, {path | path t ∈ lowerSegment (witnesses t)} := by
+  intro path hmiss
+  rcases hmiss with ⟨t, hmiss⟩
+  refine Set.mem_iUnion.2 ⟨t, ?_⟩
+  change path t < witnesses t
+  exact lt_of_lt_of_le (lt_of_not_ge hmiss) (hcontains path t)
+
 /-- A single global target family of functions from naturals to labels. -/
 def GlobalTailFamily (thresholds : ℕ → Label) (f : ℕ → Label) : Prop :=
   ∀ t, thresholds t ≤ f t
