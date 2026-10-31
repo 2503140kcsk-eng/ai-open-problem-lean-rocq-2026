@@ -1,6 +1,6 @@
 # Sources checked on 2026-10-28
 
-1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the inseparability necessity question at the end of Section 3.2 (finite Helly / nested inclusion), Theorem 15's sufficient inseparability criteria in Section 3.2, and, separately, the oblivious-versus-public comparison in Section 3.3. Theorem 17 proves equality for set-valued feedback; Theorem 18 proves the oblivious-versus-public separation for partial feedback.
+1. Shao, Shihao; Fang, Cong; Lin, Zhouchen; Tao, Dacheng. “Partial Feedback Online Learning.” arXiv:2601.21462v3, dated 2026-04-02. Primary source for the public randomized-versus-deterministic learnability question at the end of Section 3.3, Theorem 15's sufficient inseparability criteria in Section 3.2, and, separately, the oblivious-versus-public comparison in Section 3.3. Theorem 17 proves equality for set-valued feedback; Theorem 18 proves the oblivious-versus-public separation for partial feedback.
    - https://arxiv.org/abs/2601.21462
    - https://arxiv.org/html/2601.21462v3
 
@@ -42,3 +42,7 @@ The literature search was performed through academic and web-search connectors. 
 
 10. GitHub Actions run 41157208222 completed successfully for both Lean 4.35 and Rocq 9.2 on commit 1168ded2065bc238a1f6978b5b48addfece2dee3.
    - https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41157208222
+
+
+11. Exact locations of the two different open questions were rechecked in the complete v3 paper text: the target public-setting randomization-versus-determinism question ends Section 3.3; the finite-Helly / nested-inclusion necessity question ends Section 3.2.
+   - https://arxiv.org/html/2601.21462v3
