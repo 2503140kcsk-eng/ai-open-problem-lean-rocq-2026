@@ -6,7 +6,7 @@ Shao, Fang, Lin, and Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3
 - https://arxiv.org/html/2601.21462v3
 - https://arxiv.org/abs/2601.21462
 
-Section 1.1 introduces partial feedback and set-realizability. Section 3.3 defines the public-versus-oblivious adversary distinction; Section 3.2 contains Theorem 15 and the inseparability necessity question. The randomized-versus-deterministic learnability question is explicitly left open in the final paragraph of Section 3.3. In particular, the current round's order is:
+Section 1.1 introduces partial feedback and set-realizability. Section 3.3 defines the public-versus-oblivious adversary distinction; Section 3.2 contains Theorem 15 and the inseparability necessity question. The finite-Helly / nested-inclusion necessity question appears at the end of Section 3.2. Section 3.3 separately defines the oblivious-versus-public distinction. For the public partial-feedback protocol, the current round's order is:
 
 1. the adversary chooses the instance/context;
 2. the learner chooses a distribution/action using its observable feedback history;
@@ -71,7 +71,7 @@ Theorem 15's structural criterion does not cover this family: every countable se
 
 ### Verification caveat
 
-The Lean file PublicSetting/Lean/OmegaOneSeparation.lean is the concrete omega_1 development. The Rocq file PublicSetting/Rocq/OmegaOneSeparation.v is an independent generic theorem over an ordered type and a countable ideal with the omega-one properties; it does not construct the concrete ordinal type omega_1 in Rocq Stdlib. GitHub Actions for the new modules are still queued as of the latest inspection. Until completed logs are green, neither file may be described as independently machine-checked.
+The Lean file PublicSetting/Lean/OmegaOneSeparation.lean is the concrete omega_1 development. The Rocq file PublicSetting/Rocq/OmegaOneSeparation.v is an independent generic theorem over an ordered type and a countable ideal with the omega-one properties; it does not construct the concrete ordinal type omega_1 in Rocq Stdlib. Both Lean and Rocq jobs passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3 (run 41157208222). The later public-history refinement is being checked separately. Rocq remains an abstract ordered-type development, not a concrete omega_1 instantiation.
 
 The random upper-bound uses the paper's broad measurable-space model (arbitrary sigma algebra and probability measures). It is not a standard-Borel or usual-PRNG construction. Thus, if the intended setting imposes a standard Borel label space or ordinary algorithmically samplable randomness, the question is not settled by this candidate.
 
@@ -83,3 +83,8 @@ The proof also still needs a single top-level public-game theorem that packages 
 Lean 4.35 / Mathlib 4.35 now concretely proves the countable-cocountable probability measure on omega_1, zero measure of upper-tail complements and adaptive miss sets, countable upper-tail intersections, exact global realizability, zero comparator loss, randomized zero expected finite-horizon loss, and the deterministic public-history loss T witness. The deterministic public-history input records (context, visible label, previous realized prediction). Rocq 9.2 independently checks the corresponding countable-ideal and ordered-tail lemmas under abstract omega-one-like hypotheses; it does not construct concrete omega_1.
 
 Both Lean and Rocq CI passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3 (run 41157208222). The explicit Appendix G inf-sup minimax operator is not itself encoded as a Lean definition. The probability space is not claimed to be standard Borel or ordinary-PRNG samplable.
+
+
+## Public-history strategy input
+
+The Lean strategy interface now records a list of public round triples (context, visible label, realized prediction). This is intentionally more expressive than a history of only contexts and visible labels: previous realized predictions are visible in the public setting. The current-round learner action is computed from the previous history, after which the adversary chooses the visible label.
