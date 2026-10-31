@@ -225,4 +225,136 @@ theorem adaptiveStagewiseBellmanStep_eq_appendixGSetValued
       (fun h x p s => draw h x p (acceptable h x s)ᶜ)
       nextPublic next V h hmass hnext)
 
+
+/-!
+## Full-continuation-dependent terminal targets
+
+The previous conditionalSectionRisk allows a terminal threshold to depend
+on the current sampled label.  The following extension allows it to depend
+on an arbitrary complete future continuation as well.
+
+The key condition is pointwise: for a fixed public history, every possible
+continuation target still contains that history's pre-sampling witness.
+Consequently, the error section is contained in a measurable null cylinder
+on the current-label coordinate.  The error section itself need not be
+measurable.  Its measure is zero by monotonicity of outer measure.
+
+This is an iterated/conditional-risk theorem.  It does not assert that the
+union of all such sections over nonmeasurable history-dependent choices is
+measurable in the full path sigma-algebra.
+-/
+
+/-- The terminal miss section when the final threshold may depend on both
+the current label and an arbitrary future continuation. -/
+def fullContinuationMissSection {Future : Type*}
+    (chooseThreshold : Label → Future → Label) : Set (Label × Future) :=
+  {z | ¬ chooseThreshold z.1 z.2 ≤ z.1}
+
+/-- Every miss remains inside the null lower cylinder whenever every
+continuation's selected upper tail contains the pre-draw witness. -/
+theorem fullContinuationMissSection_subset_lowerCylinder
+    {Future : Type*}
+    (chooseThreshold : Label → Future → Label) (witness : Label)
+    (hcontains : ∀ y future, chooseThreshold y future ≤ witness) :
+    fullContinuationMissSection chooseThreshold ⊆
+      {z : Label × Future | z.1 ∈ lowerSegment witness} := by
+  rintro ⟨y, future⟩ hmiss
+  change ¬ chooseThreshold y future ≤ y at hmiss
+  change y ∈ lowerSegment witness
+  change y < witness
+  exact lt_of_lt_of_le (lt_of_not_ge hmiss) (hcontains y future)
+
+/-- Conditional risk of a miss whose terminal threshold can inspect the
+entire future continuation. -/
+noncomputable def fullContinuationConditionalRisk
+    {H Future : Type*}
+    (jointLaw : H → Measure (Label × Future))
+    (witness : H → Label)
+    (threshold : H → Label → Future → Label) : H → ℝ≥0∞ :=
+  fun h => jointLaw h (fullContinuationMissSection (threshold h))
+
+/-- Full-continuation-dependent conditional risk is zero under the
+pre-sampling envelope and a null lower-cylinder condition.  No joint
+measurability of the terminal miss relation is required. -/
+theorem fullContinuationConditionalRisk_eq_zero
+    {H Future : Type*}
+    (jointLaw : H → Measure (Label × Future))
+    (witness : H → Label)
+    (threshold : H → Label → Future → Label)
+    (hcontains : ∀ h y future, threshold h y future ≤ witness h)
+    (hnull : ∀ h,
+      jointLaw h {z : Label × Future | z.1 ∈ lowerSegment (witness h)} = 0) :
+    ∀ h, fullContinuationConditionalRisk jointLaw witness threshold h = 0 := by
+  intro h
+  unfold fullContinuationConditionalRisk
+  apply MeasureTheory.Measure.mono_null
+    (fullContinuationMissSection_subset_lowerCylinder
+      (threshold h) (witness h) (fun y future => hcontains h y future))
+  exact hnull h
+
+/-- A finite-horizon collection of conditional risks, where the future
+continuation type may vary with the round.  Each threshold can inspect the
+complete suffix after that round, not merely the current draw. -/
+noncomputable def fullFutureSequentialRisk
+    (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    (jointLaw : ∀ t, History t → Measure (Label × Future t))
+    (witness : ∀ t, History t → Label)
+    (threshold : ∀ t, History t → Label → Future t → Label)
+    (histories : ∀ t, History t) : ℝ≥0∞ :=
+  ∑ t : Fin T,
+    fullContinuationConditionalRisk (jointLaw t) (witness t) (threshold t)
+      (histories t)
+
+/-- All finite-round full-future conditional risks vanish for every
+history sequence.  In particular, the bound is uniform over arbitrary
+history-dependent public witness policies and terminal targets depending
+on all later samples. -/
+theorem fullFutureSequentialRisk_eq_zero
+    (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    (jointLaw : ∀ t, History t → Measure (Label × Future t))
+    (witness : ∀ t, History t → Label)
+    (threshold : ∀ t, History t → Label → Future t → Label)
+    (histories : ∀ t, History t)
+    (hcontains : ∀ t h y future, threshold t h y future ≤ witness t h)
+    (hnull : ∀ t h,
+      jointLaw t h {z : Label × Future t | z.1 ∈ lowerSegment (witness t h)} = 0) :
+    fullFutureSequentialRisk T History Future jointLaw witness threshold histories = 0 := by
+  classical
+  unfold fullFutureSequentialRisk
+  apply Finset.sum_eq_zero
+  intro t ht
+  exact fullContinuationConditionalRisk_eq_zero
+    (jointLaw t) (witness t) (threshold t)
+    (fun h y future => hcontains t h y future)
+    (fun h => hnull t h)
+    (histories t)
+
+/-- The sequential conditional-risk process is identically zero as a
+function of the complete random history trace, so its integral is zero
+under any probability law on those traces.  This is deliberately distinct
+from integrating a potentially nonmeasurable pathwise error indicator. -/
+theorem integratedFullFutureSequentialRisk_eq_zero
+    (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [MeasurableSpace (∀ t, History t)]
+    (jointLaw : ∀ t, History t → Measure (Label × Future t))
+    (witness : ∀ t, History t → Label)
+    (threshold : ∀ t, History t → Label → Future t → Label)
+    (traceLaw : Measure (∀ t, History t))
+    (hcontains : ∀ t h y future, threshold t h y future ≤ witness t h)
+    (hnull : ∀ t h,
+      jointLaw t h {z : Label × Future t | z.1 ∈ lowerSegment (witness t h)} = 0) :
+    ∫⁻ trace, fullFutureSequentialRisk T History Future jointLaw witness threshold
+      (fun t => trace t) ∂traceLaw = 0 := by
+  have hzero :
+      (fun trace : ∀ t, History t =>
+        fullFutureSequentialRisk T History Future jointLaw witness threshold
+          (fun t => trace t)) = fun _ => (0 : ℝ≥0∞) := by
+    funext trace
+    exact fullFutureSequentialRisk_eq_zero
+      T History Future jointLaw witness threshold
+      (fun t => trace t) hcontains hnull
+  rw [hzero]
+  simp
+
+
 end PublicSetting.SequentialConditionalRisk
