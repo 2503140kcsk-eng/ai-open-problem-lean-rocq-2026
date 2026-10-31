@@ -213,17 +213,18 @@ Section CountableCocountableMeasure.
 
   Lemma mass_universe_one : Mass (fun _ : Y => True) = 1.
   Proof.
-    unfold Mass, MeasureOne.
-    destruct (excluded_middle_informative (universe_not_small I)) as [h | h].
+    unfold Mass.
+    destruct (excluded_middle_informative
+      (MeasureOne (fun _ : Y => True))) as [h | h].
     - reflexivity.
-    - contradiction.
+    - exfalso. apply h. exact (universe_not_small I).
   Qed.
 
   Lemma mass_empty_zero : Mass (fun _ : Y => False) = 0.
   Proof.
-    unfold Mass, MeasureOne.
+    unfold Mass.
     destruct (excluded_middle_informative
-      (~ Small I (fun _ => False))) as [h | h].
+      (MeasureOne (fun _ : Y => False))) as [h | h].
     - exfalso. apply h. exact (small_empty I).
     - reflexivity.
   Qed.
