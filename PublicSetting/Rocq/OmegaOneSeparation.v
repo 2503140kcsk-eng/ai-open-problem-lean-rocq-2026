@@ -68,8 +68,9 @@ Section CountableCocountableMeasure.
       + eapply small_mono; [|exact hsc].
         intros x hx hAx. apply hx. exists n. exact hAx.
     - left. apply small_countable_union.
-      intro n. destruct (hA n) as [hs | hsc]; [exact hs|].
-      exfalso. apply hall. exists n. exact hsc.
+      intro n. destruct (hA n) as [hs | _]; [exact hs|].
+      apply NNPP. intro hns.
+      apply hall. exists n. exact hns.
   Qed.
 
   Lemma measure_one_iff_union :
