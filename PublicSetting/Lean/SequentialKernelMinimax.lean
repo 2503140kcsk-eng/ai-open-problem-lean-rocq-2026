@@ -1,6 +1,8 @@
-import Mathlib.Probability.Kernel.IonescuTulcea.Traj
-import Mathlib.Topology.Sion
-import Mathlib.Probability.Process.Filtration
+module
+
+public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
+public import Mathlib.Topology.Sion
+public import Mathlib.Probability.Process.Filtration
 
 /-!
 # Sequential-kernel / tower / minimax interface
@@ -29,11 +31,11 @@ namespace PublicSetting.SequentialKernelMinimax
 The initial history is a measurable encoding of the two players' strategy parameters.
 The transition kernels may depend on the entire finite history. -/
 noncomputable def strategyPathKernel
-    {E F : Type*} [MeasurableSpace E] [MeasurableSpace F]
+    {E F : Type*} [MeasurableSpace E] [MeasurableSpace F] [MeasurableSpace (E × F)]
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
-    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Set.Iic n, States i)
+    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Finset.Iic n, States i)
       (States (n + 1)))
-    (initial : E × F → Π i : Set.Iic 0, States i)
+    (initial : E × F → Π i : Finset.Iic 0, States i)
     (hinitial : Measurable initial) :
     ProbabilityTheory.Kernel (E × F) (Π n, States n) :=
   ProbabilityTheory.Kernel.traj κ 0 ∘ₖ
@@ -42,11 +44,11 @@ noncomputable def strategyPathKernel
 /-- The trajectory kernel constructed above is a Markov kernel whenever the
 one-step transition kernels are Markov kernels. -/
 theorem strategyPathKernel_isMarkov
-    {E F : Type*} [MeasurableSpace E] [MeasurableSpace F]
+    {E F : Type*} [MeasurableSpace E] [MeasurableSpace F] [MeasurableSpace (E × F)]
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
-    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Set.Iic n, States i)
+    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Finset.Iic n, States i)
       (States (n + 1)))
-    (initial : E × F → Π i : Set.Iic 0, States i)
+    (initial : E × F → Π i : Finset.Iic 0, States i)
     (hinitial : Measurable initial)
     (hκ : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n)) :
     ProbabilityTheory.IsMarkovKernel (strategyPathKernel κ initial hinitial) := by
@@ -58,7 +60,7 @@ theorem strategyPathKernel_isMarkov
 This is the kernel-composition form of sequential probability construction. -/
 theorem finitePrefix_consistency
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
-    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Set.Iic n, States i)
+    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Finset.Iic n, States i)
       (States (n + 1)))
     {a b : ℕ} (hab : a ≤ b) :
     ProbabilityTheory.Kernel.traj κ b ∘ₖ
@@ -72,10 +74,10 @@ the expected continuation payoff under the trajectory kernel restarted at b. -/
 theorem trajectory_tower
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Set.Iic n, States i)
+    (κ : (n : ℕ) → ProbabilityTheory.Kernel (Π i : Finset.Iic n, States i)
       (States (n + 1)))
     {a b : ℕ} (hab : a ≤ b)
-    (x₀ : Π i : Set.Iic a, States i)
+    (x₀ : Π i : Finset.Iic a, States i)
     (f : (Π n, States n) → E)
     (hf : Integrable f (ProbabilityTheory.Kernel.traj κ a x₀)) :
     (ProbabilityTheory.Kernel.traj κ a x₀)[f | ProbabilityTheory.piLE b] =ᵐ[
@@ -109,7 +111,7 @@ proved from the chosen model (for example, from a finite mixed-strategy
 normal-form representation), not inferred from kernel measurability alone. -/
 structure SequentialKernelGame
     (E F : Type*)
-    [MeasurableSpace E] [MeasurableSpace F]
+    [MeasurableSpace E] [MeasurableSpace F] [MeasurableSpace (E × F)]
     [TopologicalSpace E] [AddCommGroup E] [Module ℝ E]
     [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
     [TopologicalSpace F] [AddCommGroup F] [Module ℝ F]
@@ -118,8 +120,8 @@ structure SequentialKernelGame
   minimizing : CompactConvexStrategySpace E
   maximizing : CompactConvexStrategySpace F
   transition : (n : ℕ) → ProbabilityTheory.Kernel
-    (Π i : Set.Iic n, States i) (States (n + 1))
-  initial : E × F → Π i : Set.Iic 0, States i
+    (Π i : Finset.Iic n, States i) (States (n + 1))
+  initial : E × F → Π i : Finset.Iic 0, States i
   initial_measurable : Measurable initial
   transition_markov : ∀ n, ProbabilityTheory.IsMarkovKernel (transition n)
   reward : (Π n, States n) → ℝ
@@ -157,7 +159,7 @@ regularity assumptions are imposed on the expected terminal reward induced by
 the complete trajectory kernel. -/
 theorem sequential_kernel_minimax
     {E F : Type*}
-    [MeasurableSpace E] [MeasurableSpace F]
+    [MeasurableSpace E] [MeasurableSpace F] [MeasurableSpace (E × F)]
     [TopologicalSpace E] [AddCommGroup E] [Module ℝ E]
     [IsTopologicalAddGroup E] [ContinuousSMul ℝ E]
     [TopologicalSpace F] [AddCommGroup F] [Module ℝ F]
