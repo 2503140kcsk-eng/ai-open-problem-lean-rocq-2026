@@ -76,3 +76,8 @@ The latest Lean/Rocq code commits are 4ebc89d95a6deb59bf658c2e2c26bac897701f2a a
 ## Public partial-feedback omega-one status (2026-10-31)
 
 Lean now formally proves both the pointwise full-path miss containment and the finite-product probability-zero bridge for fixed visible-label sequences, plus a uniform zero one-step miss probability at every public history. The current checked proof boundary still excludes a single joint sequential-kernel/tower-property theorem for arbitrary history-dependent adversary policies and the literal minimax inf-sup. See `PublicSetting/README.md` and `PublicSetting/PROTOCOL_FORMALIZATION.md` for exact theorem names, CI runs, and limitations.
+
+
+## Final branch CI
+
+Final documentation head 001fa8b623e0326223658ac228f0f8f435460100 passed push run 41163413199 and PR run 41163416315. Lean and Rocq passed in both; all four job logs were scanned and were free of compiler errors, warnings, and unfinished-proof markers.
