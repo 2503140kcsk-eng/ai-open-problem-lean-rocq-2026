@@ -43,6 +43,7 @@ noncomputable def strategyPathKernel
     ProbabilityTheory.Kernel.deterministic initial hinitial
 
 /-- The complete path law is a Markov kernel. -/
+set_option linter.style.haveILetI false in
 theorem strategyPathKernel_isMarkov
     {E F : Type*} [MeasurableSpace E] [MeasurableSpace F]
     [MeasurableSpace (E × F)]
@@ -122,8 +123,7 @@ noncomputable def finiteMixedStrategySpace (A : Type*) [Fintype A] [Nonempty A] 
       Convexity.StdSimplex.single (Classical.choice (inferInstance : Nonempty A))
     exact ⟨p.weights, ⟨p, rfl⟩⟩
   convex := by
-    intro x hx
-    intro y hy a b ha hb hab
+    intro x hx y hy a b ha hb hab
     rcases hx with ⟨p, rfl⟩
     rcases hy with ⟨q, rfl⟩
     let r : Convexity.StdSimplex ℝ A :=
