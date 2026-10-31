@@ -12,7 +12,13 @@ The key declarations in Gaia are:
   equivalent to being a countable ordinal.
 
 The adapter at `Rocq/ConcreteOmegaOne.v` re-exports this characterization
-under the project name `PublicSettingConcreteOmegaOne.omegaOne`.
+under the project name `PublicSettingConcreteOmegaOne.omegaOne`. It also
+states two further properties for verification:
+
+- `omegaOne_countable_sup`: the supremum of a countable family of countable
+  ordinals remains a countable ordinal;
+- `omegaOne_not_countable`: the carrier `omegaOne` itself is not countable,
+  using Gaia's `Cantor_Omega` cardinality theorem.
 
 This is materially stronger than the project's previous generic
 `CountableIdeal`/ordered-type interface: it supplies an actual set in
