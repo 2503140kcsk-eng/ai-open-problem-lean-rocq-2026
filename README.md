@@ -14,7 +14,9 @@ That mathematical result is **not proved by this repository's source files**. Th
 
 - `Lean/VCLearning.lean`: Lean 4 core-only definitions for Boolean concepts and natural-number thresholds, plus proofs that every singleton can be shattered and no ordered pair (a<b) can be shattered.
 - `Rocq/VCLearning.v`: independent Rocq 9.2 proofs of the corresponding singleton/pair shattering facts. These files contain no `sorry`, `admit`, or `Admitted`.
-- `PublicSetting/Lean/` and `PublicSetting/Rocq/`: separate formalization of information order and globally consistent targets for public partial-feedback online learning. The exact randomized-versus-deterministic separation theorem remains open in the cited paper; the repository does **not** claim to have proved it.
+- `PublicSetting/Lean/OmegaOneSeparation.lean`: concrete Mathlib 4.35 development of the countable-cocountable probability space on ω₁, with a finite-horizon randomized zero-loss upper and a deterministic public-history lower bound of exactly T using one global target family.
+- `PublicSetting/Rocq/OmegaOneSeparation.v`: independent abstract Rocq 9.2 counterpart for omega-one-like ordered label structures; it does not instantiate concrete ω₁.
+- The literal inf-sup minimax operator is not separately defined in Lean, and the measurable space is not standard Borel; these boundaries are documented in PublicSetting/README.md.
 
 The threshold results are a checked pair/singleton shattering characterization, not a separately defined global `VCDim = 1` theorem or a proof of the information-complexity result.
 
@@ -58,4 +60,4 @@ GitHub Actions checks all four source modules. A green build means only that the
 
 ## Status
 
-The formalization is deliberately limited and explicit about its boundaries. No theorem asserting the eCMI (O(d)) result, and no theorem asserting the public randomized/deterministic separation, is currently proved in Lean or Rocq.
+The formalization is deliberately limited and explicit about its boundaries. The omega-one strategy-level finite-horizon separation is now machine-checked in Lean and its abstract counterpart in Rocq. The eCMI (O(d)) result is not proved in this repository.
