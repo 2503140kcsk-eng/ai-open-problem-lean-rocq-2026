@@ -80,7 +80,7 @@ theorem nonempty_inter_of_measure_gt_half
     (μ : Measure α) [IsProbabilityMeasure μ]
     (A B : Set α) (hA : (1 / 2 : ℝ≥0∞) < μ A)
     (hB : (1 / 2 : ℝ≥0∞) < μ B)
-    (hAm : MeasurableSet A) (hBm : MeasurableSet B) :
+    (hBm : MeasurableSet B) :
     (A ∩ B).Nonempty := by
   have hsum : (1 : ℝ≥0∞) < μ A + μ B := by
     calc
@@ -105,8 +105,7 @@ theorem nonempty_inter_of_measure_gt_half
     exact (not_lt_of_ge hUnion) hbad
   by_contra hne
   have hempty : A ∩ B = ∅ := Set.not_nonempty_iff_eq_empty.mp hne
-  have hfalse := hInterPos
-  simpa [hempty] using hfalse
+  simp [hempty] at hInterPos
 
 /-- Uniform-section core theorem: for a product-measurable transitive
 relation, if every incoming section has mass at least c₁ > 1/2, then
@@ -124,14 +123,13 @@ theorem exists_universal_core_point
   intro y
   let A : Set α := Prod.mk x₀ ⁻¹' R
   let B : Set α := (fun x : α => (x, y)) ⁻¹' R
-  have hAm : MeasurableSet A := hR.preimage measurable_prodMk_left
   have hBm : MeasurableSet B := hR.preimage measurable_prodMk_right
   have hA : (1 / 2 : ℝ≥0∞) < μ A := by
     simpa [A, outgoingMass] using hx₀
   have hB : (1 / 2 : ℝ≥0∞) < μ B := by
     simpa [B, incomingMass] using lt_of_lt_of_le hc₁ (hcol y)
   obtain ⟨z, hzA, hzB⟩ :=
-    nonempty_inter_of_measure_gt_half μ A B hA hB hAm hBm
+    nonempty_inter_of_measure_gt_half μ A B hA hB hBm
   exact htrans x₀ z y hzA hzB
 
 end PublicSetting.StandardBorelCore
