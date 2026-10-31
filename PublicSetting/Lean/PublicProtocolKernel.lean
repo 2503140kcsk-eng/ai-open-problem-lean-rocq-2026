@@ -213,7 +213,7 @@ noncomputable def publicProtocolPrefixKernel
         historyPrefix ⟨n, by simp⟩)
       (by fun_prop)
 
-theorem publicProtocolPrefixKernel_isMarkov
+instance publicProtocolPrefixKernel_isMarkov
     {X : Type u} {D : Type v} [MeasurableSpace D] {Y : Type w}
     [MeasurableSpace (History X D Y)]
     [MeasurableSpace Y]
@@ -282,6 +282,8 @@ theorem publicProtocol_trajectory_tower
     [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L))
     (hupdate : Measurable (updateHistory A L))
+    [hprefix : ∀ n, ProbabilityTheory.IsMarkovKernel
+      (publicProtocolPrefixKernel A L draw hpolicy hupdate n)]
     {a b : ℕ} (hab : a ≤ b)
     (historyPrefix : Π i : Finset.Iic a, History X D Y)
     (reward : (Π n : ℕ, History X D Y) → ℝ)
@@ -296,7 +298,7 @@ theorem publicProtocol_trajectory_tower
         ProbabilityTheory.Kernel.traj
           (publicProtocolPrefixKernel A L draw hpolicy hupdate) b
           (Preorder.frestrictLe b path) := by
-  exact trajectory_tower
+  exact PublicSetting.SequentialKernelMinimax.trajectory_tower
     (publicProtocolPrefixKernel A L draw hpolicy hupdate)
     hab historyPrefix reward hreward
 
@@ -339,6 +341,8 @@ theorem finitePathLoss_tower
     [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L))
     (hupdate : Measurable (updateHistory A L))
+    [hprefix : ∀ n, ProbabilityTheory.IsMarkovKernel
+      (publicProtocolPrefixKernel A L draw hpolicy hupdate n)]
     (T : ℕ) (loss : History X D Y → History X D Y → ℝ)
     (hloss : Measurable (fun p : History X D Y × History X D Y =>
       loss p.1 p.2))
