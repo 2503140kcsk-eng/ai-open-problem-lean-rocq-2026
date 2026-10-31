@@ -277,7 +277,7 @@ theorem adaptiveMiss_measure_zero
 /-- The full finite prediction path may determine every terminal threshold.
 If each selected upper tail still contains its pre-sampling witness, then any
 round with a mistake has its sampled coordinate below that fixed witness. -/
-def terminalPathMissSet (T : ℕ) (witnesses : Fin T → Label)
+def terminalPathMissSet (T : ℕ)
     (chooseThreshold : (Fin T → Label) → Fin T → Label) :
     Set (Fin T → Label) :=
   {path | ∃ t, ¬ chooseThreshold path t ≤ path t}
@@ -289,7 +289,7 @@ theorem terminalPathMiss_subset_badCoordinateCylinders
     (T : ℕ) (witnesses : Fin T → Label)
     (chooseThreshold : (Fin T → Label) → Fin T → Label)
     (hcontains : ∀ path t, chooseThreshold path t ≤ witnesses t) :
-    terminalPathMissSet T witnesses chooseThreshold ⊆
+    terminalPathMissSet T chooseThreshold ⊆
       ⋃ t : Fin T, {path | path t ∈ lowerSegment (witnesses t)} := by
   intro path hmiss
   rcases hmiss with ⟨t, hmiss⟩
