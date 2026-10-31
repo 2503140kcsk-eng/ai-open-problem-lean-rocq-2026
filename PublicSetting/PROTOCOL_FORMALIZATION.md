@@ -109,3 +109,8 @@ All four latest CI job logs (push and PR at source commit 4ebc89d95a6deb59bf658c
 For a fixed finite vector of visible witnesses, `terminalPathMiss_pi_measure_zero` additionally proves that even an arbitrary terminal threshold rule depending on the complete sampled path yields a miss event of product measure zero. Its proof uses Mathlib 4.35's `Measure.pi_eval_preimage_null` for each coordinate and `measure_iUnion_null_iff` for the finite union.
 
 Not encoded as one Lean theorem: a sequential transition-kernel model in which the adversary's visible witness at round t is a measurable function of the random prefix, the tower-property argument over that adaptive process, and the literal Appendix G minimax inf-sup operator. These remain clearly separated from the proved pointwise conditional lemma and the fixed-witness product theorem.
+
+
+## Documentation-head verification
+
+The final documentation-only branch head 001fa8b623e0326223658ac228f0f8f435460100 passed both Lean/Rocq workflows: push 41163413199 and pull request 41163416315. All four job logs were scanned; zero compiler errors, warning/deprecation/hint diagnostics, or unfinished-proof markers were found.
