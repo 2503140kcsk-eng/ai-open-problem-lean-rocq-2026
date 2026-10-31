@@ -134,8 +134,8 @@ Section CountableCocountableMeasure.
     intros a. unfold CountableSum01.
     destruct (excluded_middle_informative (exists n, a n = 1)) as [h | h].
     - split.
-      + intro _. exact h.
-      + intro _. reflexivity.
+      + intros hEq. exact h.
+      + intros hExists. reflexivity.
     - split.
       + intro hEq. discriminate.
       + intro hExists. contradiction.
