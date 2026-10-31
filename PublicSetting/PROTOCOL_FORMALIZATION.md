@@ -31,7 +31,7 @@ The bounded-support result is now stated as an explicit pathwise loss gap in bot
 
 ## The unresolved theorem
 
-The final paragraph of Section 3.2 asks whether the finite-Helly or nested-inclusion criterion is necessary whether, in the public setting, there exists a set-realizable hypothesis class with sublinear randomized minimax regret while every deterministic learner has linear minimax regret. Section 3.3 instead proves a distinct comparison between oblivious and public adversaries. The paper's Theorem 18 is a different separation: randomized learnability in the oblivious setting versus unlearnability in the public setting. These must not be conflated.
+The final paragraph of Section 3.3 asks whether randomized and deterministic learners can have distinct learnability in the public partial-feedback setting; this is the target of this formalization. A separate question at the end of Section 3.2 asks whether the finite-Helly or nested-inclusion criterion is necessary for inseparability. Section 3.3 also proves a distinct comparison between oblivious and public adversaries. The paper's Theorem 18 is that oblivious-versus-public separation, not the target question. These must not be conflated.
 
 A fresh search on 29 October 2026 did not find a later work resolving this exact question. This bounded search is not a proof that no resolution exists.
 
