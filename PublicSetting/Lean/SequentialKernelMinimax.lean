@@ -43,18 +43,16 @@ noncomputable def strategyPathKernel
     ProbabilityTheory.Kernel.deterministic initial hinitial
 
 /-- The complete path law is a Markov kernel. -/
-set_option linter.style.haveILetI false in
 theorem strategyPathKernel_isMarkov
     {E F : Type*} [MeasurableSpace E] [MeasurableSpace F]
     [MeasurableSpace (E × F)]
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
     (κ : (n : ℕ) → ProbabilityTheory.Kernel
       (Π i : Finset.Iic n, States i) (States (n + 1)))
-    (hκ : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n))
+    [hκ : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n)]
     (initial : E × F → Π i : Finset.Iic 0, States i)
     (hinitial : Measurable initial) :
     ProbabilityTheory.IsMarkovKernel (strategyPathKernel κ hκ initial hinitial) := by
-  letI : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n) := hκ
   dsimp [strategyPathKernel]
   infer_instance
 
