@@ -1,3 +1,5 @@
+module
+
 import Mathlib.MeasureTheory.Measure.Prod
 
 /-!
@@ -15,6 +17,7 @@ probability measure supplies the measurability hypothesis used here.
 -/
 
 open MeasureTheory
+open scoped ENNReal
 
 namespace PublicSetting.StandardBorelCore
 
