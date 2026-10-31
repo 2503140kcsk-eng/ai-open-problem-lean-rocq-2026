@@ -10,7 +10,7 @@ The horizon quantifier matters. A result for one finite T does not establish asy
 
 ## Literature audit
 
-Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 3.3 explicitly leaves open whether randomized and deterministic learnability can separate under the public setting. Section 3.3 also studies the separate distinction between oblivious and public adversaries. The same paper proves a different result, Theorem 18: randomized learnability under the oblivious setting can fail to persist under the public setting. The two statements must not be conflated.
+Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion condition is necessary for inseparability. Section 3.3 also studies the separate distinction between oblivious and public adversaries. The same paper proves a different result, Theorem 18: randomized learnability under the oblivious setting can fail to persist under the public setting. The two statements must not be conflated.
 
 - Paper: https://arxiv.org/abs/2601.21462
 - HTML source: https://arxiv.org/html/2601.21462v3
@@ -197,7 +197,7 @@ One could parameterize a narrower family such as computable or suitably coded me
 - This cardinality argument is **not** a no-go theorem for every possible hypothesis class: a successful class might diagonalize along paths without literally indexing policies in the context.
 - No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
 
-Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3, The final paragraph of Section 3.3 explicitly leaves the public-setting randomized-versus-deterministic learnability separation open. Theorem 18 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
+Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3. The final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion criterion is necessary for deterministic/randomized inseparability. Theorem 18 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
 
 
 ## Formalized quantifier boundary: what can and cannot be ruled out
@@ -219,7 +219,7 @@ is invalid in general. The first theorem rules out only the stronger interpretat
 
 Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
 
-As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 3.3 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact question. This is evidence about the state of the literature, not a proof of impossibility.
+As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 3.3 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact necessity question. This is evidence about the state of the literature, not a proof of impossibility.
 
 
 ## 2026-10-31: omega-one countable/cocountable candidate
@@ -268,4 +268,11 @@ This candidate uses the paper's very general formulation in which the label spac
 
 ### Next formal verification boundary
 
-The current files formalize the central one-round measure lemma and the pathwise deterministic construction. A remaining improvement is a single theorem packaging the public sequential game, conditional expected losses over adaptive target selection, and minimax-regret quantifier order exactly as in the public minimax expression (12) in Appendix G / the public-setting formulation in the paper. This wrapper must not weaken the fixed-global-target constraint or move the visible witness after the current sample.
+The Lean file contains a finite-horizon strategy-level theorem quantifying over all upper-tail sequences and all deterministic public-history learners. The literal inf-sup minimax operator from Appendix G is not separately declared in Lean. The remaining formal-strengthening option is to encode that operator explicitly without weakening the fixed-global-target condition or moving the visible witness after the current sample.
+
+
+## 2026-10-31 verification update
+
+The latest source commit with the exact public-history learner interface is 1168ded2065bc238a1f6978b5b48addfece2dee3. GitHub Actions run 41157208222 passed both Lean 4.35 and Rocq 9.2. Both logs were inspected; Lean contains no warning diagnostics (the string Cache.Warning:c.o is a build-artifact name, not a compiler warning) and Rocq is clean. The Lean theorem omegaOne_finite_horizon_separation formalizes the strategy-level finite-horizon bounds; Rocq remains an abstract ordered-type counterpart rather than a concrete omega_1 instantiation.
+
+The public-history type is List (Nat × Label × Label), storing (context, visible label, realized prediction). This allows deterministic strategies to depend on the previous sampled predictions visible in the public protocol. The randomized policy is the constant countable-cocountable probability measure; the error-event argument is pointwise contained in a null initial segment, including terminal upper-tail choices compatible with the visible witness.
