@@ -1,5 +1,5 @@
 import PublicProtocol
-import SequentialKernelMinimax
+import Mathlib.Probability.Kernel.IonescuTulcea.Traj
 
 /-!
 # Measurable stochastic semantics for the public protocol
@@ -26,12 +26,10 @@ not imply that an unrestricted full-path error event is measurable.
 open MeasureTheory
 open scoped ProbabilityTheory
 
-set_option maxHeartbeats 400000
 
 namespace PublicSetting.ProtocolKernel
 
 open PublicSetting.Protocol
-open PublicSetting.SequentialKernelMinimax
 
 universe u v w
 
@@ -300,9 +298,7 @@ theorem publicProtocol_trajectory_tower
         ProbabilityTheory.Kernel.traj
           (publicProtocolPrefixKernel A L draw hpolicy hupdate) b
           (Preorder.frestrictLe b path) := by
-  exact PublicSetting.SequentialKernelMinimax.trajectory_tower
-    (publicProtocolPrefixKernel A L draw hpolicy hupdate)
-    hab historyPrefix reward hreward
+  exact ProbabilityTheory.Kernel.condExp_traj hab hreward
 
 /-- A measurable one-round loss on a pair of consecutive public histories.
 For a concrete partial-feedback game this is the indicator that the newly
