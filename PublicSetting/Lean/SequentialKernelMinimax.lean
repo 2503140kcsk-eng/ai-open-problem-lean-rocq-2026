@@ -135,7 +135,8 @@ noncomputable def finiteMixedStrategySpace (A : Type*) [Fintype A] [Nonempty A] 
     simp [r, Convexity.StdSimplex.weights_convexCombPair]
   compact := by
     change IsCompact
-      ((fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ)) '' Set.univ)
+      (Set.range (fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ)))
+    rw [← Set.image_univ]
     exact isCompact_univ.image
       (Convexity.StdSimplex.isEmbedding_toFun_comp_weights ℝ A).continuous
 
