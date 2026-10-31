@@ -61,3 +61,8 @@ GitHub Actions checks all four source modules. A green build means only that the
 ## Status
 
 The formalization is deliberately limited and explicit about its boundaries. The omega-one strategy-level finite-horizon separation is now machine-checked in Lean and its abstract counterpart in Rocq. The eCMI (O(d)) result is not proved in this repository.
+
+
+## Public partial-feedback omega-one construction
+
+The target open question is the final paragraph of Section 3.3 of arXiv:2601.21462v3. Section 3.2 contains a different finite-Helly/nested-inclusion necessity question. The Lean module concretely formalizes the countable-cocountable probability space on omega_1, zero-mass miss sets, path-dependent terminal-threshold error containment, and deterministic global-target lower bound. Rocq proves an abstract order/ideal counterpart. The full finite-product probability and literal minimax inf-sup are not yet formalized; details and CI status are in PublicSetting/README.md.
