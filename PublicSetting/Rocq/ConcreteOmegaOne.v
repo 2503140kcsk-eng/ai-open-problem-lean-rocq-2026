@@ -22,9 +22,9 @@ Module PublicSettingConcreteOmegaOne.
   Qed.
 
 
-  /-- The supremum of a countable family of countable ordinals is again
-      a countable ordinal. This is the regularity property needed to show
-      that countable subsets of omegaOne are bounded below omegaOne. -/
+  (* The supremum of a countable family of countable ordinals is again
+     a countable ordinal. This is the regularity property needed to show
+     that countable subsets of omegaOne are bounded below omegaOne. *)
   Theorem omegaOne_countable_sup (E : Set) :
       countable_set E ->
       (forall a, inc a E -> isCountableOrdinal a) ->
