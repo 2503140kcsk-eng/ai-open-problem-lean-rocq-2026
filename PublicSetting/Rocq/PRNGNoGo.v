@@ -55,7 +55,7 @@ Section CountableSupportObstruction.
     - intros y [seed hy].
       destruct (covers seed) as [n hn].
       exists n.
-      rewrite <- hn.
+      rewrite hn.
       exact hy.
     - apply nat_range_small.
   Qed.
