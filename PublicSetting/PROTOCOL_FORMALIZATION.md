@@ -71,18 +71,34 @@ Theorem 15's structural criterion does not cover this family: every countable se
 
 ### Verification caveat
 
-The Lean file PublicSetting/Lean/OmegaOneSeparation.lean is the concrete omega_1 development. The Rocq file PublicSetting/Rocq/OmegaOneSeparation.v is an independent generic theorem over an ordered type and a countable ideal with the omega-one properties; it does not construct the concrete ordinal type omega_1 in Rocq Stdlib. Both Lean and Rocq jobs passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3 (run 41157208222). The later public-history refinement is being checked separately. Rocq remains an abstract ordered-type development, not a concrete omega_1 instantiation.
+Lean's PublicSetting/Lean/OmegaOneSeparation.lean remains the concrete
+countable-cocountable measure development. Rocq now additionally contains
+PublicSetting/Rocq/ConcreteOmegaOne.v, which imports Gaia 2.4 and defines
+omegaOne as Ordinals1.aleph_one (= cnext omega0). It states/proves the
+aleph_oneP countable-ordinal characterization, countable-supremum closure,
+and non-countability of the carrier. The generic Rocq countable-ideal/game
+theorems in OmegaOneSeparation.v have not yet been instantiated over that
+concrete Gaia carrier; do not conflate the ordinal adapter with a completed
+Rocq game-measure port.
 
 The random upper-bound uses the paper's broad measurable-space model (arbitrary sigma algebra and probability measures). It is not a standard-Borel or usual-PRNG construction. Thus, if the intended setting imposes a standard Borel label space or ordinary algorithmically samplable randomness, the question is not settled by this candidate.
 
-The proof also still needs a single top-level public-game theorem that packages the conditional one-round zero-error lemma and the pathwise deterministic lower bound into the exact minimax regret semantics of the paper. This remains a required verification step.
-
+The formal development now also contains a finite-horizon Appendix G
+public/oblivious value theorem, described below. What remains is to connect
+all concrete public-protocol objects and strategy regularity hypotheses to
+the generic value and Sion interfaces, rather than treating the existence
+of those interfaces as a completed minimax proof for the original research
+question.
 
 ## 2026-10-31 omega-one formalization status
 
 Lean 4.35 / Mathlib 4.35 now concretely proves the countable-cocountable probability measure on omega_1, zero measure of upper-tail complements and adaptive miss sets, countable upper-tail intersections, exact global realizability, zero comparator loss, randomized zero expected finite-horizon loss, and the deterministic public-history loss T witness. The deterministic public-history input records (context, visible label, previous realized prediction). Rocq 9.2 independently checks the corresponding countable-ideal and ordered-tail lemmas under abstract omega-one-like hypotheses; it does not construct concrete omega_1.
 
-Both Lean and Rocq CI passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3 (run 41157208222). The explicit Appendix G inf-sup minimax operator is not itself encoded as a Lean definition. The probability space is not claimed to be standard Borel or ordinary-PRNG samplable.
+The Lean source now additionally includes the finite-horizon public/oblivious
+value recursion in AppendixGBackwardInduction.lean. The probability space
+is not claimed to be standard Borel or ordinary-PRNG samplable. Rocq now has
+a concrete Gaia ordinal adapter, but its generic measure/game theory remains
+abstract over its own countable-ideal carrier.
 
 
 ## Public-history strategy input
@@ -94,7 +110,22 @@ The Lean strategy interface now records a list of public round triples (context,
 
 The exact target is the final paragraph of Section 3.3 in Shao–Fang–Lin–Tao, arXiv:2601.21462v3: whether randomized and deterministic learners can have distinct learnability in the public partial-feedback setting. The separate end-of-Section-3.2 question about necessity of finite Helly number / nested inclusion must not be substituted for it.
 
-Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation is now formalized by `terminalPathMiss_pi_measure_zero`: coordinate-preimage nullity plus `measure_iUnion_null_iff` proves the complete-path miss event has product outer-measure zero for a fixed visible-witness sequence. `constantRandomizedLearner_zero_at_every_public_history` proves zero conditional one-step miss probability uniformly over all public histories and current witnesses. The single sequential-kernel/tower-property theorem for arbitrary history-dependent visible-witness policies and the literal Appendix G inf-sup operator are not separately encoded.
+Lean's omega-one file includes full sampled-path miss-event containment for
+a fixed finite sequence of pre-draw visible witnesses, arbitrary path-dependent
+terminal thresholds, and the product-probability-zero theorem
+terminalPathMiss_pi_measure_zero. The one-step theorem
+constantRandomizedLearner_zero_at_every_public_history is uniform over all
+public histories and current witnesses.
+
+The generic sequential-process framework has since been added in
+Lean/SequentialKernelMinimax.lean: each strategy pair selects its own
+full-history-dependent kernel sequence, a single Ionescu–Tulcea path law is
+built for that pair, and strategyDependent_trajectory_tower applies
+Mathlib's conditional-expectation tower theorem under integrability. This
+covers arbitrary behavioral kernel sequences when supplied and when the
+path reward is measurable/integrable. It is not yet the concrete
+instantiation of the omega-one public adversary and its non-product-measurable
+pathwise loss.
 
 
 ## Final validation (2026-10-31)
@@ -108,7 +139,14 @@ All four latest CI job logs (push and PR at source commit 4ebc89d95a6deb59bf658c
 
 For a fixed finite vector of visible witnesses, `terminalPathMiss_pi_measure_zero` additionally proves that even an arbitrary terminal threshold rule depending on the complete sampled path yields a miss event of product measure zero. Its proof uses Mathlib 4.35's `Measure.pi_eval_preimage_null` for each coordinate and `measure_iUnion_null_iff` for the finite union.
 
-Not encoded as one Lean theorem: a sequential transition-kernel model in which the adversary's visible witness at round t is a measurable function of the random prefix, the tower-property argument over that adaptive process, and the literal Appendix G minimax inf-sup operator. These remain clearly separated from the proved pointwise conditional lemma and the fixed-witness product theorem.
+The sequential-kernel and tower theorem is now encoded generically, and the
+literal finite-horizon Appendix G recursion/value identity is now encoded in
+AppendixGBackwardInduction.lean. The remaining gap is the concrete public-game
+instantiation: prove the actual adversary strategy correspondence and its
+measurable kernel hypotheses, address the known failure of product
+measurability for unrestricted omega-one adaptive pathwise loss, and supply
+the compactness/convexity/continuity assumptions required by the Sion
+interface.
 
 
 ## Documentation-head verification
@@ -119,3 +157,28 @@ The final documentation-only branch head 001fa8b623e0326223658ac228f0f8f43546010
 ## Latest documentation CI
 
 The docs-only head `f54efc8ec90333eb10eb03552d71532300ac910c` passed push run 41163749385 and PR run 41163752038. Lean and Rocq passed in both; all four job logs had zero compiler diagnostics, warnings, deprecations, hints, or unfinished-proof markers.
+
+
+## Appendix G public/oblivious minimax recursion (added 2026-10-31)
+
+AppendixGBackwardInduction.lean formalizes the finite-horizon recursion behind
+equations (24)–(26). A PairHistory is a finite list of (context,
+acceptable-set) pairs. pairHistoryGloballyRealizable requires a single f in
+the hypothesis class to satisfy all pairs simultaneously.
+pairHistoryGloballyRealizable_extend_iff proves the exact one-step extension
+criterion.
+
+The publicValue recursion stores the sampled-label list and integrates the
+current indicator loss plus the continuation value. The obliviousValue
+recursion uses the pair-history state only and the corresponding
+probability-of-miss term. Backward induction proves publicValue_eq_obliviousValue.
+The file further exports appendixG_pairHistory_value_identity,
+appendixG_public_eq_oblivious_minimax (empty-history initial values, Eqs.
+(24)–(25)), and appendixG_equation_26 (past loss plus continuation).
+
+The theorem's information restriction is explicit: the next pair-history
+state depends on the chosen context and acceptable set, but not on the
+just-drawn current label. This is the Appendix G / Theorem 18 information
+structure. It does not by itself settle arbitrary hidden-witness policies
+whose next acceptable set depends on the fresh sample.
+
