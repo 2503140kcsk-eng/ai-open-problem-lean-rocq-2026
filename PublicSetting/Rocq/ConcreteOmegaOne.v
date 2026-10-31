@@ -56,6 +56,7 @@ Module PublicSettingConcreteOmegaOne.
     {
       rewrite /omegaOne - Ordinals4.Cantor_omega_pr3.
       rewrite /aleph0 - Ordinals4.aleph0E.
+      rewrite /Ordinals4.aleph1 - Bordinal.osucc_zero.
       exact (Ordinals4.aleph_lt_ltc (oltS OS0)).
     }
     assert (hImpossible : omegaOne <=c aleph0).
