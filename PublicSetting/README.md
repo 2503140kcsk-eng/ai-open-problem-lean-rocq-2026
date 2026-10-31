@@ -15,7 +15,7 @@ Here o(T) means sublinear regret: regret divided by T tends to zero. Ω(T) means
 
 ## Literature status
 
-The latest version found for this audit is Shao, Fang, Lin, and Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3 (posted 2026-04-02). The final paragraph of Section 5.2 explicitly leaves open whether randomized and deterministic learnability can separate in the public setting. Theorem 18 in Section 5.3 establishes equality between oblivious and public settings for set-valued feedback. Theorem 19 establishes a different result: randomized learnability in the oblivious partial-feedback setting need not imply learnability in the public partial-feedback setting. Neither result answers the open randomized-versus-deterministic question within the public setting.
+The latest version found for this audit is Shao, Fang, Lin, and Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3 (posted 2026-04-02). The final paragraph of Section 3.3 explicitly leaves open whether randomized and deterministic learnability can separate in the public setting. Theorem 17 in Section 3.3 establishes equality between oblivious and public settings for set-valued feedback. Theorem 18 establishes a different result: randomized learnability in the oblivious partial-feedback setting need not imply learnability in the public partial-feedback setting. Neither result answers the open randomized-versus-deterministic question within the public setting.
 
 Source: https://arxiv.org/html/2601.21462v3
 
@@ -75,7 +75,7 @@ Randomized side: use this probability measure as the learner's distribution on e
 
 Deterministic side: for any deterministic prediction path p_t, choose the visible witness and tail threshold to be the successor p_t+1. One global target family F* consists of all functions f with f(t) >= p_t+1 at every coordinate. This family is nonempty and induces exactly the required upper tail at each context. It contains every visible witness while excluding the deterministic prediction, so the path incurs exactly T mistakes.
 
-Theorem 16 in the paper does not rule out this family: every countable sequence of countable ordinals is bounded below omega_1, so countably many upper tails have nonempty intersection; the intersection of all upper tails is empty.
+Theorem 15 (and its set-valued analogue, Corollary 16) does not cover this family. The full family of upper tails has empty intersection, but every countable subfamily has nonempty intersection by countable boundedness of omega_1, and every finite subfamily has nonempty intersection. Thus neither Theorem 15 condition (1), a countable decreasing sequence with empty intersection, nor condition (2), a finite subfamily with empty intersection, is satisfied.
 
 Model boundary: this uses the paper's abstract model allowing arbitrary probability measures on a measurable label space. The countable-cocountable space is not claimed to be standard Borel, countably generated, or implementable by an ordinary real-valued PRNG. A stronger standard-Borel or implementable-sampling restriction requires a separate analysis.
 
