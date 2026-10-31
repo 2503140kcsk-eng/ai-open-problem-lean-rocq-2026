@@ -11,7 +11,10 @@ Import ListNotations.
   countable sequence of labels is bounded. The concrete ordinal instance is
   constructed in the Lean/Mathlib development.
 
-  No axiom, Parameter, Admitted, or admit is used here.
+  No project-local Axiom, Parameter, Admitted, or admit is introduced.
+  This is nevertheless a classical development: Classical_Prop and
+  ClassicalDescription are imported, and Print Assumptions is emitted for
+  the principal measure and stagewise-risk results at the end of the file.
 *)
 
 Section CountableCocountableMeasure.
@@ -589,3 +592,9 @@ Section OmegaOneGame.
   Qed.
 
 End OmegaOneGame.
+
+
+Print Assumptions countable_additivity_zero_one.
+Print Assumptions miss_set_mass_zero.
+Print Assumptions sequential_conditional_risk_zero.
+Print Assumptions total_loss_exact.
