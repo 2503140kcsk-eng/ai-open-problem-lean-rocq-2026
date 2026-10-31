@@ -303,3 +303,8 @@ Code: Lean 4.35 commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a; Rocq 9.2 commit
 - Lean 4.35 commit `e9e731725fa84cf9e78306013d49e7ebce072538` added `constantRandomizedLearner_zero_at_every_public_history`.
 - Both push and PR workflows passed for both commits: 41162686492, 41162690428, 41162960823, 41162965658. All eight job logs were scanned; zero compiler errors, warning/deprecation/hint diagnostics, or sorry/admit/Admitted/Axiom/Parameter markers were found.
 - The finite-product result assumes a fixed sequence of visible witnesses, while the one-step theorem is uniform over all possible public histories and witnesses. A complete sequential-kernel/tower-property formalization for arbitrary history-dependent adversary policies and the exact minimax inf-sup remains outside the current checked core.
+
+
+## Documentation-head CI (2026-10-31)
+
+The final documentation-only branch head `001fa8b623e0326223658ac228f0f8f435460100` passed push run 41163413199 and PR run 41163416315. Lean and Rocq succeeded in both workflows; all four job logs were scanned and had zero compiler diagnostics or unfinished-proof markers.
