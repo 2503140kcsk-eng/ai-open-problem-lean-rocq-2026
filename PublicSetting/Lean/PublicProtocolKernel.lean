@@ -26,6 +26,8 @@ not imply that an unrestricted full-path error event is measurable.
 open MeasureTheory
 open scoped ProbabilityTheory
 
+set_option maxHeartbeats 400000
+
 namespace PublicSetting.ProtocolKernel
 
 open PublicSetting.Protocol
