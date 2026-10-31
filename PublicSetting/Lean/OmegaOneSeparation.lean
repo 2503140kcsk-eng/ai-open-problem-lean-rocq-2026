@@ -420,5 +420,36 @@ theorem constantRandomizedLearner_zero_expected_loss
   simp [randomizedExpectedTotalLoss, constantRandomizedLearner,
     upperTail_complement_measure_zero]
 
+/-- Combined finite-horizon separation statement in the paper's set-realizable
+measurable-space model. Every randomized round uses the same valid probability
+measure and has zero expected loss for every upper-tail sequence. Conversely,
+each deterministic public strategy admits one fixed global target family that
+realizes all tails and forces exactly T mistakes while the comparator has zero
+loss. -/
+theorem omegaOne_finite_horizon_separation (T : ℕ) :
+    (∀ thresholds : ℕ → Label,
+      ∃ f : ℕ → Label,
+        GlobalTailFamily thresholds f ∧
+        (∀ t y, AcceptedAt thresholds t y ↔ thresholds t ≤ y) ∧
+        comparatorTotalLoss thresholds f T = 0 ∧
+        randomizedExpectedTotalLoss thresholds T = 0) ∧
+    (∀ learner : DeterministicLearner,
+      ∃ f : ℕ → Label,
+        GlobalTailFamily (deterministicThresholds (deterministicPredictionPath learner)) f ∧
+        (∀ t y,
+          AcceptedAt (deterministicThresholds (deterministicPredictionPath learner)) t y
+            ↔ deterministicThresholds (deterministicPredictionPath learner) t ≤ y) ∧
+        comparatorTotalLoss (deterministicThresholds (deterministicPredictionPath learner)) f T = 0 ∧
+        deterministicTotalLoss (deterministicPredictionPath learner) T = T) := by
+  constructor
+  · intro thresholds
+    obtain ⟨f, hf⟩ := globalTailFamily_nonempty thresholds
+    refine ⟨f, hf, ?_, comparatorTotalLoss_zero thresholds f hf T,
+      constantRandomizedLearner_zero_expected_loss thresholds T⟩
+    intro t y
+    exact acceptedAt_iff_upperTail thresholds t y
+  · intro learner
+    exact deterministicLearner_global_separation_witness learner T
+
 
 end PublicSetting.OmegaOne
