@@ -505,7 +505,7 @@ Section OmegaOneGame.
   Proof.
     intros prediction T. induction T as [|T IH].
     - reflexivity.
-    - simpl. rewrite IH, round_loss_one. reflexivity.
+    - simpl. rewrite IH, round_loss_one. lia.
   Qed.
 
 End OmegaOneGame.
