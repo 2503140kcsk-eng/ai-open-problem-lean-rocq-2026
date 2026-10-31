@@ -50,8 +50,8 @@ Section CountableCocountableMeasure.
   Proof.
     intros A [hA | hAc].
     - right.
-      exact (@small_mono I A (fun x => ~ ~ A x)
-        (fun x hAx hnot => hnot hAx) hA).
+      exact (@small_mono I (fun x => ~ ~ A x) A
+        (fun x hnnA => NNPP (A x) hnnA) hA).
     - left. exact hAc.
   Qed.
 
