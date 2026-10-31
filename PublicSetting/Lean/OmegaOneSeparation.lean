@@ -36,7 +36,7 @@ abbrev Label := Set.Iio (Ordinal.omega 1)
 
 theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
   intro h
-  letI : Countable Label := Set.countable_univ_iff.mp h
+  haveI : Countable Label := Set.countable_univ_iff.mp h
   let b : Ordinal := ⨆ a : Label, (a : Ordinal)
   have hb : b < Ordinal.omega 1 := by
     exact Ordinal.iSup_lt_omega_one (fun a => a.2)
@@ -49,7 +49,7 @@ theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
     exact le_ciSup hbdd a
   let w : Label := ⟨Order.succ b, (Cardinal.isSuccLimit_omega 1).succ_lt hb⟩
   have hw : b < (w : Ordinal) := by
-    simpa [w] using (lt_succ b)
+    simp [w]
   exact (not_lt_of_ge (hbound w)) hw
 
 /-- Every strict initial segment below a label is countable. -/
@@ -102,7 +102,6 @@ def countableCocountableMeasurableSpace : MeasurableSpace Label where
       apply hcomp.mono
       intro x hx
       change x ∈ (⋃ n, f n)ᶜ at hx
-      change x ∈ (f i)ᶜ
       exact fun hxi => hx (Set.mem_iUnion.mpr ⟨i, hxi⟩)
     · left
       apply Set.countable_iUnion
@@ -141,7 +140,11 @@ theorem countableCocountableMass_iUnion
       have hwhole : (Set.univ : Set Label).Countable := by
         have hu : ((⋃ n, f n) ∪ (⋃ n, f n)ᶜ).Countable :=
           hcnt.union hcompUnion
-        exact hu.mono (by intro x hx; simp)
+        apply hu.mono
+        intro x _
+        by_cases hx : x ∈ ⋃ n, f n
+        · exact Or.inl hx
+        · exact Or.inr hx
       exact label_univ_not_countable hwhole
     have hothers : ∀ j, j ≠ i → (f j).Countable := by
       intro j hji
@@ -154,7 +157,7 @@ theorem countableCocountableMass_iUnion
       · simp [countableCocountableMass, hi]
       · intro j hji
         simp [countableCocountableMass, hothers j hji]
-    simp [countableCocountableMass, hnotUnion, hsum]
+    simpa [countableCocountableMass, hnotUnion] using hsum.symm
   · have hall : ∀ i, (f i).Countable := by
       intro i
       by_contra hi
@@ -216,7 +219,7 @@ theorem upperTail_measure_one (threshold : Label) :
 theorem allUpperTails_intersection_empty (y : Label) :
     ∃ threshold : Label, ¬ upperTail threshold y := by
   refine ⟨⟨Order.succ y.1, (Cardinal.isSuccLimit_omega 1).succ_lt y.2⟩, ?_⟩
-  exact not_le_of_gt (lt_succ y.1)
+  exact not_le_of_gt (ordinal_lt_succ y.1)
 
 /-- The set of predictions rejected by a tail whose threshold may depend
 on the current sampled label. -/
