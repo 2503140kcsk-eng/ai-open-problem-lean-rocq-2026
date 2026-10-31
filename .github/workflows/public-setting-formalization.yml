@@ -63,7 +63,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/rocq-opam-root
-          key: rocq-opam-${{ runner.os }}-9.2.0-gaia-2.4-v1
+          key: rocq-opam-${{ runner.os }}-9.2.0-gaia-2.4-elpi-3.7.1-v2
       - name: Show pinned Rocq version and compile with Gaia 2.4
         shell: bash
         run: |
@@ -76,4 +76,41 @@ jobs:
             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
             -v "$GITHUB_WORKSPACE/Rocq:/input-root:ro" \
             rocq/rocq-prover:9.2.0 \
-            sh -lc 'set -eu; mkdir -p /opam-cache/opam-root; if [ ! -f /opam-cache/opam-root/config ]; then cp -a /home/rocq/.opam/. /opam-cache/opam-root/; fi; export OPAMROOT=/opam-cache/opam-root; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; opam --version; opam update; if ! OPAMERRLOGLEN=100000 opam install --verbose --yes elpi.3.7.1 coq-gaia-ordinals.2.4; then echo "=== Detailed Gaia dependency build logs ==="; for file in "$OPAMROOT"/log/rocq-elpi-*.out "$OPAMROOT"/log/rocq-elpi-*.env; do if [ -f "$file" ]; then echo "--- $file"; cat "$file"; fi; done; exit 1; fi; opam list --installed --short; eval "$(opam env)"; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v; rocq compile -Q . PublicSetting PublicProtocol.v; rocq compile -Q . PublicSetting ProbabilisticBounds.v; rocq compile -Q . PublicSetting AdaptiveMoments.v; rocq compile -Q . PublicSetting OmegaOneSeparation.v; rocq compile -Q . PublicSetting PRNGNoGo.v; rocq compile -Q . PublicSetting ConcreteOmegaOne.v; cp /input-root/VCLearning.v /tmp/rocq-root-check/; cd /tmp/rocq-root-check; rocq compile VCLearning.v'
+            sh -lc 'set -eu
+              mkdir -p /opam-cache/opam-root
+              if [ ! -f /opam-cache/opam-root/config ]; then
+                cp -a /home/rocq/.opam/. /opam-cache/opam-root/
+              fi
+              # Keep the canonical OPAM path identical to the official image.
+              # Packages and generated wrappers may embed /home/rocq/.opam paths.
+              rm -rf /home/rocq/.opam
+              ln -s /opam-cache/opam-root /home/rocq/.opam
+              export OPAMROOT=/home/rocq/.opam
+              opam --version
+              opam update
+              if ! OPAMERRLOGLEN=100000 opam install --verbose --yes elpi.3.7.1 coq-gaia-ordinals.2.4; then
+                echo "=== Detailed Gaia dependency build logs ==="
+                for file in "$OPAMROOT"/log/rocq-elpi-*.out "$OPAMROOT"/log/rocq-elpi-*.env; do
+                  if [ -f "$file" ]; then echo "--- $file"; cat "$file"; fi
+                done
+                exit 1
+              fi
+              eval "$(opam env --switch=4.14.2+flambda --set-switch)"
+              echo "=== Resolved OCaml findlib paths ==="
+              ocamlfind printconf path
+              ocamlfind query elpi
+              opam list --installed --short
+              mkdir -p /tmp/rocq-check /tmp/rocq-root-check
+              cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/
+              cd /tmp/rocq-check
+              rocq --version
+              rocq compile -Q . PublicSetting PublicSetting.v
+              rocq compile -Q . PublicSetting PublicProtocol.v
+              rocq compile -Q . PublicSetting ProbabilisticBounds.v
+              rocq compile -Q . PublicSetting AdaptiveMoments.v
+              rocq compile -Q . PublicSetting OmegaOneSeparation.v
+              rocq compile -Q . PublicSetting PRNGNoGo.v
+              rocq compile -Q . PublicSetting ConcreteOmegaOne.v
+              cp /input-root/VCLearning.v /tmp/rocq-root-check/
+              cd /tmp/rocq-root-check
+              rocq compile VCLearning.v'
