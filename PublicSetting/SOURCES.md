@@ -46,3 +46,9 @@ The literature search was performed through academic and web-search connectors. 
 
 11. Exact locations of the two different open questions were rechecked in the complete v3 paper text: the target public-setting randomization-versus-determinism question ends Section 3.3; the finite-Helly / nested-inclusion necessity question ends Section 3.2.
    - https://arxiv.org/html/2601.21462v3
+
+
+12. GitHub Actions validation for the omega-one full-path containment addition:
+   - Lean source commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160197913; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160201246.
+   - Rocq source commit b5940c796e71800125625cbe61f5502f98902da9: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41159597912; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41159600483.
+   - Final PR documentation head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e: push run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160340096; PR run https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41160343911.
