@@ -69,3 +69,4 @@ End PublicSettingConcreteOmegaOne.
 
 Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_iff_countable_ordinal.
 Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_countable_sup.
+Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_not_countable.
