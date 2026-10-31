@@ -73,3 +73,47 @@ formalization task.
 
 The GitHub workflow compiles this file with the repository's pinned
 Rocq 9.2.0 container, after compiling `OmegaOneSeparation.v`.
+
+## Boundary: an ideal real-valued source is a different question
+
+The countable-range theorem above must not be overextended to arbitrary
+uncountable source spaces. For a Lebesgue-uniform source
+`([0,1], Leb)`, existence of a measurable map
+`f : [0,1] -> omega_1` whose pushforward is exactly the countable-cocountable
+0/1 measure is equivalent to
+
+[
+  \operatorname{cov}(\mathcal N) \leq \aleph_1,
+]
+
+where `cov(N)` is the least cardinality of a family of Lebesgue-null sets
+covering the real line.
+
+**Forward direction.** If `f_* Leb = mu`, then each fiber
+`f^{-1}({alpha})` has Lebesgue measure zero, because every singleton in
+`omega_1` is countable and hence has target measure zero. These at most
+`aleph_1` fibers cover `[0,1]`, so `cov(N) <= aleph_1`.
+
+**Reverse direction.** Suppose `[0,1]` is covered by
+`aleph_1` Lebesgue-null measurable sets `N_alpha`, indexed by
+`alpha < omega_1`. Replace the cover by the disjoint measurable pieces
+`P_alpha = N_alpha minus union_{beta<alpha} N_beta`.
+Every `alpha < omega_1` is countable, so the union removed at stage alpha
+is a countable union of null sets. Thus each `P_alpha` is null, and the
+pieces partition `[0,1]`. Define `f(x)=alpha` on `P_alpha`. The inverse
+image of every countable subset of `omega_1` is a countable union of null
+sets; hence `f` is measurable for the countable-cocountable sigma algebra
+and has exactly the desired pushforward law.
+
+Consequently CH (which gives continuum = aleph_1) is sufficient, while
+set-theoretic models with `cov(N) > aleph_1` preclude such a pushforward.
+Shelah's paper *Covering of the Null Ideal May Have Countable Cofinality*
+shows the consistency of `cov(N)=aleph_omega`, which is one example of a
+value strictly above `aleph_1`.
+
+This is a mathematical existence criterion for a highly nonconstructive map
+from an ideal continuum of exact real randomness. It is **not** an ordinary
+finite-state PRNG, a finite-bit output routine, or an executable construction
+of countable ordinals. The Rocq theorem in `PRNGNoGo.v` addresses the latter
+countable-output setting only.
+
