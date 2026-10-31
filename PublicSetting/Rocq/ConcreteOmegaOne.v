@@ -49,7 +49,6 @@ Module PublicSettingConcreteOmegaOne.
     have hCantorCount : countable_set Ordinals4.Cantor_Omega :=
       countable_sub hSub hCount.
     move /countableP : hCantorCount => hCardLe.
-    have hAlephLe : aleph0 <=c aleph0 := cleR CS_aleph0.
     have hStrict : aleph0 <c omegaOne.
     {
       rewrite /omegaOne - Ordinals4.Cantor_omega_pr3.
@@ -61,7 +60,7 @@ Module PublicSettingConcreteOmegaOne.
       rewrite - Ordinals4.Cantor_omega_pr2.
       exact hCardLe.
     }
-    exact (ocltNge hStrict hImpossible).
+    exact (cleNgt hImpossible hStrict).
   Qed.
 
 End PublicSettingConcreteOmegaOne.
