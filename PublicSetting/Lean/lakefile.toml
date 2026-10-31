@@ -1,6 +1,6 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore", "AppendixGBackwardInduction"]
 
 [[require]]
 name = "mathlib"
@@ -30,3 +30,6 @@ name = "SequentialConditionalRisk"
 
 [[lean_lib]]
 name = "StandardBorelCore"
+
+[[lean_lib]]
+name = "AppendixGBackwardInduction"
