@@ -245,7 +245,7 @@ noncomputable def publicProtocolTrajectoryMeasure
     (hupdate : Measurable (updateHistory A L)) :
     Measure (Π n : ℕ, History X D Y) := by
   let κ : (n : ℕ) → ProbabilityTheory.Kernel
-      (Π i : Finset.Iic n, History X D Y) History :=
+      (Π i : Finset.Iic n, History X D Y) (History X D Y) :=
     fun n => publicProtocolPrefixKernel A L draw hpolicy hupdate n
   letI : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n) :=
     fun n => publicProtocolPrefixKernel_isMarkov A L draw hpolicy hupdate n
@@ -264,7 +264,7 @@ theorem publicProtocolTrajectoryMeasure_isProbability
       (publicProtocolTrajectoryMeasure A L draw hpolicy hupdate) := by
   dsimp [publicProtocolTrajectoryMeasure]
   let κ : (n : ℕ) → ProbabilityTheory.Kernel
-      (Π i : Finset.Iic n, History X D Y) History :=
+      (Π i : Finset.Iic n, History X D Y) (History X D Y) :=
     fun n => publicProtocolPrefixKernel A L draw hpolicy hupdate n
   letI : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n) :=
     fun n => publicProtocolPrefixKernel_isMarkov A L draw hpolicy hupdate n
