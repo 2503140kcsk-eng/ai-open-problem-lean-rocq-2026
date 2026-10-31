@@ -49,7 +49,9 @@ Section CountableCocountableMeasure.
     forall A, Measurable A -> Measurable (fun x => ~ A x).
   Proof.
     intros A [hA | hAc].
-    - right. exact hA.
+    - right.
+      eapply small_mono; [|exact hA].
+      intros x hAx hnot. exact (hnot hAx).
     - left. exact hAc.
   Qed.
 
