@@ -267,7 +267,7 @@ theorem fullContinuationMissSection_subset_lowerCylinder
 /-- Conditional risk of a miss whose terminal threshold can inspect the
 entire future continuation. -/
 noncomputable def fullContinuationConditionalRisk
-    {H Future : Type*}
+    {H Future : Type*} [MeasurableSpace Future]
     (jointLaw : H → Measure (Label × Future))
     (witness : H → Label)
     (threshold : H → Label → Future → Label) : H → ℝ≥0∞ :=
@@ -277,7 +277,7 @@ noncomputable def fullContinuationConditionalRisk
 pre-sampling envelope and a null lower-cylinder condition.  No joint
 measurability of the terminal miss relation is required. -/
 theorem fullContinuationConditionalRisk_eq_zero
-    {H Future : Type*}
+    {H Future : Type*} [MeasurableSpace Future]
     (jointLaw : H → Measure (Label × Future))
     (witness : H → Label)
     (threshold : H → Label → Future → Label)
@@ -297,6 +297,7 @@ continuation type may vary with the round.  Each threshold can inspect the
 complete suffix after that round, not merely the current draw. -/
 noncomputable def fullFutureSequentialRisk
     (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [∀ t, MeasurableSpace (Future t)]
     (jointLaw : ∀ t, History t → Measure (Label × Future t))
     (witness : ∀ t, History t → Label)
     (threshold : ∀ t, History t → Label → Future t → Label)
@@ -311,6 +312,7 @@ history-dependent public witness policies and terminal targets depending
 on all later samples. -/
 theorem fullFutureSequentialRisk_eq_zero
     (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [∀ t, MeasurableSpace (Future t)]
     (jointLaw : ∀ t, History t → Measure (Label × Future t))
     (witness : ∀ t, History t → Label)
     (threshold : ∀ t, History t → Label → Future t → Label)
@@ -335,6 +337,7 @@ under any probability law on those traces.  This is deliberately distinct
 from integrating a potentially nonmeasurable pathwise error indicator. -/
 theorem integratedFullFutureSequentialRisk_eq_zero
     (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [∀ t, MeasurableSpace (Future t)]
     [MeasurableSpace (∀ t, History t)]
     (jointLaw : ∀ t, History t → Measure (Label × Future t))
     (witness : ∀ t, History t → Label)
