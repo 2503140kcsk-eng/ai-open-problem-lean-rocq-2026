@@ -88,3 +88,10 @@ Both Lean and Rocq CI passed on code commit 1168ded2065bc238a1f6978b5b48addfece2
 ## Public-history strategy input
 
 The Lean strategy interface now records a list of public round triples (context, visible label, realized prediction). This is intentionally more expressive than a history of only contexts and visible labels: previous realized predictions are visible in the public setting. The current-round learner action is computed from the previous history, after which the adversary chooses the visible label.
+
+
+## Target open question and formal status (2026-10-31)
+
+The exact target is the final paragraph of Section 3.3 in Shao–Fang–Lin–Tao, arXiv:2601.21462v3: whether randomized and deterministic learners can have distinct learnability in the public partial-feedback setting. The separate end-of-Section-3.2 question about necessity of finite Helly number / nested inclusion must not be substituted for it.
+
+Lean's omega-one file now includes a full sampled-path miss-event containment theorem: for arbitrary path-dependent terminal upper-tail thresholds that all contain the pre-sampling witnesses, any error path lies in the finite union of coordinate initial-segment cylinders. Rocq proves the abstract order/ideal counterpart. The finite-product measure calculation converting this containment into a joint probability-zero theorem is not separately formalized. The literal Appendix G inf-sup operator is not a separately defined Lean object either. Keep those limits explicit.
