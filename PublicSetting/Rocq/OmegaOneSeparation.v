@@ -268,7 +268,8 @@ Section CountableCocountableMeasure.
           destruct (hbin k) as [hzero | hone_k].
           - exact hzero.
           - exfalso.
-            exact (hone k n (Nat.ne_of_lt hk) hone_k hone_n). }
+            assert (hkn : k <> n) by lia.
+            exact (hone k n hkn hone_k hone_n). }
         rewrite hprefix, hone_n. lia.
   Qed.
 
