@@ -7,7 +7,7 @@ import Mathlib
 
 This file formalizes the measurable-space and measure-theoretic core of a candidate
 separation for Shao–Fang–Lin–Tao, Partial Feedback Online Learning
-(arXiv:2601.21462v3), Section 5.2.
+(arXiv:2601.21462v3), Section 3.3.
 
 The label space is the set of all countable ordinals, represented by Iio (omega-one).
 It carries the countable-cocountable sigma algebra and the probability measure
@@ -66,7 +66,7 @@ theorem lowerSegment_countable (w : Label) : (lowerSegment w).Countable := by
   exact h.preimage Subtype.val_injective
 
 /-- Every countable family of upper tails has a common label. This is the
-    cofinality-omega-one fact that prevents Theorem 16's nested-countable
+    cofinality-omega-one fact that prevents Theorem 15's nested-countable
     intersection condition from applying to this tail family. -/
 theorem countableTails_intersect (thresholds : ℕ → Label) :
     ∃ w : Label, ∀ n, thresholds n ≤ w := by
@@ -204,6 +204,15 @@ theorem upperTail_compl_countable (threshold : Label) :
   change y < threshold
   exact lt_of_not_ge hy
 
+/-- Every upper tail has a null complement under the countable-cocountable
+probability measure. This is the expected zero-one loss for predicting from
+the fixed measure when the hidden acceptable set is that tail. -/
+theorem upperTail_complement_measure_zero (threshold : Label) :
+    countableCocountableMeasure ((upperTail threshold)ᶜ) = 0 := by
+  rw [countableCocountableMeasure_apply _ (Or.inl (upperTail_compl_countable threshold))]
+  simp [countableCocountableMass, upperTail_compl_countable]
+
+
 theorem upperTail_measure_one (threshold : Label) :
     countableCocountableMeasure (upperTail threshold) = 1 := by
   have hcomp := upperTail_compl_countable threshold
@@ -291,6 +300,19 @@ theorem globalTailFamily_nonempty (thresholds : ℕ → Label) :
     ∃ f : ℕ → Label, GlobalTailFamily thresholds f :=
   ⟨thresholds, fun _ => le_rfl⟩
 
+/-- A member of the global target family is a zero-loss comparator on every
+finite horizon, because each of its values lies in the corresponding
+acceptable tail. -/
+def comparatorTotalLoss (thresholds : ℕ → Label) (f : ℕ → Label) (T : ℕ) : ℕ :=
+  ∑ t ∈ Finset.range T, if thresholds t ≤ f t then 0 else 1
+
+theorem comparatorTotalLoss_zero
+    (thresholds : ℕ → Label) (f : ℕ → Label)
+    (hf : GlobalTailFamily thresholds f) (T : ℕ) :
+    comparatorTotalLoss thresholds f T = 0 := by
+  simp [comparatorTotalLoss, hf]
+
+
 /-- The successor of a countable ordinal is still below omega-one. -/
 def succLabel (a : Label) : Label :=
   ⟨Order.succ a.1, (Cardinal.isSuccLimit_omega 1).succ_lt a.2⟩
@@ -359,5 +381,42 @@ theorem deterministicLearner_exact_linear_loss
     (learner : DeterministicLearner) (T : ℕ) :
     deterministicTotalLoss (deterministicPredictionPath learner) T = T :=
   deterministicTotalLoss_eq_horizon _ _
+
+/-- Full finite-horizon deterministic witness: one fixed global target family
+realizes every revealed upper tail, the comparator incurs zero loss, and the
+deterministic learner incurs one mistake per round. -/
+theorem deterministicLearner_global_separation_witness
+    (learner : DeterministicLearner) (T : ℕ) :
+    ∃ f : ℕ → Label,
+      GlobalTailFamily (deterministicThresholds (deterministicPredictionPath learner)) f ∧
+      (∀ t y, AcceptedAt (deterministicThresholds (deterministicPredictionPath learner)) t y
+        ↔ deterministicThresholds (deterministicPredictionPath learner) t ≤ y) ∧
+      comparatorTotalLoss (deterministicThresholds (deterministicPredictionPath learner)) f T = 0 ∧
+      deterministicTotalLoss (deterministicPredictionPath learner) T = T := by
+  let thresholds := deterministicThresholds (deterministicPredictionPath learner)
+  obtain ⟨f, hf⟩ := globalTailFamily_nonempty thresholds
+  refine ⟨f, hf, ?_, comparatorTotalLoss_zero thresholds f hf T,
+    deterministicLearner_exact_linear_loss learner T⟩
+  intro t y
+  exact acceptedAt_iff_upperTail thresholds t y
+
+/-- The constant-measure randomized learner has zero expected loss on every
+finite sequence of upper-tail acceptable sets. The summand is the probability
+of the error event, using E[1_A] = measure(A). -/
+abbrev RandomizedLearner := List (Nat × Label × Label) → Nat → Measure Label
+
+noncomputable def constantRandomizedLearner : RandomizedLearner :=
+  fun _ _ => countableCocountableMeasure
+
+noncomputable def randomizedExpectedTotalLoss (thresholds : ℕ → Label) (T : ℕ) : ENNReal :=
+  ∑ t ∈ Finset.range T,
+    constantRandomizedLearner [] t ((upperTail (thresholds t))ᶜ)
+
+theorem constantRandomizedLearner_zero_expected_loss
+    (thresholds : ℕ → Label) (T : ℕ) :
+    randomizedExpectedTotalLoss thresholds T = 0 := by
+  simp [randomizedExpectedTotalLoss, constantRandomizedLearner,
+    upperTail_complement_measure_zero]
+
 
 end PublicSetting.OmegaOne
