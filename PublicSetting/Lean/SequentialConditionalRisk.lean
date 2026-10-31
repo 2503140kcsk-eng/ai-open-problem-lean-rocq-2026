@@ -360,4 +360,86 @@ theorem integratedFullFutureSequentialRisk_eq_zero
   simp
 
 
+
+/-- If the current-label marginal of a joint current/future law is the
+countable-cocountable omega-one measure, its lower cylinder is null,
+regardless of how the future continuation depends on the current label. -/
+theorem fullContinuation_lowerCylinder_null_of_marginal
+    {Future : Type*} [MeasurableSpace Future]
+    (jointLaw : Measure (Label × Future)) (witness : Label)
+    (hmarginal : jointLaw.map Prod.fst = countableCocountableMeasure) :
+    jointLaw {z : Label × Future | z.1 ∈ lowerSegment witness} = 0 := by
+  have hmeas : MeasurableSet (lowerSegment witness) :=
+    Or.inl (lowerSegment_countable witness)
+  calc
+    jointLaw {z : Label × Future | z.1 ∈ lowerSegment witness} =
+        (jointLaw.map Prod.fst) (lowerSegment witness) := by
+          rw [Measure.map_apply measurable_fst hmeas]
+          rfl
+    _ = countableCocountableMeasure (lowerSegment witness) := by
+          rw [hmarginal]
+    _ = 0 := lowerSegment_measure_zero witness
+
+/-- Omega-one full-continuation conditional risk needs only the exact
+countable-cocountable marginal for the current draw.  The joint law may
+couple that draw arbitrarily with the entire future suffix. -/
+theorem fullContinuationConditionalRisk_eq_zero_of_marginal
+    {H Future : Type*} [MeasurableSpace Future]
+    (jointLaw : H → Measure (Label × Future))
+    (witness : H → Label)
+    (threshold : H → Label → Future → Label)
+    (hcontains : ∀ h y future, threshold h y future ≤ witness h)
+    (hmarginal : ∀ h, (jointLaw h).map Prod.fst = countableCocountableMeasure) :
+    ∀ h, fullContinuationConditionalRisk jointLaw witness threshold h = 0 := by
+  apply fullContinuationConditionalRisk_eq_zero
+    jointLaw witness threshold hcontains
+  intro h
+  exact fullContinuation_lowerCylinder_null_of_marginal
+    (jointLaw h) (witness h) (hmarginal h)
+
+/-- Finite-horizon omega-one conditional risk is zero for arbitrary
+history-dependent witnesses and terminal targets that can inspect every
+future sample, provided every round's current-label marginal is the
+countable-cocountable probability measure. -/
+theorem omegaOne_fullFutureSequentialRisk_eq_zero
+    (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [∀ t, MeasurableSpace (Future t)]
+    (jointLaw : ∀ t, History t → Measure (Label × Future t))
+    (witness : ∀ t, History t → Label)
+    (threshold : ∀ t, History t → Label → Future t → Label)
+    (histories : ∀ t, History t)
+    (hcontains : ∀ t h y future, threshold t h y future ≤ witness t h)
+    (hmarginal : ∀ t h,
+      (jointLaw t h).map Prod.fst = countableCocountableMeasure) :
+    fullFutureSequentialRisk T History Future jointLaw witness threshold histories = 0 := by
+  apply fullFutureSequentialRisk_eq_zero
+    T History Future jointLaw witness threshold histories hcontains
+  intro t h
+  exact fullContinuation_lowerCylinder_null_of_marginal
+    (jointLaw t h) (witness t h) (hmarginal t h)
+
+/-- The integrated omega-one sequential conditional risk remains zero under
+any law of random history traces.  This is an expected *conditional-risk*
+statement; it does not identify that risk with the probability of an
+unrestricted, potentially nonmeasurable full-path error event. -/
+theorem integratedOmegaOneFullFutureSequentialRisk_eq_zero
+    (T : ℕ) (History : Fin T → Type*) (Future : Fin T → Type*)
+    [∀ t, MeasurableSpace (Future t)]
+    [MeasurableSpace (∀ t, History t)]
+    (jointLaw : ∀ t, History t → Measure (Label × Future t))
+    (witness : ∀ t, History t → Label)
+    (threshold : ∀ t, History t → Label → Future t → Label)
+    (traceLaw : Measure (∀ t, History t))
+    (hcontains : ∀ t h y future, threshold t h y future ≤ witness t h)
+    (hmarginal : ∀ t h,
+      (jointLaw t h).map Prod.fst = countableCocountableMeasure) :
+    ∫⁻ trace, fullFutureSequentialRisk T History Future jointLaw witness threshold
+      (fun t => trace t) ∂traceLaw = 0 := by
+  apply integratedFullFutureSequentialRisk_eq_zero
+    T History Future jointLaw witness threshold traceLaw hcontains
+  intro t h
+  exact fullContinuation_lowerCylinder_null_of_marginal
+    (jointLaw t h) (witness t h) (hmarginal t h)
+
+
 end PublicSetting.SequentialConditionalRisk
