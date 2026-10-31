@@ -6,7 +6,7 @@ Shao, Fang, Lin, and Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3
 - https://arxiv.org/html/2601.21462v3
 - https://arxiv.org/abs/2601.21462
 
-Section 1.1 introduces partial feedback and set-realizability. Section 3.3 defines the public-versus-oblivious adversary distinction. The randomized-versus-deterministic learnability question is explicitly left open in the final paragraph of Section 3.3. In particular, the current round's order is:
+Section 1.1 introduces partial feedback and set-realizability. Section 3.3 defines the public-versus-oblivious adversary distinction; Section 3.2 contains Theorem 15 and the inseparability necessity question. The randomized-versus-deterministic learnability question is explicitly left open in the final paragraph of Section 3.3. In particular, the current round's order is:
 
 1. the adversary chooses the instance/context;
 2. the learner chooses a distribution/action using its observable feedback history;
@@ -31,7 +31,7 @@ The bounded-support result is now stated as an explicit pathwise loss gap in bot
 
 ## The unresolved theorem
 
-The final paragraph of Section 3.3 explicitly leaves open whether, in the public setting, there exists a set-realizable hypothesis class with sublinear randomized minimax regret while every deterministic learner has linear minimax regret. Section 3.3 instead proves a distinct comparison between oblivious and public adversaries. The paper's Theorem 18 is a different separation: randomized learnability in the oblivious setting versus unlearnability in the public setting. These must not be conflated.
+The final paragraph of Section 3.2 asks whether the finite-Helly or nested-inclusion criterion is necessary whether, in the public setting, there exists a set-realizable hypothesis class with sublinear randomized minimax regret while every deterministic learner has linear minimax regret. Section 3.3 instead proves a distinct comparison between oblivious and public adversaries. The paper's Theorem 18 is a different separation: randomized learnability in the oblivious setting versus unlearnability in the public setting. These must not be conflated.
 
 A fresh search on 29 October 2026 did not find a later work resolving this exact question. This bounded search is not a proof that no resolution exists.
 
@@ -76,3 +76,10 @@ The Lean file PublicSetting/Lean/OmegaOneSeparation.lean is the concrete omega_1
 The random upper-bound uses the paper's broad measurable-space model (arbitrary sigma algebra and probability measures). It is not a standard-Borel or usual-PRNG construction. Thus, if the intended setting imposes a standard Borel label space or ordinary algorithmically samplable randomness, the question is not settled by this candidate.
 
 The proof also still needs a single top-level public-game theorem that packages the conditional one-round zero-error lemma and the pathwise deterministic lower bound into the exact minimax regret semantics of the paper. This remains a required verification step.
+
+
+## 2026-10-31 omega-one formalization status
+
+Lean 4.35 / Mathlib 4.35 now concretely proves the countable-cocountable probability measure on omega_1, zero measure of upper-tail complements and adaptive miss sets, countable upper-tail intersections, exact global realizability, zero comparator loss, randomized zero expected finite-horizon loss, and the deterministic public-history loss T witness. The deterministic public-history input records (context, visible label, previous realized prediction). Rocq 9.2 independently checks the corresponding countable-ideal and ordered-tail lemmas under abstract omega-one-like hypotheses; it does not construct concrete omega_1.
+
+Both Lean and Rocq CI passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3 (run 41157208222). The explicit Appendix G inf-sup minimax operator is not itself encoded as a Lean definition. The probability space is not claimed to be standard Borel or ordinary-PRNG samplable.
