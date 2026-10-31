@@ -63,11 +63,11 @@ converge to the target in total variation.
 The theorem does not show that every imaginable set-theoretic map from an
 uncountable probability space into (\omega_1) is impossible. It rules out
 countably-supported samplers, including ordinary executable samplers with
-finite or countably many finite outputs. It also does not construct
-(\omega_1) inside Rocq; the existing Rocq game development still assumes an
-abstract ordered label type with countable-ideal axioms. A concrete Rocq
-construction of the quotient of countable well-orders remains a separate
-formalization task.
+finite or countably many finite outputs. The PR now also contains a concrete
+Gaia-backed Rocq adapter for the set-theoretic object (\omega_1), in
+`Rocq/ConcreteOmegaOne.v`. The existing generic Rocq countable-ideal game
+lemmas have **not yet** been instantiated over Gaia's concrete carrier; the
+adapter and the RNG no-go theorem are separate verified modules.
 
 ## Verification
 
@@ -108,8 +108,7 @@ and has exactly the desired pushforward law.
 Consequently CH (which gives continuum = aleph_1) is sufficient, while
 set-theoretic models with `cov(N) > aleph_1` preclude such a pushforward.
 Shelah's paper *Covering of the Null Ideal May Have Countable Cofinality*
-shows the consistency of `cov(N)=aleph_omega`, which is one example of a
-value strictly above `aleph_1`.
+(Fundamenta Mathematicae 166 (2000), 109–136; [arXiv:math/9810181](https://arxiv.org/abs/math/9810181)) proves that it is consistent for the covering number of the null ideal to have countable cofinality. Since this covering number is uncountable, such a model has it strictly above `aleph_1`.
 
 This is a mathematical existence criterion for a highly nonconstructive map
 from an ideal continuum of exact real randomness. It is **not** an ordinary
