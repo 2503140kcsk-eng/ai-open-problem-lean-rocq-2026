@@ -1,92 +1,70 @@
 # Public-setting separation in partial-feedback online learning
 
-Status date: 2026-10-28
+Status date: 2026-10-31
 
-## Research question
+## Research target
 
-For partial-feedback online learning in the public setting, does there exist one fixed hypothesis class and one globally consistent target subfamily such that:
+Construct a fixed set-realizable hypothesis class and a single globally consistent target subfamily for which randomized regret is sublinear while every deterministic public-history learner has linear regret, or identify the obstruction. The construction below gives a finite-horizon strategy-level separation in the paper's unrestricted measurable-space model.
 
-- the randomized learner has minimax regret o(T); and
-- every deterministic learner has minimax regret Ω(T),
+Here o(T) means regret divided by T tends to zero; Ω(T) means a positive linear lower bound. A globally consistent target means that the accepted-label set at every context is the projection of the same fixed target subfamily H* of one hypothesis class H.
 
-as the horizon T tends to infinity?
+## Candidate construction: countable-cocountable ω₁
 
-Here o(T) means sublinear regret: regret divided by T tends to zero. Ω(T) means a positive constant fraction of T for all sufficiently large horizons. “Globally consistent” means that the acceptable label set at every context is induced by the same target subfamily F of a single hypothesis class H; it is not permissible to choose unrelated target hypotheses independently at each round.
+- Label space: Y = ω₁, the first uncountable ordinal.
+- Sigma algebra: all countable or cocountable subsets of Y.
+- Probability measure: zero on countable sets and one on cocountable sets.
+- Admissible sets: upper tails Sβ = {y in ω₁ : β ≤ y}.
+- Instance space: X = ℕ; hypothesis class: H = Y^ℕ.
 
-## Literature status
+Every strict initial segment below an element w of ω₁ is countable. Hence every upper tail has measure one and its complement has measure zero.
 
-The latest version found for this audit is Shao, Fang, Lin, and Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3 (posted 2026-04-02). The final paragraph of Section 3.3 explicitly leaves open whether randomized and deterministic learnability can separate in the public setting. Theorem 17 in Section 3.3 establishes equality between oblivious and public settings for set-valued feedback. Theorem 18 establishes a different result: randomized learnability in the oblivious partial-feedback setting need not imply learnability in the public partial-feedback setting. Neither result answers the open randomized-versus-deterministic question within the public setting.
+### Randomized upper bound
 
-Source: https://arxiv.org/html/2601.21462v3
+The randomized learner returns the same countable-cocountable probability measure after every public history. If the visible witness is w_t and the eventual acceptable set is an upper tail S_{β_t} containing w_t, then β_t ≤ w_t. A mistake implies ŷ_t < β_t ≤ w_t, so the entire miss event is contained in the null initial segment [0,w_t). This containment is pointwise and still holds when the terminal target family is chosen after the prediction path. Lean formalizes the one-round adaptive miss-set containment and the zero expected loss of every finite upper-tail sequence.
 
-A search performed on 2026-10-28 did not find a later paper resolving this exact question. This is a bounded literature check, not a proof that no result exists anywhere.
+### Deterministic lower bound
 
-## What is formalized here
+The deterministic strategy interface uses public histories containing each previous context, visible label, and realized prediction. At round t, the adversary computes the learner's current prediction p_t and reveals w_t = p_t + 1. Define one global target family
 
-The Lean and Rocq files are independent developments. They formalize:
+H* = { f : ℕ → ω₁ | for every t, p_t + 1 ≤ f(t) }.
 
-1. Exact asymptotic specifications for natural-number regret profiles.
-2. The elementary but useful fact that one and the same nonnegative regret profile cannot be both o(T) and Ω(T).
-3. A global-consistency model in which one fixed subfamily F of H induces every accepted-label set.
-4. An all-horizons pathwise construction for complement-of-singleton accepted sets, and the fact that a prediction path equal to the excluded labels incurs exactly T losses over horizon T.
-5. Machine-checked low-mass atom lemmas in both provers: Lean uses nonnegative rational masses with every finite prefix bounded by one; Rocq uses an integer-scaled encoding with every finite prefix bounded by denominator D. Each proves the corresponding atom-mass bound of 1/T for every positive integer horizon.
+This family is nonempty. Its projection at context t is exactly S_{p_t+1}; therefore one fixed H* realizes every accepted set, accepts each visible witness, and excludes every deterministic prediction. The comparator loss is zero and the learner loses exactly T rounds.
 
-All stated lemmas are intended to be proved without placeholders. The complement-of-singleton construction is a boundary-case / adversarial-path lemma; it is **not** a randomized-versus-deterministic separation. It does not establish that any randomized learner has o(T) regret in the public protocol.
+## Relation to the paper's structural criterion
 
-## What remains open in this repository
+Theorem 15 in Section 3.2, and its set-valued analogue Corollary 16, give sufficient conditions for deterministic/randomized inseparability. For every countable sequence β_n < ω₁, its supremum is still below ω₁, so every countable family of upper tails has nonempty intersection. Every finite subfamily also has nonempty intersection, while the intersection of all upper tails is empty. Thus this family has infinite Helly number and violates Theorem 15 condition (1), which asks for a countable decreasing subfamily with empty intersection.
 
-The main separation is **not proved** here. The operational model now records the learner's own previous sampled predictions and gives the public adversary access to all completed previous rounds, while keeping current-round sampling hidden until after the visible witness is chosen. It also enforces one global target subfamily. The remaining bridge is to define and verify probability measures, the paper's exact minimax-regret semantics, connect the discrete low-mass lemmas to conditional expected loss, and then prove a construction or impossibility theorem for every horizon T. The asymptotic profile predicate below is only a specification, not evidence that a game realizes those profiles.
+A terminology caveat: all upper tails are pairwise nested (linearly ordered by inclusion), but no countable subfamily has empty intersection. The v3 paper's text does not give a separate stand-alone definition of “nested inclusion property”; its formal sufficient criterion is Theorem 15(1). This repository uses that precise countable-empty-intersection criterion and does not conflate it with mere pairwise nestedness.
 
-No theorem named “exists separation” is declared or assumed. No axiom, sorry, or admitted step is used to pretend the open problem is solved.
+The open question stated at the end of Section 3.2 asks whether finite Helly number or the nested-inclusion condition is necessary for inseparability. Section 3.3 is a different topic: Theorem 17 compares oblivious and public set-valued learning; Theorem 18 separates oblivious and public partial-feedback learning. Neither is the same theorem as the omega-one randomized/deterministic construction.
+
+## Formal verification status
+
+- Lean 4.35 / Mathlib 4.35: PublicSetting/Lean/OmegaOneSeparation.lean concretely constructs ω₁, the countable-cocountable measurable space, and the 0/1 probability measure using Measure.ofMeasurable. The theorem omegaOne_finite_horizon_separation packages the finite-horizon strategy-level quantifiers: every upper-tail sequence admits one global zero-loss comparator and zero randomized expected loss; every deterministic public-history learner admits one global target family forcing exactly T mistakes.
+- Rocq 9.2: PublicSetting/Rocq/OmegaOneSeparation.v independently formalizes the countable-ideal, 0/1 countably additive probability, finite-series semantics, and ordered-tail game lemmas under explicit omega-one-like hypotheses. It is an abstract schema, not a concrete Rocq construction of ω₁.
+
+Both proof assistants passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3. The corresponding GitHub Actions run is https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41157208222. The Lean and Rocq job logs were inspected: no compiler errors, no Lean warning diagnostics, and no sorry/admit/Admitted/Axiom/Parameter markers.
+
+### Limits that remain explicit
+
+1. The Lean theorem packages the strategy-level quantifiers for every finite horizon; the literal inf-sup minimax operator from Appendix G is not separately encoded as a Lean definition/theorem.
+2. The construction uses the paper's unrestricted measurable-space model. The countable-cocountable space on ω₁ is not claimed to be standard Borel, countably generated, or sampleable by an ordinary real-valued PRNG.
+3. Rocq verifies an abstract counterpart, not a concrete ω₁ construction.
+
+These are scope limits, not outstanding compiler failures. The full mathematical strategy-level candidate is machine-checked concretely in Lean and abstractly in Rocq.
+
+## External repository roles
+
+The supplied repositories were inspected for suitability; they were not all executed as autonomous agents. Mathlib4 is the main formal proof library and Lean kernel environment. LeanDojo-v2 is for proof retrieval and tactic assistance, not proof certification. Naproche checks natural-language mathematical documents. cvc5 is useful for finite first-order/SMT countermodels. SageMath, SymPy, and Wolfram support finite algebraic, ordinal-toy, and numerical sanity checks. GAP is useful for finite combinatorial/group models. Macaulay2 targets commutative algebra and has little direct leverage on the ω₁ measure construction. None substitutes for the Lean/Rocq kernels.
+
+## Sources
+
+- Shao, Fang, Lin, Tao, Partial Feedback Online Learning, arXiv:2601.21462v3 (2026-04-02): https://arxiv.org/html/2601.21462v3
+- MathOverflow, Inner Regularity of probability measure on totally ordered sets: https://mathoverflow.net/questions/343303/inner-regularity-of-probability-measure-on-totally-ordered-sets
+- MathOverflow, Measure on ω₁: https://mathoverflow.net/questions/81143/measure-on-omega-1
 
 ## Verify
 
-Lean (from the repository root):
+Lean: cd PublicSetting/Lean && lake build
 
-    cd PublicSetting/Lean
-    lake build
-
-Rocq (from the repository root):
-
-    cd PublicSetting/Rocq
-    rocq compile -Q . PublicSetting PublicSetting.v
-
-The GitHub Actions workflow runs both independent builds. A passing build verifies only the theorem statements actually present in these files, not the open separation claim.
-
-## Reproducibility
-
-The Lean subproject pins its Lean toolchain. The Rocq workflow pins a versioned official prover image. The Lean and Rocq sources do not import, generate, or trust one another.
-
-
-## Omega-one candidate added on 2026-10-31
-
-A concrete candidate has been added to the Lean project.
-
-- Label space: Y = omega_1, the first uncountable ordinal.
-- Sigma algebra: all countable or cocountable subsets of Y.
-- Probability measure: zero on countable sets and one on cocountable sets.
-- Admissible acceptable sets: upper tails S_beta = {y : beta <= y}.
-- Instance space: natural numbers.
-- Hypothesis class: all functions from natural numbers to Y.
-
-Every initial segment below a countable ordinal is countable. Therefore every admissible upper tail has measure one.
-
-Randomized side: use this probability measure as the learner's distribution on every round. If the visible witness is w_t, every terminal acceptable tail compatible with that witness has threshold beta_t <= w_t. A mistake implies prediction < beta_t <= w_t. Thus the error event is contained in the countable null initial segment below w_t. This remains true when the terminal target family is selected after all sampled predictions, because the containment holds pointwise for every possible terminal choice.
-
-Deterministic side: for any deterministic prediction path p_t, choose the visible witness and tail threshold to be the successor p_t+1. One global target family F* consists of all functions f with f(t) >= p_t+1 at every coordinate. This family is nonempty and induces exactly the required upper tail at each context. It contains every visible witness while excluding the deterministic prediction, so the path incurs exactly T mistakes.
-
-Theorem 15 (and its set-valued analogue, Corollary 16) does not cover this family. The full family of upper tails has empty intersection, but every countable subfamily has nonempty intersection by countable boundedness of omega_1, and every finite subfamily has nonempty intersection. Thus neither Theorem 15 condition (1), a countable decreasing sequence with empty intersection, nor condition (2), a finite subfamily with empty intersection, is satisfied.
-
-Model boundary: this uses the paper's abstract model allowing arbitrary probability measures on a measurable label space. The countable-cocountable space is not claimed to be standard Borel, countably generated, or implementable by an ordinary real-valued PRNG. A stronger standard-Borel or implementable-sampling restriction requires a separate analysis.
-
-## Current formal verification status
-
-- Lean/OmegaOneSeparation.lean contains the concrete omega_1 label space, countable-cocountable measurable space, 0/1 probability measure through Measure.ofMeasurable, null-miss result, countable tail-intersection result, and globally realizable deterministic lower-bound construction.
-- Rocq/OmegaOneSeparation.v proves the same measure and game lemmas for an abstract ordered label structure equipped with a countable ideal, countable initial segments, successors, and countable boundedness. It is an abstract theorem schema, not a concrete Rocq encoding of omega_1.
-- The latest GitHub Actions runs for these new modules remain queued. No completed CI result has yet been verified. Do not treat source upload or a queued workflow as a machine-checked proof.
-
-## Remaining tasks
-
-1. Obtain and inspect successful Lean and Rocq 9.2 CI runs for the new modules.
-2. Formalize the final wrapper connecting the roundwise zero-error lemma and deterministic pathwise lower bound to the exact public sequential minimax expression.
-3. Decide whether the intended problem permits arbitrary measurable label spaces and all countably additive measures. Under that model, the candidate implies randomized regret zero and deterministic regret T. Under additional standard-Borel or implementable-sampling restrictions, this result does not automatically apply.
+Rocq 9.2: cd PublicSetting/Rocq && rocq compile -Q . PublicSetting PublicSetting.v
