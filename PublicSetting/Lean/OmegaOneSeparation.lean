@@ -36,16 +36,21 @@ abbrev Label := Set.Iio (Ordinal.omega 1)
 
 theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
   intro h
-  have hcnt : Countable Label := Set.countable_univ_iff.mp h
-  have hcard : Cardinal.mk Label ≤ Cardinal.aleph0 :=
-    Cardinal.mk_le_aleph0_iff.mpr hcnt
-  have hmk : Cardinal.mk Label = Cardinal.lift (Cardinal.aleph 1) := by
-    simpa [Label, Ordinal.card_omega] using
-      (Cardinal.mk_Iio_ordinal (Ordinal.omega 1))
-  rw [hmk, ← Cardinal.lift_aleph 0] at hcard
-  have hle : Cardinal.aleph 1 ≤ Cardinal.aleph 0 :=
-    (Cardinal.lift_le).mp hcard
-  exact (not_le_of_gt Cardinal.aleph0_lt_aleph_one) hle
+  letI : Countable Label := Set.countable_univ_iff.mp h
+  let b : Ordinal := ⨆ a : Label, (a : Ordinal)
+  have hb : b < Ordinal.omega 1 := by
+    exact Ordinal.iSup_lt_omega_one (fun a => a.2)
+  have hbdd : BddAbove (Set.range fun a : Label => (a : Ordinal)) := by
+    refine ⟨Ordinal.omega 1, ?_⟩
+    rintro _ ⟨a, rfl⟩
+    exact a.2.le
+  have hbound : ∀ a : Label, (a : Ordinal) ≤ b := by
+    intro a
+    exact le_ciSup hbdd a
+  let w : Label := ⟨Order.succ b, (Cardinal.isSuccLimit_omega 1).succ_lt hb⟩
+  have hw : b < (w : Ordinal) := by
+    simpa [w] using (lt_succ b)
+  exact (not_lt_of_ge (hbound w)) hw
 
 /-- Every strict initial segment below a label is countable. -/
 def lowerSegment (w : Label) : Set Label := {x | x.1 < w.1}
@@ -68,9 +73,14 @@ theorem countableTails_intersect (thresholds : ℕ → Label) :
   refine ⟨⟨b, hb⟩, ?_⟩
   intro n
   change (thresholds n).1 ≤ b
-  exact le_iSup (fun k => (thresholds k).1) n
+  have hbdd : BddAbove (Set.range fun k : ℕ => (thresholds k).1) := by
+    refine ⟨Ordinal.omega 1, ?_⟩
+    rintro _ ⟨k, rfl⟩
+    exact (thresholds k).2.le
+  exact le_ciSup hbdd n
 
 /-- The countable-cocountable sigma algebra on the label space. -/
+@[instance_reducible]
 def countableCocountableMeasurableSpace : MeasurableSpace Label where
   MeasurableSet' s := s.Countable ∨ sᶜ.Countable
   measurableSet_empty := Or.inl Set.countable_empty
@@ -99,59 +109,69 @@ def countableCocountableMeasurableSpace : MeasurableSpace Label where
 
 instance : MeasurableSpace Label := countableCocountableMeasurableSpace
 
-/-- The 0/1 mass on measurable sets: countable sets have mass zero. -/
-noncomputable def countableCocountableMass
-    (s : Set Label) (_hs : MeasurableSet s) : ℝ≥0∞ := by
+/-- The 0/1 mass: countable sets have mass zero and cocountable sets mass one. -/
+noncomputable def countableCocountableMass (s : Set Label) : ENNReal := by
   classical
   exact if s.Countable then 0 else 1
 
-/-- Countable-cocountable probability measure on omega-one. -/
-noncomputable def countableCocountableMeasure : Measure Label := by
-  refine Measure.ofMeasurable countableCocountableMass ?_ ?_
-  · simp [countableCocountableMass]
-  · intro f hf hdisj
-    classical
-    by_cases hsome : ∃ i, ¬ (f i).Countable
-    · obtain ⟨i, hi⟩ := hsome
-      have hcomp : (f i)ᶜ.Countable := (hf i).resolve_left hi
-      have hcompUnion : (⋃ n, f n)ᶜ.Countable := by
-        apply hcomp.mono
-        intro x hx
-        change x ∈ (⋃ n, f n)ᶜ at hx
-        change x ∈ (f i)ᶜ
-        exact fun hxi => hx (Set.mem_iUnion.mpr ⟨i, hxi⟩)
-      have hnotUnion : ¬ (⋃ n, f n).Countable := by
-        intro hcnt
-        have hwhole : (Set.univ : Set Label).Countable := by
-          have hu : ((⋃ n, f n) ∪ (⋃ n, f n)ᶜ).Countable :=
-            hcnt.union hcompUnion
-          simpa using hu
-        exact label_univ_not_countable hwhole
-      have hothers : ∀ j, j ≠ i → (f j).Countable := by
-        intro j hji
-        have hdis : Disjoint (f i) (f j) := hdisj (Ne.symm hji)
-        apply hcomp.mono
-        intro x hxj
-        change x ∈ (f i)ᶜ
-        intro hxi
-        exact (Set.disjoint_left.mp hdis) hxi hxj
-      have hsum : (∑' j : ℕ, countableCocountableMass (f j) (hf j)) = 1 := by
-        rw [tsum_eq_single i]
-        · simp [countableCocountableMass, hi]
-        · intro j hji
-          simp [countableCocountableMass, hothers j hji]
-      simp [countableCocountableMass, hnotUnion, hsum]
-    · have hall : ∀ i, (f i).Countable := by
-        intro i
-        by_contra hi
-        exact hsome ⟨i, hi⟩
-      have hcnt : (⋃ n, f n).Countable := Set.countable_iUnion hall
-      simp [countableCocountableMass, hcnt, hall]
+theorem countableCocountableMass_empty :
+    countableCocountableMass (∅ : Set Label) = 0 := by
+  simp [countableCocountableMass]
+
+/-- Countable additivity of the 0/1 mass on pairwise-disjoint measurable sets. -/
+theorem countableCocountableMass_iUnion
+    (f : ℕ → Set Label) (hf : ∀ i, MeasurableSet (f i))
+    (hdisj : Pairwise (Disjoint on f)) :
+    countableCocountableMass (⋃ i, f i) =
+      ∑' i, countableCocountableMass (f i) := by
+  classical
+  by_cases hsome : ∃ i, ¬ (f i).Countable
+  · obtain ⟨i, hi⟩ := hsome
+    have hcomp : (f i)ᶜ.Countable := (hf i).resolve_left hi
+    have hcompUnion : (⋃ n, f n)ᶜ.Countable := by
+      apply hcomp.mono
+      intro x hx
+      change x ∈ (⋃ n, f n)ᶜ at hx
+      exact fun hxi => hx (Set.mem_iUnion.mpr ⟨i, hxi⟩)
+    have hnotUnion : ¬ (⋃ n, f n).Countable := by
+      intro hcnt
+      have hwhole : (Set.univ : Set Label).Countable := by
+        have hu : ((⋃ n, f n) ∪ (⋃ n, f n)ᶜ).Countable :=
+          hcnt.union hcompUnion
+        exact hu.mono (by intro x hx; simp)
+      exact label_univ_not_countable hwhole
+    have hothers : ∀ j, j ≠ i → (f j).Countable := by
+      intro j hji
+      have hdis : Disjoint (f i) (f j) := hdisj (Ne.symm hji)
+      apply hcomp.mono
+      intro x hxj hxi
+      exact (Set.disjoint_left.mp hdis) hxi hxj
+    have hsum : (∑' j : ℕ, countableCocountableMass (f j)) = 1 := by
+      rw [tsum_eq_single i]
+      · simp [countableCocountableMass, hi]
+      · intro j hji
+        simp [countableCocountableMass, hothers j hji]
+    simp [countableCocountableMass, hnotUnion, hsum]
+  · have hall : ∀ i, (f i).Countable := by
+      intro i
+      by_contra hi
+      exact hsome ⟨i, hi⟩
+    have hcnt : (⋃ n, f n).Countable := Set.countable_iUnion hall
+    simp [countableCocountableMass, hcnt, hall]
+
+noncomputable def countableCocountableMeasure : Measure Label :=
+  Measure.ofMeasurable
+    (fun s (_ : MeasurableSet s) => countableCocountableMass s)
+    (by simpa using countableCocountableMass_empty)
+    (by
+      intro f hf hdisj
+      exact countableCocountableMass_iUnion f hf hdisj)
 
 theorem countableCocountableMeasure_apply
     (s : Set Label) (hs : MeasurableSet s) :
-    countableCocountableMeasure s = countableCocountableMass s hs := by
-  rw [countableCocountableMeasure, Measure.ofMeasurable_apply]
+    countableCocountableMeasure s = countableCocountableMass s := by
+  unfold countableCocountableMeasure
+  exact Measure.ofMeasurable_apply s hs
 
 instance : IsProbabilityMeasure countableCocountableMeasure where
   measure_univ := by
@@ -160,7 +180,8 @@ instance : IsProbabilityMeasure countableCocountableMeasure where
 
 theorem lowerSegment_measure_zero (w : Label) :
     countableCocountableMeasure (lowerSegment w) = 0 := by
-  rw [countableCocountableMeasure_apply (lowerSegment w) (Or.inl (lowerSegment_countable w))]
+  rw [countableCocountableMeasure_apply (lowerSegment w)
+    (Or.inl (lowerSegment_countable w))]
   simp [countableCocountableMass, lowerSegment_countable]
 
 /-- An admissible acceptable set is an upper tail. -/
@@ -191,8 +212,8 @@ theorem upperTail_measure_one (threshold : Label) :
 /-- The intersection of all admissible upper tails is empty. -/
 theorem allUpperTails_intersection_empty (y : Label) :
     ∃ threshold : Label, ¬ upperTail threshold y := by
-  refine ⟨⟨Ordinal.succ y.1, (Cardinal.isSuccLimit_omega 1).succ_lt y.2⟩, ?_⟩
-  exact not_le_of_gt (Ordinal.lt_succ y.1)
+  refine ⟨⟨Order.succ y.1, (Cardinal.isSuccLimit_omega 1).succ_lt y.2⟩, ?_⟩
+  exact not_le_of_gt (lt_succ y.1)
 
 /-- The set of predictions rejected by a tail whose threshold may depend
 on the current sampled label. -/
@@ -264,10 +285,10 @@ theorem globalTailFamily_nonempty (thresholds : ℕ → Label) :
 
 /-- The successor of a countable ordinal is still below omega-one. -/
 def succLabel (a : Label) : Label :=
-  ⟨Ordinal.succ a.1, (Cardinal.isSuccLimit_omega 1).succ_lt a.2⟩
+  ⟨Order.succ a.1, (Cardinal.isSuccLimit_omega 1).succ_lt a.2⟩
 
 theorem lt_succLabel (a : Label) : a < succLabel a := by
-  exact Ordinal.lt_succ a.1
+  exact lt_succ a.1
 
 /-- For a fixed deterministic prediction path, the adversary uses the next
 ordinal as the visible witness and as the tail threshold. -/
