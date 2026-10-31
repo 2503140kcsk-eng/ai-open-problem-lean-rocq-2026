@@ -69,6 +69,16 @@ def pairHistoryPrefixRealizable {X Y : Type*}
     (h : PairHistory X Y) (x : X) (s : Set Y) : Prop :=
   pairHistoryGloballyRealizable hypotheses (pairHistoryExtend h x s)
 
+/-- A pair-history extension is globally realizable exactly when one
+hypothesis realizes the old prefix and the new acceptable-set constraint. -/
+theorem pairHistoryGloballyRealizable_extend_iff
+    {X Y : Type*} (hypotheses : Set (X → Y))
+    (h : PairHistory X Y) (x : X) (s : Set Y) :
+    pairHistoryGloballyRealizable hypotheses (pairHistoryExtend h x s) ↔
+      ∃ f, f ∈ hypotheses ∧
+        (∀ entry ∈ h, f entry.1 ∈ entry.2) ∧ f x ∈ s := by
+  simp [pairHistoryGloballyRealizable, pairHistoryExtend, List.mem_append]
+
 /-- The oblivious continuation value V_t(h), with t rounds remaining.
 It is the exact sup_x inf_pi sup_{S admissible and prefix-realizable}
 Bellman recursion from Appendix G. -/
@@ -167,6 +177,38 @@ theorem appendixG_pairHistory_value_identity
   exact publicValue_eq_obliviousValue
     admissible admissible_measurable
     (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend
+
+/-- The public value of the original game from the empty history, i.e.
+the nested supremum/infimum/expectation expression in Equation (24). -/
+noncomputable def publicInitialValue
+    {X Y : Type*} [MeasurableSpace Y]
+    (admissible : Set (Set Y))
+    (admissible_measurable : ∀ s ∈ admissible, MeasurableSet s)
+    (hypotheses : Set (X → Y)) (T : ℕ) : ℝ≥0∞ :=
+  publicValue admissible admissible_measurable
+    (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend T [] []
+
+/-- The oblivious value of the same game, i.e. the nested minimax expression
+with a single expectation over the roundwise randomized predictions in
+Equation (25). -/
+noncomputable def obliviousInitialValue
+    {X Y : Type*} [MeasurableSpace Y]
+    (admissible : Set (Set Y))
+    (hypotheses : Set (X → Y)) (T : ℕ) : ℝ≥0∞ :=
+  obliviousValue admissible
+    (pairHistoryPrefixRealizable hypotheses) pairHistoryExtend T []
+
+/-- Appendix G's initial minimax equality: public and oblivious set-valued
+feedback games have exactly the same finite-horizon value. -/
+theorem appendixG_public_eq_oblivious_minimax
+    {X Y : Type*} [MeasurableSpace Y]
+    (admissible : Set (Set Y))
+    (admissible_measurable : ∀ s ∈ admissible, MeasurableSet s)
+    (hypotheses : Set (X → Y)) (T : ℕ) :
+    publicInitialValue admissible admissible_measurable hypotheses T =
+      obliviousInitialValue admissible hypotheses T := by
+  exact appendixG_pairHistory_value_identity
+    admissible admissible_measurable hypotheses T [] []
 
 /-- The full public continuation value includes the losses already incurred.
 This is the left-hand side W_t(tau_t) of Eq. (26), with pastLoss standing
