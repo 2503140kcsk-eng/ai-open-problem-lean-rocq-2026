@@ -2,66 +2,82 @@
 
 Status date: 2026-10-31
 
-## Research target
+## Target open problem
 
-Construct a fixed set-realizable hypothesis class and a single globally consistent target subfamily for which randomized regret is sublinear while every deterministic public-history learner has linear regret, or identify the obstruction. The construction below gives a finite-horizon strategy-level separation in the paper's unrestricted measurable-space model.
+Shao, Fang, Lin, and Tao, Partial Feedback Online Learning, arXiv:2601.21462v3, ends Section 3.3 with this open question: can randomized and deterministic learners have different learnability in the public partial-feedback setting? The paper distinguishes public from oblivious adversaries by whether the adversary can use past realized predicted labels. The current PR studies a set-realizable construction with one globally consistent target subfamily.
 
-Here o(T) means regret divided by T tends to zero; Ω(T) means a positive linear lower bound. A globally consistent target means that the accepted-label set at every context is the projection of the same fixed target subfamily H* of one hypothesis class H.
+There is a separate question at the end of Section 3.2 about whether finite Helly number or the nested-inclusion condition is necessary for inseparability. These are different questions; the present construction targets the Section 3.3 public-setting question.
 
-## Candidate construction: countable-cocountable ω₁
+## Candidate construction: countable-cocountable omega-one space
 
-- Label space: Y = ω₁, the first uncountable ordinal.
-- Sigma algebra: all countable or cocountable subsets of Y.
+- Label space: \(Y=\omega_1\), the first uncountable ordinal.
+- Sigma algebra: all countable or cocountable subsets.
 - Probability measure: zero on countable sets and one on cocountable sets.
-- Admissible sets: upper tails Sβ = {y in ω₁ : β ≤ y}.
-- Instance space: X = ℕ; hypothesis class: H = Y^ℕ.
+- Admissible sets: upper tails \(S_\beta=\{y\in\omega_1:\beta\le y\}\).
+- Instance space: \(X=\mathbb N\).
+- Hypothesis class: \(H=Y^{\mathbb N}\), all functions from contexts to labels.
 
-Every strict initial segment below an element w of ω₁ is countable. Hence every upper tail has measure one and its complement has measure zero.
+Every strict initial segment below \(w<\omega_1\) is countable. Thus each upper tail has measure one and its complement has measure zero. The measure is countably additive: in a disjoint measurable sequence, at most one member can be cocountable; if there is one, all other members are countable and the union has mass one; if there is none, the countable union is countable and every term has mass zero.
 
-### Randomized upper bound
+### Randomized side
 
-The randomized learner returns the same countable-cocountable probability measure after every public history. If the visible witness is w_t and the eventual acceptable set is an upper tail S_{β_t} containing w_t, then β_t ≤ w_t. A mistake implies ŷ_t < β_t ≤ w_t, so the entire miss event is contained in the null initial segment [0,w_t). This containment is pointwise and still holds when the terminal target family is chosen after the prediction path. Lean formalizes the one-round adaptive miss-set containment and the zero expected loss of every finite upper-tail sequence.
+The learner returns the same countable-cocountable probability measure after every public history. The visible witness \(w_t\) is fixed before the current sample. Any eventual admissible upper tail \(S_{\beta_t}\) containing it satisfies \(\beta_t\le w_t\). A mistake implies
+\[
+\hat y_t<\beta_t\le w_t.
+\]
+Hence the miss set is contained in the countable null initial segment below \(w_t\), so the one-round expected mistake is zero.
 
-### Deterministic lower bound
+The terminal global target subfamily can be selected after the complete prediction path. Lean now formalizes the stronger pointwise statement: for any full-path threshold rule \(\beta_t(\hat y_1,\ldots,\hat y_T)\) with \(\beta_t\le w_t\), every path with at least one mistake belongs to the finite union of coordinate cylinders where \(\hat y_t<w_t\). Each coordinate cylinder is null under the corresponding marginal measure. The finite-product measure step converting this finite union into a joint probability-zero event is a standard mathematical consequence, but is not yet encoded as a separate Lean theorem.
 
-The deterministic strategy interface uses public histories containing each previous context, visible label, and realized prediction. At round t, the adversary computes the learner's current prediction p_t and reveals w_t = p_t + 1. Define one global target family
+### Deterministic side
 
-H* = { f : ℕ → ω₁ | for every t, p_t + 1 ≤ f(t) }.
+The deterministic strategy receives the complete public history: previous contexts, visible labels, and realized predictions. At round \(t\), the adversary computes the current deterministic prediction \(p_t\) and reveals \(w_t=p_t+1\).
 
-This family is nonempty. Its projection at context t is exactly S_{p_t+1}; therefore one fixed H* realizes every accepted set, accepts each visible witness, and excludes every deterministic prediction. The comparator loss is zero and the learner loses exactly T rounds.
+One global target subfamily is
+\[
+H^*=\{f:\mathbb N\to\omega_1:\forall t,\ p_t+1\le f(t)\}.
+\]
+It is nonempty. Its projection at context \(t\) is exactly \(S_{p_t+1}\), so the same \(H^*\) realizes all acceptable sets, contains every visible witness, and excludes every deterministic prediction. The comparator loss is zero and the deterministic learner loses exactly \(T\) rounds.
 
-## Relation to the paper's structural criterion
+## Relation to Section 3.2 / Theorem 15
 
-Theorem 15 in Section 3.2, and its set-valued analogue Corollary 16, give sufficient conditions for deterministic/randomized inseparability. For every countable sequence β_n < ω₁, its supremum is still below ω₁, so every countable family of upper tails has nonempty intersection. Every finite subfamily also has nonempty intersection, while the intersection of all upper tails is empty. Thus this family has infinite Helly number and violates Theorem 15 condition (1), which asks for a countable decreasing subfamily with empty intersection.
+Theorem 15 (Section 3.2) gives sufficient conditions for deterministic/randomized inseparability; Corollary 16 gives a set-valued analogue. For every countable sequence \(\beta_n<\omega_1\), its supremum is still below \(\omega_1\). Therefore every countable family of upper tails has nonempty intersection; every finite subfamily does too, while the intersection of all upper tails is empty. In this family Theorem 15's condition (1), a countable decreasing subfamily with empty intersection, fails, and the Helly number is infinite.
 
-A terminology caveat: all upper tails are pairwise nested (linearly ordered by inclusion), but no countable subfamily has empty intersection. The v3 paper's text does not give a separate stand-alone definition of “nested inclusion property”; its formal sufficient criterion is Theorem 15(1). This repository uses that precise countable-empty-intersection criterion and does not conflate it with mere pairwise nestedness.
-
-The open question stated at the end of Section 3.2 asks whether finite Helly number or the nested-inclusion condition is necessary for inseparability. Section 3.3 is a different topic: Theorem 17 compares oblivious and public set-valued learning; Theorem 18 separates oblivious and public partial-feedback learning. Neither is the same theorem as the omega-one randomized/deterministic construction.
+A terminology caveat: the upper tails are pairwise nested (linearly ordered by inclusion), but no countable subfamily has empty intersection. The v3 paper does not give a separate stand-alone definition of “nested inclusion property” in the passage; this repository therefore reports the explicit condition in Theorem 15 rather than equating it with mere pairwise nestedness.
 
 ## Formal verification status
 
-- Lean 4.35 / Mathlib 4.35: PublicSetting/Lean/OmegaOneSeparation.lean concretely constructs ω₁, the countable-cocountable measurable space, and the 0/1 probability measure using Measure.ofMeasurable. The theorem omegaOne_finite_horizon_separation packages the finite-horizon strategy-level quantifiers: every upper-tail sequence admits one global zero-loss comparator and zero randomized expected loss; every deterministic public-history learner admits one global target family forcing exactly T mistakes.
-- Rocq 9.2: PublicSetting/Rocq/OmegaOneSeparation.v independently formalizes the countable-ideal, 0/1 countably additive probability, finite-series semantics, and ordered-tail game lemmas under explicit omega-one-like hypotheses. It is an abstract schema, not a concrete Rocq construction of ω₁.
+- Lean 4.35 / Mathlib 4.35: PublicSetting/Lean/OmegaOneSeparation.lean concretely constructs omega_1, the countable-cocountable measurable space, and the 0/1 probability measure via Measure.ofMeasurable. It proves the ordinal/countability facts, countable upper-tail intersection, nullity of adaptive one-round miss sets, finite-path miss-event containment in a finite union of null coordinate cylinders, and the globally realizable deterministic T-mistake construction. omegaOne_finite_horizon_separation packages the fixed-threshold randomized guarantee and the deterministic public-history lower bound for every finite horizon.
+- Rocq 9.2: PublicSetting/Rocq/OmegaOneSeparation.v independently checks the 0/1 countably additive measure over a countable ideal and an abstract ordered label type, including the corresponding full-path miss-coordinate containment and deterministic global-family loss result. It is an abstract omega-one-like schema, not a concrete Rocq encoding of omega_1.
 
-Both proof assistants passed on code commit 1168ded2065bc238a1f6978b5b48addfece2dee3. The corresponding GitHub Actions run is https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41157208222. The Lean and Rocq job logs were inspected: no compiler errors, no Lean warning diagnostics, and no sorry/admit/Admitted/Axiom/Parameter markers.
+Latest source CI on commit dae081273ea4e6cc59478f18118729991277a6bf (Lean path lemma) and its immediate Rocq follow-up b5940c796e71800125625cbe61f5502f98902da9 is being checked. The previously verified public-history code commit 518d8321b0682bc5cf3077a070ec4579c6ec3aed passed both Lean and Rocq. See the Actions tab for exact newest runs; do not label the newly added full-path lemma machine-checked until the current run completes.
 
-### Limits that remain explicit
+### Scope boundaries
 
-1. The Lean theorem packages the strategy-level quantifiers for every finite horizon; the literal inf-sup minimax operator from Appendix G is not separately encoded as a Lean definition/theorem.
-2. The construction uses the paper's unrestricted measurable-space model. The countable-cocountable space on ω₁ is not claimed to be standard Borel, countably generated, or sampleable by an ordinary real-valued PRNG.
-3. Rocq verifies an abstract counterpart, not a concrete ω₁ construction.
+1. The finite-product probability calculation for a terminal target selected as a function of the complete sampled path is not yet separately encoded; the pointwise path-event containment is encoded.
+2. The literal minimax inf-sup operator from Appendix G is not separately declared as a Lean definition/theorem. The file formalizes the finite-horizon strategy-level witnesses and loss statements.
+3. The construction uses the paper's unrestricted measurable-space model. The countable-cocountable space on omega_1 is not standard Borel or countably generated, and the measure is not claimed to be implemented by a usual real-valued PRNG.
+4. Rocq verifies the corresponding abstract order/ideal schema rather than a concrete ordinal omega_1.
 
-These are scope limits, not outstanding compiler failures. The full mathematical strategy-level candidate is machine-checked concretely in Lean and abstractly in Rocq.
+These are formalization and model boundaries, not compiler failures.
 
-## External repository roles
+## Roles of the supplied repositories
 
-The supplied repositories were inspected for suitability; they were not all executed as autonomous agents. Mathlib4 is the main formal proof library and Lean kernel environment. LeanDojo-v2 is for proof retrieval and tactic assistance, not proof certification. Naproche checks natural-language mathematical documents. cvc5 is useful for finite first-order/SMT countermodels. SageMath, SymPy, and Wolfram support finite algebraic, ordinal-toy, and numerical sanity checks. GAP is useful for finite combinatorial/group models. Macaulay2 targets commutative algebra and has little direct leverage on the ω₁ measure construction. None substitutes for the Lean/Rocq kernels.
+The supplied repositories were inspected for suitability; they are supporting references and tools, not interchangeable proof kernels.
+
+- Mathlib4 — primary Lean library and trusted kernel environment for ordinals, measurable sets, and measure construction.
+- LeanDojo-v2 — retrieval/tactic suggestion and Lean proof-development assistance; not a proof certifier.
+- Naproche — checks natural-language mathematical exposition; useful for documenting the argument, not a substitute for Lean/Rocq.
+- cvc5 — finite first-order/SMT models and counterexample search; it cannot prove the uncountability of omega_1.
+- SageMath / SymPy / Wolfram — finite arithmetic, toy-order examples, and symbolic sanity checks.
+- GAP — finite combinatorial and group-theoretic experiments; low direct relevance here.
+- Macaulay2 — commutative algebra and algebraic geometry; little direct leverage on the ordinal measure argument.
 
 ## Sources
 
 - Shao, Fang, Lin, Tao, Partial Feedback Online Learning, arXiv:2601.21462v3 (2026-04-02): https://arxiv.org/html/2601.21462v3
 - MathOverflow, Inner Regularity of probability measure on totally ordered sets: https://mathoverflow.net/questions/343303/inner-regularity-of-probability-measure-on-totally-ordered-sets
-- MathOverflow, Measure on ω₁: https://mathoverflow.net/questions/81143/measure-on-omega-1
+- MathOverflow, Measure on omega_1: https://mathoverflow.net/questions/81143/measure-on-omega-1
 
 ## Verify
 
