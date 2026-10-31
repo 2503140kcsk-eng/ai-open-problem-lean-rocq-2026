@@ -59,12 +59,6 @@ jobs:
       - uses: actions/checkout@v7
         env:
           GIT_CONFIG_GLOBAL: ${{ runner.temp }}/gitconfig
-      - name: Detect pinned container OPAM root
-        id: opam-root
-        shell: bash
-        run: |
-          root="$(docker run --rm rocq/rocq-prover:9.2.0 sh -lc 'opam var root')"
-          echo "root=$root" >> "$GITHUB_OUTPUT"
       - name: Cache Gaia and Rocq OPAM dependencies
         uses: actions/cache@v4
         with:
@@ -78,8 +72,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/rocq-opam-root"
           chmod -R a+rwX "$RUNNER_TEMP/rocq-opam-root"
           docker run --rm \
-            -v "$RUNNER_TEMP/rocq-opam-root:${{ steps.opam-root.outputs.root }}" \
+            -v "$RUNNER_TEMP/rocq-opam-root:/opam-cache:rw" \
             -v "$GITHUB_WORKSPACE/PublicSetting/Rocq:/input:ro" \
             -v "$GITHUB_WORKSPACE/Rocq:/input-root:ro" \
             rocq/rocq-prover:9.2.0 \
-            sh -lc 'set -eu; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; opam --version; opam update; opam install --yes coq-gaia-ordinals.2.4; eval "$(opam env)"; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v; rocq compile -Q . PublicSetting PublicProtocol.v; rocq compile -Q . PublicSetting ProbabilisticBounds.v; rocq compile -Q . PublicSetting AdaptiveMoments.v; rocq compile -Q . PublicSetting OmegaOneSeparation.v; rocq compile -Q . PublicSetting PRNGNoGo.v; rocq compile -Q . PublicSetting ConcreteOmegaOne.v; cp /input-root/VCLearning.v /tmp/rocq-root-check/; cd /tmp/rocq-root-check; rocq compile VCLearning.v'
+            sh -lc 'set -eu; mkdir -p /opam-cache/opam-root; if [ ! -f /opam-cache/opam-root/config ]; then cp -a /home/rocq/.opam/. /opam-cache/opam-root/; fi; export OPAMROOT=/opam-cache/opam-root; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; opam --version; opam update; opam install --yes coq-gaia-ordinals.2.4; eval "$(opam env)"; mkdir -p /tmp/rocq-check /tmp/rocq-root-check; cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/; cd /tmp/rocq-check; rocq --version; rocq compile -Q . PublicSetting PublicSetting.v; rocq compile -Q . PublicSetting PublicProtocol.v; rocq compile -Q . PublicSetting ProbabilisticBounds.v; rocq compile -Q . PublicSetting AdaptiveMoments.v; rocq compile -Q . PublicSetting OmegaOneSeparation.v; rocq compile -Q . PublicSetting PRNGNoGo.v; rocq compile -Q . PublicSetting ConcreteOmegaOne.v; cp /input-root/VCLearning.v /tmp/rocq-root-check/; cd /tmp/rocq-root-check; rocq compile VCLearning.v'
