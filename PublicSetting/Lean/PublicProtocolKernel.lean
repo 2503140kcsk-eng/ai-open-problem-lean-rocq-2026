@@ -133,8 +133,10 @@ noncomputable def jointHistoryDrawKernel
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
     (hpolicy : Measurable (currentPolicy A L)) :
-    ProbabilityTheory.Kernel (History X D Y) (History X D Y × Y) :=
-  (ProbabilityTheory.Kernel.id ∥ₖ
+    ProbabilityTheory.Kernel (History X D Y) (History X D Y × Y) := by
+  letI : ProbabilityTheory.IsMarkovKernel (drawAfterPolicy A L draw hpolicy) :=
+    drawAfterPolicy_isMarkov A L draw hpolicy
+  exact (ProbabilityTheory.Kernel.id ∥ₖ
     drawAfterPolicy A L draw hpolicy) ∘ₖ
       ProbabilityTheory.Kernel.copy (History X D Y)
 
@@ -148,6 +150,8 @@ theorem jointHistoryDrawKernel_isMarkov
     (hpolicy : Measurable (currentPolicy A L)) :
     ProbabilityTheory.IsMarkovKernel
       (jointHistoryDrawKernel A L draw hpolicy) := by
+  letI : ProbabilityTheory.IsMarkovKernel (drawAfterPolicy A L draw hpolicy) :=
+    drawAfterPolicy_isMarkov A L draw hpolicy
   dsimp [jointHistoryDrawKernel]
   infer_instance
 
@@ -177,6 +181,8 @@ theorem publicProtocolTransition_isMarkov
     (hupdate : Measurable (updateHistory A L)) :
     ProbabilityTheory.IsMarkovKernel
       (publicProtocolTransition A L draw hpolicy hupdate) := by
+  letI : ProbabilityTheory.IsMarkovKernel (jointHistoryDrawKernel A L draw hpolicy) :=
+    jointHistoryDrawKernel_isMarkov A L draw hpolicy
   exact ProbabilityTheory.Kernel.IsMarkovKernel.map
     (jointHistoryDrawKernel A L draw hpolicy) hupdate
 
@@ -196,7 +202,7 @@ noncomputable def publicProtocolPrefixKernel
       (Π i : Finset.Iic n, History X D Y) (History X D Y) :=
   publicProtocolTransition A L draw hpolicy hupdate ∘ₖ
     ProbabilityTheory.Kernel.deterministic
-      (fun historyPrefix : Π i : Finset.Iic n, History X D Y =>
+      (fun historyPrefix : Π _i : Finset.Iic n, History X D Y =>
         historyPrefix ⟨n, by simp⟩)
       (by fun_prop)
 
@@ -212,6 +218,9 @@ theorem publicProtocolPrefixKernel_isMarkov
     (n : ℕ) :
     ProbabilityTheory.IsMarkovKernel
       (publicProtocolPrefixKernel A L draw hpolicy hupdate n) := by
+  letI : ProbabilityTheory.IsMarkovKernel
+      (publicProtocolTransition A L draw hpolicy hupdate) :=
+    publicProtocolTransition_isMarkov A L draw hpolicy hupdate
   dsimp [publicProtocolPrefixKernel]
   infer_instance
 
@@ -226,8 +235,10 @@ noncomputable def publicProtocolTrajectoryMeasure
     (draw : ProbabilityTheory.Kernel D Y)
     (hpolicy : Measurable (currentPolicy A L))
     (hupdate : Measurable (updateHistory A L)) :
-    Measure (Π n, History X D Y) := by
-  let κ := publicProtocolPrefixKernel A L draw hpolicy hupdate
+    Measure (Π n : ℕ, History X D Y) := by
+  let κ : (n : ℕ) → ProbabilityTheory.Kernel
+      (Π i : Finset.Iic n, History X D Y) History :=
+    fun n => publicProtocolPrefixKernel A L draw hpolicy hupdate n
   letI : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n) :=
     fun n => publicProtocolPrefixKernel_isMarkov A L draw hpolicy hupdate n
   exact ProbabilityTheory.Kernel.traj κ 0 (fun _ => ([] : History X D Y))
@@ -244,7 +255,9 @@ theorem publicProtocolTrajectoryMeasure_isProbability
     IsProbabilityMeasure
       (publicProtocolTrajectoryMeasure A L draw hpolicy hupdate) := by
   dsimp [publicProtocolTrajectoryMeasure]
-  let κ := publicProtocolPrefixKernel A L draw hpolicy hupdate
+  let κ : (n : ℕ) → ProbabilityTheory.Kernel
+      (Π i : Finset.Iic n, History X D Y) History :=
+    fun n => publicProtocolPrefixKernel A L draw hpolicy hupdate n
   letI : ∀ n, ProbabilityTheory.IsMarkovKernel (κ n) :=
     fun n => publicProtocolPrefixKernel_isMarkov A L draw hpolicy hupdate n
   infer_instance
@@ -263,7 +276,7 @@ theorem publicProtocol_trajectory_tower
     (hupdate : Measurable (updateHistory A L))
     {a b : ℕ} (hab : a ≤ b)
     (historyPrefix : Π i : Finset.Iic a, History X D Y)
-    (reward : (Π n, History X D Y) → ℝ)
+    (reward : (Π n : ℕ, History X D Y) → ℝ)
     (hreward : Integrable reward
       (ProbabilityTheory.Kernel.traj
         (publicProtocolPrefixKernel A L draw hpolicy hupdate) a historyPrefix)) :
