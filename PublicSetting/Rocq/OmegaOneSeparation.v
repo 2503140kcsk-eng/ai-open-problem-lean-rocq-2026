@@ -222,6 +222,117 @@ Section CountableCocountableMeasure.
     - reflexivity.
   Qed.
 
+
+  Definition Binary01 (a : nat -> nat) : Prop :=
+    forall n, a n = 0 \/ a n = 1.
+
+  Fixpoint PartialSum01 (a : nat -> nat) (n : nat) : nat :=
+    match n with
+    | 0 => 0
+    | S k => PartialSum01 a k + a k
+    end.
+
+  Lemma partial_sum01_zero_prefix :
+    forall a n,
+      (forall k, k < n -> a k = 0) ->
+      PartialSum01 a n = 0.
+  Proof.
+    intros a n. induction n as [|n IH]; intro h.
+    - reflexivity.
+    - simpl. rewrite IH.
+      + rewrite (h n (Nat.lt_succ_diag_r n)). lia.
+      + intros k hk. apply h. lia.
+  Qed.
+
+  Lemma partial_sum01_le_one :
+    forall a,
+      Binary01 a ->
+      AtMostOneOne a ->
+      forall n, PartialSum01 a n <= 1.
+  Proof.
+    intros a hbin hone n. induction n as [|n IH].
+    - reflexivity.
+    - simpl.
+      destruct (hbin n) as [hzero | hone_n].
+      + rewrite hzero. lia.
+      + assert (hprefix : PartialSum01 a n = 0).
+        { apply partial_sum01_zero_prefix.
+          intros k hk.
+          destruct (hbin k) as [hzero | hone_k].
+          - exact hzero.
+          - exfalso.
+            exact (hone k n (Nat.ne_of_lt hk) hone_k hone_n). }
+        rewrite hprefix, hone_n. lia.
+  Qed.
+
+  Lemma countable_sum01_is_sup_partial_sums :
+    forall a,
+      Binary01 a ->
+      AtMostOneOne a ->
+      (forall n, PartialSum01 a n <= CountableSum01 a) /\
+      (forall b, (forall n, PartialSum01 a n <= b) ->
+        CountableSum01 a <= b).
+  Proof.
+    intros a hbin hone.
+    unfold CountableSum01.
+    destruct (excluded_middle_informative (exists n, a n = 1))
+      as [[n hn] | hnone].
+    - simpl. split.
+      + intro k. exact (partial_sum01_le_one a hbin hone k).
+      + intros b hb.
+        assert (hprefix : PartialSum01 a n = 0).
+        { apply partial_sum01_zero_prefix.
+          intros k hk.
+          destruct (hbin k) as [hzero | hone_k].
+          - exact hzero.
+          - exfalso.
+            exact (hone k n (Nat.ne_of_lt hk) hone_k hn). }
+        specialize (hb (S n)).
+        simpl in hb. rewrite hprefix, hn in hb. lia.
+    - simpl. split.
+      + intro n.
+        assert (hzero : PartialSum01 a n = 0).
+        { apply partial_sum01_zero_prefix.
+          intros k hk.
+          destruct (hbin k) as [hzero | hone_k].
+          - exact hzero.
+          - exfalso. apply hnone. exists k. exact hone_k. }
+        rewrite hzero. lia.
+      + intros b hb. lia.
+  Qed.
+
+  (--
+    A zero-one probability measure is a probability measure with values in
+    {0,1}; its countable sum is the supremum of its finite partial sums.
+    For disjoint measurable sets, at most one summand can be one, and the
+    preceding theorem verifies the exact series semantics of CountableSum01.
+  --)
+  Record ZeroOneProbabilityMeasure := {
+    zpm_measurable : (Y -> Prop) -> Prop;
+    zpm_mass : (Y -> Prop) -> nat;
+    zpm_empty : zpm_mass (fun _ => False) = 0;
+    zpm_total : zpm_mass (fun _ => True) = 1;
+    zpm_binary : forall A, zpm_mass A = 0 \/ zpm_mass A = 1;
+    zpm_countable_additive :
+      forall A : nat -> Y -> Prop,
+        (forall n, zpm_measurable (A n)) ->
+        PairwiseDisjoint A ->
+        zpm_mass (fun x => exists n, A n x) =
+          CountableSum01 (fun n => zpm_mass (A n))
+  }.
+
+  Definition countableCocountableProbability : ZeroOneProbabilityMeasure :=
+    {| zpm_measurable := Measurable;
+       zpm_mass := Mass;
+       zpm_empty := mass_empty_zero;
+       zpm_total := mass_universe_one;
+       zpm_binary := mass_is_zero_or_one;
+       zpm_countable_additive := countable_additivity_zero_one |}.
+
+  Lemma countableCocountable_probability_measure :
+    zpm_total countableCocountableProbability = 1.
+  Proof. exact (zpm_total countableCocountableProbability). Qed.
+
 End CountableCocountableMeasure.
 
 Section OmegaOneGame.
