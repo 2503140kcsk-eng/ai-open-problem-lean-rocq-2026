@@ -367,17 +367,19 @@ theorem deterministicTotalLoss_eq_horizon
       simp [deterministicTotalLoss, ih, deterministicRoundLoss_eq_one]
 
 /-- A deterministic learner as a function of its public past and current context. -/
-abbrev DeterministicLearner := List (Nat × Label × Label) → Nat → Label
+abbrev PublicHistory := List (Nat × Label)
+
+abbrev DeterministicLearner := PublicHistory → Nat → Label
 
 /-- The adversarial public trace: at context t, the learner's deterministic
 prediction is known, and the witness is its ordinal successor. -/
 def deterministicTrace (learner : DeterministicLearner) :
-    ℕ → List (Nat × Label × Label)
+    ℕ → PublicHistory
   | 0 => []
   | n + 1 =>
       let history := deterministicTrace learner n
       let prediction := learner history n
-      history ++ [(n, prediction, succLabel prediction)]
+      history ++ [(n, succLabel prediction)]
 
 def deterministicPredictionPath (learner : DeterministicLearner) : ℕ → Label :=
   fun t => learner (deterministicTrace learner t) t
@@ -411,7 +413,7 @@ noncomputable def constantRandomizedAction : Measure Label :=
   countableCocountableMeasure
 
 noncomputable def constantRandomizedLearner
-    (_history : List (Nat × Label × Label)) (_context : Nat) : Measure Label :=
+    (_history : PublicHistory) (_context : Nat) : Measure Label :=
   constantRandomizedAction
 
 /-- The finite-horizon expected loss of this strategy on a sequence of
@@ -419,12 +421,12 @@ upper-tail acceptable sets. For an indicator loss, expectation equals the
 measure of its error event. -/
 noncomputable def randomizedExpectedTotalLoss (thresholds : ℕ → Label) (T : ℕ) : ENNReal :=
   ∑ t ∈ Finset.range T,
-    constantRandomizedAction ((upperTail (thresholds t))ᶜ)
+    (constantRandomizedLearner ([] : PublicHistory) t) ((upperTail (thresholds t))ᶜ)
 
 theorem constantRandomizedLearner_zero_expected_loss
     (thresholds : ℕ → Label) (T : ℕ) :
     randomizedExpectedTotalLoss thresholds T = 0 := by
-  simp [randomizedExpectedTotalLoss, constantRandomizedAction,
+  simp [randomizedExpectedTotalLoss, constantRandomizedLearner, constantRandomizedAction,
     upperTail_complement_measure_zero]
 
 /-- Combined finite-horizon separation statement in the paper's set-realizable
