@@ -242,7 +242,7 @@ For every beta < omega_1, the initial segment [0,beta) is countable. Hence mu([0
 
 The learner chooses mu at every round. Consider any public history and its next visible witness w_t. The terminal target subfamily may be selected after the sampled predictions, but it must be globally consistent and its acceptable set at x_t must be an admissible upper tail S_{beta_t} containing w_t. Thus beta_t <= w_t. A mistake at round t implies
 prediction < beta_t <= w_t,
-so every possible miss is contained in [0,w_t), which has mu-measure zero. This is a pointwise containment, so it is unaffected by how the terminal target is selected after the predictions. Conditional on every pre-round public history and witness, the expected round loss is zero. Consequently the randomized regret is zero for every finite horizon T in the paper's abstract probability-measure strategy model.
+so every possible miss is contained in [0,w_t), which has mu-measure zero. This pointwise containment is unaffected by how the terminal target is selected after the predictions. Lean machine-checks that the conditional one-round miss probability is zero uniformly at every public history and every pre-sampling witness. Under the paper's usual sequential conditional-sampling semantics, summing these zero conditional expectations yields zero expected cumulative loss. The formal sequential-kernel/tower-property construction for arbitrary measurable history-dependent adversary policies is not yet encoded as a single Lean theorem, so the cumulative conclusion is a mathematical consequence of the uniform one-step theorem, not yet a standalone kernel-checked minimax result.
 
 The formal lemma needed for this argument is stronger than fixing one threshold: for every function beta:Y->Y satisfying beta(y)<=w for all y, the miss set {y : not beta(y)<=y} is contained in [0,w). It therefore covers threshold selection depending on the current sampled label. Conditioning on the other sampled labels yields the same pointwise argument for a terminal family selected from the entire path.
 
@@ -264,7 +264,7 @@ This candidate uses the paper's very general formulation in which the label spac
 
 - Lean: PublicSetting/Lean/OmegaOneSeparation.lean is a concrete Mathlib development of omega_1, the countable-cocountable sigma algebra, the probability measure via Measure.ofMeasurable, countable upper-tail intersection, adaptive miss-set nullity, and the one-global-target deterministic lower bound.
 - Rocq: PublicSetting/Rocq/OmegaOneSeparation.v proves the same measure/game lemmas abstractly for an ordered label type supplied with a countable ideal, small initial segments, successor, and countable boundedness. The Rocq Stdlib project does not supply a concrete omega_1 ordinal/measure instance in this project, so this is not yet a concrete duplicate of the Lean instantiation.
-- Both proof assistants have now checked the omega-one path-containment additions: Lean code commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a and Rocq code commit b5940c796e71800125625cbe61f5502f98902da9. Both push and PR workflows succeeded, and the documentation-complete PR head f0b7fdc755ff827aefe4f4d96e1111201bf5c68e also passed both workflows. Four current Lean/Rocq job logs were inspected; zero compiler errors, warnings, deprecation/hint messages, or unfinished-proof markers were found. The full-path set-containment theorem is checked; the finite-product integration and literal minimax operator remain unformalized.
+- Lean machine-checks the full-path miss containment, finite-product probability-zero bridge, and the one-step zero conditional miss probability uniformly over public histories. Rocq independently checks the abstract countable-ideal/order counterpart, including pathwise containment. The sequential-kernel/tower-property theorem for arbitrary history-dependent visible-witness policies and the literal minimax operator remain unformalized.
 
 ### Next formal verification boundary
 
@@ -308,3 +308,8 @@ Code: Lean 4.35 commit 4ebc89d95a6deb59bf658c2e2c26bac897701f2a; Rocq 9.2 commit
 ## Documentation-head CI (2026-10-31)
 
 The final documentation-only branch head `001fa8b623e0326223658ac228f0f8f435460100` passed push run 41163413199 and PR run 41163416315. Lean and Rocq succeeded in both workflows; all four job logs were scanned and had zero compiler diagnostics or unfinished-proof markers.
+
+
+## Latest documentation CI (2026-10-31)
+
+The docs-only head `f54efc8ec90333eb10eb03552d71532300ac910c` passed push run 41163749385 and PR run 41163752038. Lean and Rocq passed in both; all four job logs had zero compiler diagnostics, warnings, deprecations, hints, or unfinished-proof markers.
