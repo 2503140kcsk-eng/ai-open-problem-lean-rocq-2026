@@ -340,7 +340,6 @@ theorem deterministicTotalLoss_eq_horizon
       simp [deterministicTotalLoss, ih, deterministicRoundLoss_eq_one]
 
 /-- A deterministic learner as a function of its public past and current context. -/
-set_option linter.checkUnivs false in
 abbrev DeterministicLearner := List (Nat × Label × Label) → Nat → Label
 
 /-- The adversarial public trace: at context t, the learner's deterministic
