@@ -73,7 +73,7 @@ These are substantive hypotheses. Kernel measurability alone does not imply conv
 
 ## 5. Why this does not yet close the omega-one candidate
 
-The omega-one construction in `OmegaOneSeparation.lean` uses the countable-cocountable sigma algebra on (omega_1) and its 0/1 probability measure. Its current proofs establish fixed-witness nullity and a finite-product null-event result for a fixed vector of visible witnesses. They do not yet establish a fully measurable pathwise loss for arbitrary history-adaptive witness policies.
+The Lean omega-one construction in `Lean/OmegaOneSeparation.lean` uses Mathlib's concrete `Ordinal.omega 1` carrier with the countable-cocountable sigma algebra and its 0/1 probability measure. The Rocq side now also contains `Rocq/ConcreteOmegaOne.v`, an adapter to Gaia 2.4's concrete set-theoretic object `Ordinals1.aleph_one := cnext omega0`, with a proved characterization as exactly the countable ordinals and a countable-supremum closure theorem. The generic countable-ideal game lemmas in `Rocq/OmegaOneSeparation.v` have not yet been instantiated over that Gaia carrier; the concrete adapter is a completed dependency bridge, not yet a port of the full game measure.
 
 There is a concrete measurability obstruction to the direct full-path route proposed in this module.
 
@@ -116,6 +116,8 @@ The tools and repositories have distinct jobs; not all are proof engines for thi
 | `gap-system/gap` | Finite group symmetries or orbit reduction if a game instance has group structure | A relevant tool for arbitrary measurable kernels |
 | `Macaulay2/M2` | Algebraic-geometric elimination only if strategy constraints are polynomially parameterized | A direct probability-kernel formalizer |
 | `naproche` | Check structured natural-language mathematical exposition | A replacement for Lean verification |
+| `rocq-community/gaia` (new dependency) | Concrete set-theoretic ordinals and the actual `aleph_one` construction for Rocq | An axiom-free foundation; its Bourbaki-style set theory has explicit classical/set-theoretic axioms |
+| `rocq-community/hydra-battles` (audited, not adopted) | A comparison point for Schütte ordinal notations | Its `Ord` interface is axiomatic and therefore does not replace a concrete `omega_1` object |
 | Wolfram | Exact small-game examples and independent numerical checks | A proof of the general theorem |
 | Sider Scholar / Parallel Search | Literature retrieval and cross-checking assumptions | Formal verification |
 | Context7 | Current Mathlib declaration/import lookup | A proof checker |
@@ -128,5 +130,7 @@ From `PublicSetting/Lean`:
 ```sh
 lake build SequentialKernelMinimax
 ```
+
+The Rocq workflow uses Rocq 9.2 and installs the pinned Gaia 2.4 ordinal package before compiling `Rocq/ConcreteOmegaOne.v`. The adapter emits `Print Assumptions` output for its ordinal characterization and countable-supremum theorem; review this output when auditing the foundational assumptions.
 
 The package default build now includes `SequentialKernelMinimax`. Record the exact commit and both Lean/Rocq CI results when reporting verification.
