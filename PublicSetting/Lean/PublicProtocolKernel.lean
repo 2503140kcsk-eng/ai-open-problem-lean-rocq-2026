@@ -164,7 +164,7 @@ noncomputable def publicProtocolTransition
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
     (hpolicy : Measurable (currentPolicy A L))
-    (hupdate : Measurable (updateHistory A L)) :
+    (_hupdate : Measurable (updateHistory A L)) :
     ProbabilityTheory.Kernel (History X D Y) (History X D Y) :=
   ProbabilityTheory.Kernel.map
     (jointHistoryDrawKernel A L draw hpolicy)
@@ -199,8 +199,11 @@ noncomputable def publicProtocolPrefixKernel
     (hupdate : Measurable (updateHistory A L))
     (n : ℕ) :
     ProbabilityTheory.Kernel
-      (Π i : Finset.Iic n, History X D Y) (History X D Y) :=
-  publicProtocolTransition A L draw hpolicy hupdate ∘ₖ
+      (Π i : Finset.Iic n, History X D Y) (History X D Y) := by
+  letI : ProbabilityTheory.IsMarkovKernel
+      (publicProtocolTransition A L draw hpolicy hupdate) :=
+    publicProtocolTransition_isMarkov A L draw hpolicy hupdate
+  exact publicProtocolTransition A L draw hpolicy hupdate ∘ₖ
     ProbabilityTheory.Kernel.deterministic
       (fun historyPrefix : Π _i : Finset.Iic n, History X D Y =>
         historyPrefix ⟨n, by simp⟩)
@@ -233,6 +236,7 @@ noncomputable def publicProtocolTrajectoryMeasure
     [MeasurableSpace Y]
     (A : Adversary X D Y) (L : Learner X D Y)
     (draw : ProbabilityTheory.Kernel D Y)
+    [ProbabilityTheory.IsMarkovKernel draw]
     (hpolicy : Measurable (currentPolicy A L))
     (hupdate : Measurable (updateHistory A L)) :
     Measure (Π n : ℕ, History X D Y) := by
