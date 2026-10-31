@@ -10,7 +10,7 @@ The horizon quantifier matters. A result for one finite T does not establish asy
 
 ## Literature audit
 
-Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion condition is necessary for inseparability. Section 3.3 also studies the separate distinction between oblivious and public adversaries. The same paper proves a different result, Theorem 18: randomized learnability under the oblivious setting can fail to persist under the public setting. The two statements must not be conflated.
+Primary source: Shihao Shao, Cong Fang, Zhouchen Lin, Dacheng Tao, “Partial Feedback Online Learning,” arXiv:2601.21462v3, dated 2026-04-02. The final paragraph of Section 3.3 asks whether randomized and deterministic learnability can separate in the public partial-feedback setting; this is the target question of this PR. A distinct question at the end of Section 3.2 asks whether finite Helly number or the nested-inclusion sufficient condition is necessary for inseparability. Section 3.3 also proves Theorems 17 and 18 about the separate oblivious-versus-public comparison. These questions and results must not be conflated.
 
 - Paper: https://arxiv.org/abs/2601.21462
 - HTML source: https://arxiv.org/html/2601.21462v3
@@ -197,7 +197,7 @@ One could parameterize a narrower family such as computable or suitably coded me
 - This cardinality argument is **not** a no-go theorem for every possible hypothesis class: a successful class might diagonalize along paths without literally indexing policies in the context.
 - No theorem establishing all three requested conditions in the unrestricted model, and no theorem ruling out such a class, has been obtained in this update.
 
-Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3. The final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion criterion is necessary for deterministic/randomized inseparability. Theorem 18 there is only an oblivious-versus-public separation, not the requested result: https://arxiv.org/html/2601.21462v3
+Primary problem statement: Shao, Fang, Lin, Tao, *Partial Feedback Online Learning*, arXiv:2601.21462v3. The final paragraph of Section 3.3 asks whether randomized and deterministic learners can separate in the public setting. The distinct finite-Helly/nested-inclusion necessity question is at the end of Section 3.2. Theorem 18 (Section 3.3) is a separate oblivious-versus-public separation, not the same result: https://arxiv.org/html/2601.21462v3
 
 
 ## Formalized quantifier boundary: what can and cannot be ruled out
@@ -219,7 +219,7 @@ is invalid in general. The first theorem rules out only the stronger interpretat
 
 Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
 
-As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), the final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion sufficient criterion is necessary for deterministic/randomized inseparability. Section 3.3 separately treats oblivious versus public adversaries. The omega-one construction in this repository is a candidate separation when the Section 3.2 sufficient conditions fail; it does not prove a universal characterization.
+As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), the final paragraph of Section 3.3 leaves open whether randomized and deterministic learners can separate under the public partial-feedback protocol. The separate Section 3.2 necessity question concerns finite Helly number / nested inclusion. The omega-one construction targets the Section 3.3 problem.
 
 
 ## 2026-10-31: omega-one countable/cocountable candidate
@@ -281,3 +281,12 @@ The public-history type is List (Nat × Label × Label), storing (context, visib
 ## Public-history correction (2026-10-31)
 
 The Lean public history is a list of triples (context, visible label, realized prediction). This reflects that a public adversary can observe previous realized predictions, and deterministic learner strategies may condition on that complete past. The current round is generated recursively: the learner predicts from the past; the public adversary then reveals the successor of that prediction as the visible label. The current prediction is not placed in the pre-round history.
+
+
+## 2026-10-31: full-path terminal-target audit
+
+The public protocol lets the adversary see previous realized predictions, and the acceptable sets may be chosen consistently after the complete path. Lean now defines a path-dependent terminal threshold rule on Fin T → Label and proves that any path with a mistake on any coordinate lies in the finite union of cylinders {path | path t < witness t}. Rocq proves the abstract corresponding coordinate-containment lemma. Each one-coordinate initial segment is countable and has marginal mass zero. The finite-product measure argument is standard but remains separately unformalized; the latest source CI must pass before describing the new path lemmas as machine-checked.
+
+## Paper open-question locations
+
+There are two distinct open questions in arXiv:2601.21462v3. The target in this PR is the final paragraph of Section 3.3 (public-setting randomized versus deterministic learnability). The final paragraph of Section 3.2 instead asks whether finite Helly number or the nested-inclusion property is necessary for inseparability. Theorem 18 in Section 3.3 is an oblivious-versus-public separation and is also distinct from the target question.
