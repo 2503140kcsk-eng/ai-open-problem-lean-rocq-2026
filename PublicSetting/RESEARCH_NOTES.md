@@ -219,7 +219,7 @@ is invalid in general. The first theorem rules out only the stronger interpretat
 
 Consequently, neither the fixed-target mixing argument nor the cardinality obstruction to self-indexing all strategies proves that the original unrestricted public-setting separation is impossible. The cardinality obstruction is limited to that particular diagonal-construction route. Conversely, the finite matrix countermodel does not establish that a valid set-realizable hypothesis class with a randomized o(T) upper bound and Omega(T) lower bounds for all deterministic learners exists.
 
-As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), Section 3.3 explicitly leaves the exact randomized-versus-deterministic learnability separation in the public setting open; it warns that the oblivious-versus-public separation is a different result. The present audit did not find a later source resolving this exact necessity question. This is evidence about the state of the literature, not a proof of impossibility.
+As of this update, Shao, Fang, Lin, and Tao's arXiv v3 (2026-04-02), the final paragraph of Section 3.2 asks whether finite Helly number or the nested-inclusion sufficient criterion is necessary for deterministic/randomized inseparability. Section 3.3 separately treats oblivious versus public adversaries. The omega-one construction in this repository is a candidate separation when the Section 3.2 sufficient conditions fail; it does not prove a universal characterization.
 
 
 ## 2026-10-31: omega-one countable/cocountable candidate
@@ -276,3 +276,8 @@ The Lean file contains a finite-horizon strategy-level theorem quantifying over 
 The latest source commit with the exact public-history learner interface is 1168ded2065bc238a1f6978b5b48addfece2dee3. GitHub Actions run 41157208222 passed both Lean 4.35 and Rocq 9.2. Both logs were inspected; Lean contains no warning diagnostics (the string Cache.Warning:c.o is a build-artifact name, not a compiler warning) and Rocq is clean. The Lean theorem omegaOne_finite_horizon_separation formalizes the strategy-level finite-horizon bounds; Rocq remains an abstract ordered-type counterpart rather than a concrete omega_1 instantiation.
 
 The public-history type is List (Nat × Label × Label), storing (context, visible label, realized prediction). This allows deterministic strategies to depend on the previous sampled predictions visible in the public protocol. The randomized policy is the constant countable-cocountable probability measure; the error-event argument is pointwise contained in a null initial segment, including terminal upper-tail choices compatible with the visible witness.
+
+
+## Public-history correction (2026-10-31)
+
+The Lean public history is a list of triples (context, visible label, realized prediction). This reflects that a public adversary can observe previous realized predictions, and deterministic learner strategies may condition on that complete past. The current round is generated recursively: the learner predicts from the past; the public adversary then reveals the successor of that prediction as the visible label. The current prediction is not placed in the pre-round history.
