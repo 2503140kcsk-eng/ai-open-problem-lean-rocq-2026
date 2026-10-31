@@ -84,3 +84,8 @@ The supplied repositories were inspected for suitability; they are supporting re
 Lean: cd PublicSetting/Lean && lake build
 
 Rocq 9.2: cd PublicSetting/Rocq && rocq compile -Q . PublicSetting PublicSetting.v
+
+
+## Final documentation-head CI (2026-10-31)
+
+The latest documentation-complete branch head is `001fa8b623e0326223658ac228f0f8f435460100`. Its push run [41163413199](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41163413199) and pull-request run [41163416315](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41163416315) both succeeded. Lean and Rocq succeeded in both runs. All four job logs were inspected; zero compiler errors, warnings, deprecation/hint messages, or unfinished-proof markers were found.
