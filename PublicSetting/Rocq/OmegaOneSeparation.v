@@ -339,7 +339,7 @@ Section CountableCocountableMeasure.
        zpm_countable_additive := countable_additivity_zero_one |}.
 
   Lemma countableCocountable_probability_measure :
-    zpm_total countableCocountableProbability = 1.
+    zpm_mass countableCocountableProbability (fun _ => True) = 1.
   Proof. exact (zpm_total countableCocountableProbability). Qed.
 
 End CountableCocountableMeasure.
