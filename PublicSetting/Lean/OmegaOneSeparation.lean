@@ -367,7 +367,10 @@ theorem deterministicTotalLoss_eq_horizon
       simp [deterministicTotalLoss, ih, deterministicRoundLoss_eq_one]
 
 /-- A deterministic learner as a function of its public past and current context. -/
-abbrev PublicHistory := List (Nat × Label)
+/-- A public round records its context, the visible label, and the realized
+prediction. The latter is visible to the public adversary before the next
+round. -/
+abbrev PublicHistory := List (Nat × Label × Label)
 
 abbrev DeterministicLearner := PublicHistory → Nat → Label
 
@@ -379,7 +382,7 @@ def deterministicTrace (learner : DeterministicLearner) :
   | n + 1 =>
       let history := deterministicTrace learner n
       let prediction := learner history n
-      history ++ [(n, succLabel prediction)]
+      history ++ [(n, succLabel prediction, prediction)]
 
 def deterministicPredictionPath (learner : DeterministicLearner) : ℕ → Label :=
   fun t => learner (deterministicTrace learner t) t
