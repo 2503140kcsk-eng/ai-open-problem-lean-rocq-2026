@@ -71,7 +71,7 @@ theorem finitePrefix_consistency
 /-- Tower property for a sequential process: conditional expectation of an
 integrable full-path reward given the coordinates through time b equals the
 continuation-kernel expectation, almost everywhere. -/
-@[expose] public theorem trajectory_tower
+@[expose] public def trajectory_tower
     {States : ℕ → Type*} [∀ n, MeasurableSpace (States n)]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     (κ : (n : ℕ) → ProbabilityTheory.Kernel
