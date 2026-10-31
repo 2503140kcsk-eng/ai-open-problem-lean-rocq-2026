@@ -1,4 +1,4 @@
-From Stdlib Require Import FunctionalExtensionality PropExtensionality.
+From Stdlib Require Import ClassicalDescription FunctionalExtensionality PropExtensionality.
 From PublicSetting Require Import OmegaOneSeparation.
 
 (*
