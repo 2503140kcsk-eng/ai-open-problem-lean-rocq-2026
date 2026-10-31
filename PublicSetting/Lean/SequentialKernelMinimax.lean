@@ -3,6 +3,7 @@ module
 public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
 public import Mathlib.Topology.Sion
 public import Mathlib.Probability.Process.Filtration
+public import Mathlib.Geometry.Convex.ConvexSpace.CompactSpaceStdSimplex
 
 /-!
 # Sequential-kernel / tower / minimax interface
@@ -104,6 +105,41 @@ structure CompactConvexStrategySpace (E : Type*)
   nonempty : carrier.Nonempty
   convex : Convex ℝ carrier
   compact : IsCompact carrier
+
+/-- The mixed-strategy carrier for a finite set of pure contingent plans.
+A point is the vector of probabilities assigned to the pure plans. -/
+def finiteMixedStrategyCarrier (A : Type*) [Fintype A] :
+    Set (A → ℝ) :=
+  Set.range (fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ))
+
+/-- The mixed strategies over finitely many pure plans form a nonempty compact
+convex subset of the ambient real vector space of probability vectors. -/
+noncomputable def finiteMixedStrategySpace (A : Type*) [Fintype A] [Nonempty A] :
+    CompactConvexStrategySpace (A → ℝ) where
+  carrier := finiteMixedStrategyCarrier A
+  nonempty := by
+    let p : Convexity.StdSimplex ℝ A :=
+      Convexity.StdSimplex.single (Classical.choice (inferInstance : Nonempty A))
+    exact ⟨p.weights, ⟨p, rfl⟩⟩
+  convex := by
+    intro x hx y hy s hs
+    rcases hx with ⟨p, rfl⟩
+    rcases hy with ⟨q, rfl⟩
+    let t : ℝ := 1 - s
+    have ht : 0 ≤ t := sub_nonneg.mpr hs.2
+    have hst : s + t = 1 := by dsimp [t]; ring
+    let r : Convexity.StdSimplex ℝ A :=
+      Convexity.convexCombPair s t hs.1 ht hst p q
+    apply Set.mem_range.mpr
+    refine ⟨r, ?_⟩
+    simpa [t] using
+      (congrArg (fun w : A →₀ ℝ => (w : A → ℝ))
+        (Convexity.StdSimplex.weights_convexCombPair p q s t hs.1 ht hst)).symm
+  compact := by
+    change IsCompact
+      (Set.range (fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ)))
+    exact isCompact_univ.image
+      (Convexity.StdSimplex.isEmbedding_toFun_comp_weights ℝ A).continuous
 
 /-- A sequential zero-sum game over compact convex strategy sets. Each
 transition may depend on the complete public history. -/
