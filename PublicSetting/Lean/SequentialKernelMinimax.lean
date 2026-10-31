@@ -122,24 +122,23 @@ noncomputable def finiteMixedStrategySpace (A : Type*) [Fintype A] [Nonempty A] 
       Convexity.StdSimplex.single (Classical.choice (inferInstance : Nonempty A))
     exact ⟨p.weights, ⟨p, rfl⟩⟩
   convex := by
-    intro x hx y hy s hs
+    intro x hx
+    intro y hy a b ha hb hab
     rcases hx with ⟨p, rfl⟩
     rcases hy with ⟨q, rfl⟩
-    let t : ℝ := 1 - s
-    have ht : 0 ≤ t := sub_nonneg.mpr hs.2
-    have hst : s + t = 1 := by dsimp [t]; ring
     let r : Convexity.StdSimplex ℝ A :=
-      Convexity.convexCombPair s t hs.1 ht hst p q
-    apply Set.mem_range.mpr
+      Convexity.convexCombPair a b ha hb hab p q
+    change a • (p.weights : A → ℝ) + b • (q.weights : A → ℝ) ∈
+      Set.range (fun z : Convexity.StdSimplex ℝ A => (z.weights : A → ℝ))
     refine ⟨r, ?_⟩
-    simpa [t] using
-      (congrArg (fun w : A →₀ ℝ => (w : A → ℝ))
-        (Convexity.StdSimplex.weights_convexCombPair p q s t hs.1 ht hst)).symm
+    funext i
+    simp [r, Convexity.StdSimplex.weights_convexCombPair]
   compact := by
     change IsCompact
-      (Set.range (fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ)))
+      ((fun p : Convexity.StdSimplex ℝ A => (p.weights : A → ℝ)) '' Set.univ)
     exact isCompact_univ.image
       (Convexity.StdSimplex.isEmbedding_toFun_comp_weights ℝ A).continuous
+
 
 /-- A sequential zero-sum game over compact convex strategy sets. Each
 transition may depend on the complete public history. -/
