@@ -61,7 +61,7 @@ Module PublicSettingConcreteOmegaOne.
     }
     assert (hImpossible : omegaOne <=c aleph0).
     {
-      change (Ordinals4.aleph_one <=c aleph0).
+      change (Ordinals1.aleph_one <=c aleph0).
       rewrite - Ordinals4.Cantor_omega_pr2.
       exact hCardLe.
     }
