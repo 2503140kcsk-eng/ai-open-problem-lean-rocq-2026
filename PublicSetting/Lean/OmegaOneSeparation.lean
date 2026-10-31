@@ -34,22 +34,23 @@ open scoped Cardinal
 namespace PublicSetting.OmegaOne
 
 /-- The label space: all ordinals strictly below the first uncountable ordinal. -/
-abbrev Label := Set.Iio (Ordinal.omega 1)
+abbrev Label := Set.Iio (Ordinal.omega (1 : Ordinal.{0}) : Ordinal.{0})
 
 theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
   intro h
-  letI : Countable Label := Set.countable_univ_iff.mp h
-  let b : Ordinal := ⨆ a : Label, (a : Ordinal)
-  have hb : b < Ordinal.omega 1 := by
-    exact Ordinal.iSup_lt_omega_one (fun a => a.2)
-  have hbdd : BddAbove (Set.range fun a : Label => (a : Ordinal)) := by
-    refine ⟨Ordinal.omega 1, ?_⟩
+  have hcount : Countable Label := Set.countable_univ_iff.mp h
+  let b : Ordinal.{0} := ⨆ a : Label, (a : Ordinal.{0})
+  have hb : b < Ordinal.omega (1 : Ordinal.{0}) := by
+    exact @Ordinal.iSup_lt_omega_one Label hcount
+      (fun a => (a : Ordinal.{0})) (fun a => a.2)
+  have hbdd : BddAbove (Set.range fun a : Label => (a : Ordinal.{0})) := by
+    refine ⟨Ordinal.omega (1 : Ordinal.{0}), ?_⟩
     rintro _ ⟨a, rfl⟩
     exact a.2.le
-  have hbound : ∀ a : Label, (a : Ordinal) ≤ b := by
+  have hbound : ∀ a : Label, (a : Ordinal.{0}) ≤ b := by
     intro a
     exact le_ciSup hbdd a
-  let w : Label := ⟨Order.succ b, (Cardinal.isSuccLimit_omega 1).succ_lt hb⟩
+  let w : Label := ⟨Order.succ b, (Cardinal.isSuccLimit_omega (1 : Ordinal.{0})).succ_lt hb⟩
   have hw : b < (w : Ordinal) := by
     simp [w]
   exact (not_lt_of_ge (hbound w)) hw
