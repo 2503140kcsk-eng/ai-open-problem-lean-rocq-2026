@@ -431,6 +431,32 @@ Section OmegaOneGame.
     - reflexivity.
   Qed.
 
+
+  (* A terminal target family may be selected from the complete sampled path.
+     This lemma records the pointwise fact needed for the finite-product
+     probability argument: every mistake coordinate is below its witness. *)
+  Definition TerminalPathMissSet
+      (T : nat) (witnesses : nat -> Y)
+      (chooseThreshold : (nat -> Y) -> nat -> Y)
+      (path : nat -> Y) : Prop :=
+    exists t, t < T /\
+      ~ Tail (chooseThreshold path t) (path t).
+
+  Lemma terminal_path_miss_subset_bad_coordinates :
+    forall T witnesses chooseThreshold,
+      (forall path t, Tail (chooseThreshold path t) (witnesses t)) ->
+      forall path,
+        TerminalPathMissSet T witnesses chooseThreshold path ->
+        exists t, t < T /\ lt (path t) (witnesses t).
+  Proof.
+    intros T witnesses chooseThreshold hContains path [t [ht hmiss]].
+    exists t. split; [exact ht|].
+    unfold Tail, le in *.
+    apply lt_le_trans with (y := chooseThreshold path t).
+    - apply NNPP. exact hmiss.
+    - exact (hContains path t).
+  Qed.
+
   Lemma every_countable_tail_family_has_common_member :
     forall thresholds : nat -> Y,
       exists y, forall n, Tail (thresholds n) y.
