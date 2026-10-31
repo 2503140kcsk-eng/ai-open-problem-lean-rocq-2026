@@ -1,3 +1,5 @@
+module
+
 import Mathlib
 
 /-!
@@ -36,7 +38,7 @@ abbrev Label := Set.Iio (Ordinal.omega 1)
 
 theorem label_univ_not_countable : ¬ (Set.univ : Set Label).Countable := by
   intro h
-  haveI : Countable Label := Set.countable_univ_iff.mp h
+  letI : Countable Label := Set.countable_univ_iff.mp h
   let b : Ordinal := ⨆ a : Label, (a : Ordinal)
   have hb : b < Ordinal.omega 1 := by
     exact Ordinal.iSup_lt_omega_one (fun a => a.2)
@@ -223,7 +225,7 @@ theorem allUpperTails_intersection_empty (y : Label) :
 
 /-- The set of predictions rejected by a tail whose threshold may depend
 on the current sampled label. -/
-def adaptiveMissSet (chooseThreshold : Label → Label) (witness : Label) :
+def adaptiveMissSet (chooseThreshold : Label → Label) (_witness : Label) :
     Set Label := {prediction | ¬ chooseThreshold prediction ≤ prediction}
 
 /-- If the terminal tail must contain the already revealed witness, every
@@ -307,7 +309,7 @@ theorem deterministic_global_target_is_realizable
     (∀ t y,
       AcceptedAt (deterministicThresholds prediction) t y ↔
         deterministicThresholds prediction t ≤ y) :=
-  ⟨globalTailFamily_nonempty _, fun t y => acceptedAt_iff_upperTail _ _ _⟩
+  ⟨globalTailFamily_nonempty _, fun t y => acceptedAt_iff_upperTail (deterministicThresholds prediction) t y⟩
 
 /-- Every deterministic prediction is excluded by the corresponding member
 of the globally consistent tail family. -/
@@ -338,6 +340,7 @@ theorem deterministicTotalLoss_eq_horizon
       simp [deterministicTotalLoss, ih, deterministicRoundLoss_eq_one]
 
 /-- A deterministic learner as a function of its public past and current context. -/
+set_option linter.checkUnivs false in
 abbrev DeterministicLearner := List (Nat × Label × Label) → Nat → Label
 
 /-- The adversarial public trace: at context t, the learner's deterministic
