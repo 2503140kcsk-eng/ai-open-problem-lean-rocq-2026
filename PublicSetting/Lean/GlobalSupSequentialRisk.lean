@@ -34,6 +34,37 @@ theorem globalTailFamily_projection {T : ℕ}
       · simp [hj]
     · simp
 
+
+/-- A single horizon-independent hypothesis domain: functions on all
+natural-number contexts. A finite vector of thresholds constrains only the
+first T coordinates, leaving every later coordinate unrestricted. -/
+def globalTailFamilyOnNat {T : ℕ} (beta : Fin T → Label) : Set (ℕ → Label) :=
+  {f | ∀ t : Fin T, beta t ≤ f t}
+
+/-- For the fixed class domain Y^N, each of the first T coordinate images
+of one globally constrained family is exactly its prescribed upper tail. -/
+theorem globalTailFamilyOnNat_projection {T : ℕ}
+    (beta : Fin T → Label) (t : Fin T) :
+    Set.image (fun f : ℕ → Label => f t) (globalTailFamilyOnNat beta) =
+      upperTail (beta t) := by
+  classical
+  ext y
+  constructor
+  · rintro ⟨f, hf, rfl⟩
+    exact hf t
+  · intro hy
+    change beta t ≤ y at hy
+    let base : ℕ → Label := fun n =>
+      if hn : n < T then beta ⟨n, hn⟩ else ⊥
+    refine ⟨Function.update base t y, ?_, ?_⟩
+    · intro s
+      by_cases hst : (s : ℕ) = (t : ℕ)
+      · have hst' : s = t := Fin.ext hst
+        subst s
+        simp [base, t.isLt, hy]
+      · simp [Function.update, base, s.isLt, hst]
+    · simp [Function.update, base, t.isLt, hy]
+
 /-- Terminal loss after choosing one common vector of upper-tail thresholds
 subject to the visible-witness constraints. -/
 noncomputable def globalTailTerminalSupLoss {T : ℕ}
