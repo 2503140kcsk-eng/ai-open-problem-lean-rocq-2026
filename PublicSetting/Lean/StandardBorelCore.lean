@@ -132,4 +132,7 @@ theorem exists_universal_core_point
     nonempty_inter_of_measure_gt_half μ A B hA hB hBm
   exact htrans x₀ z y hzA hzB
 
+
+#print axioms exists_universal_core_point
+
 end PublicSetting.StandardBorelCore

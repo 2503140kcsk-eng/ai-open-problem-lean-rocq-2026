@@ -526,4 +526,7 @@ theorem omegaOne_finite_horizon_separation (T : ℕ) :
     exact deterministicLearner_global_separation_witness learner T
 
 
+
+#print axioms omegaOne_finite_horizon_separation
+
 end PublicSetting.OmegaOne
