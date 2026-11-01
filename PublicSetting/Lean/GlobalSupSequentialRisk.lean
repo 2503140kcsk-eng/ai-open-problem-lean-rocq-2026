@@ -308,6 +308,34 @@ theorem upperLIntegral_eq_lintegral_of_measurable
     intro majorant
     exact lintegral_mono (fun x => majorant.2.2 x)
 
+/-- Adding a measurable nonnegative immediate loss to an arbitrary
+continuation costs at most its ordinary integral plus the continuation's
+upper integral. This is the one-step upper-risk composition inequality. -/
+theorem upperLIntegral_add_measurable_le
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) (f g : α → ℝ≥0∞)
+    (hg : Measurable g) :
+    upperLIntegral μ (fun x => f x + g x) ≤
+      upperLIntegral μ f + ∫⁻ x, g x ∂μ := by
+  classical
+  unfold upperLIntegral
+  rw [ENNReal.iInf_add]
+  apply le_iInf
+  intro majorant
+  let combined :
+      {q : α → ℝ≥0∞ // Measurable q ∧
+        ∀ x, f x + g x ≤ q x} :=
+    ⟨fun x => majorant.1 x + g x,
+      majorant.2.1.add hg,
+      fun x => add_le_add_right (majorant.2.2 x) (g x)⟩
+  calc
+    (⨅ q : {q : α → ℝ≥0∞ // Measurable q ∧
+        ∀ x, f x + g x ≤ q x}, ∫⁻ x, q.1 x ∂μ)
+        ≤ ∫⁻ x, combined.1 x ∂μ :=
+          iInf_le _ combined
+    _ = (∫⁻ x, majorant.1 x ∂μ) + (∫⁻ x, g x ∂μ) := by
+          rw [lintegral_add_left majorant.2.1]
+
 /-- The upper integral of the constant-zero continuation is zero. -/
 theorem upperLIntegral_zero
     {α : Type*} [MeasurableSpace α]
