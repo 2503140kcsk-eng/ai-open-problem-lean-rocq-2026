@@ -221,12 +221,19 @@ Do not overextend this result to every uncountable source. The repository's \`RN
 - Lean: 4.35.0 / Mathlib 4.35.0.
 - Rocq CI: 9.2.0 / Gaia 2.4 for the previously tracked ordinal and countable-ideal modules. The new context-indexed Bellman development itself is Lean-formalized, not independently ported to Rocq.
 - New key declarations:
-  - \`globalContextHypothesisFamily_projection\`
-  - \`globalContextTerminalSupLoss_le_predictableMissCount\`
-  - \`globalContextTerminalSupLoss_eq_predictableMissCount_of_injective\`
-  - \`globalHypothesisTerminalSupLoss_eq_predictableMissCount\`
-  - \`publicGlobalSupGameValue_eq_zero\`
-  - \`omegaOne_publicGlobalSupGameValue_eq_zero\`
+  - `globalContextHypothesisFamily_projection`
+  - `globalContextTerminalSupLoss_le_predictableMissCount`
+  - `globalContextTerminalSupLoss_eq_predictableMissCount_of_injective`
+  - `globalHypothesisTerminalSupLoss_eq_predictableMissCount`
+  - `upperLIntegral_add_measurable_le`
+  - `upperLIntegral_lowerSegmentIndicator_eq_measure`
+  - `publicGlobalSupOuterBellmanStep_le_stagewise`
+  - `publicGlobalSupOuterBellmanStep_mono`
+  - `publicGlobalSupOuterGameValue_le_stagewiseGameValue`
+  - `publicGlobalSupOuterGameValue_eq_zero`
+  - `omegaOne_publicGlobalSupOuterGameValue_eq_zero`
+  - `publicGlobalSupGameValue_eq_zero` (stagewise comparison operator)
+  - `omegaOne_publicGlobalSupGameValue_eq_zero` (stagewise comparison operator)
 
 The final code head verified here is **d88c9495f64afacde4b5bff92b636c9250cd8229**. GitHub Actions run [41273293794](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41273293794) completed successfully: Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4 jobs both succeeded. The Lean log reports no sorryAx; the new outer-risk, finite-horizon domination, and zero-value theorems depend only on propext, Classical.choice, and Quot.sound. The new outer-risk development is Lean-formalized; the successful Rocq job independently compiles the repository's existing ordinal/countable-ideal foundations, not a second port of the new Bellman module.
 
