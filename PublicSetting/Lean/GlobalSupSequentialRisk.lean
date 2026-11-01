@@ -327,7 +327,8 @@ theorem upperLIntegral_add_measurable_le
         ∀ x, f x + g x ≤ q x} :=
     ⟨fun x => majorant.1 x + g x,
       majorant.2.1.add hg,
-      fun x => add_le_add_right (majorant.2.2 x) (g x)⟩
+      fun x => by
+        simpa [add_comm] using add_le_add_right (majorant.2.2 x) (g x)⟩
   calc
     (⨅ q : {q : α → ℝ≥0∞ // Measurable q ∧
         ∀ x, f x + g x ≤ q x}, ∫⁻ x, q.1 x ∂μ)
