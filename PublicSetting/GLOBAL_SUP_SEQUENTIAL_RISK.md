@@ -89,7 +89,7 @@ Lean checks this in \`globalContextTerminalSupLoss_eq_predictableMissCount_of_in
 
 The earlier \`globalHypothesisTerminalSupLoss\` formula is the special case \(x_t=t\), i.e. the fresh-context transcript. It is not used as an equality for transcripts with repeated contexts.
 
-## 3. Sequential conditional-risk recursion
+## 3. Sequential outer conditional-risk recursion
 
 The public move order at a history \(h\) is:
 1. adversary chooses the context \(x\);
@@ -97,47 +97,88 @@ The public move order at a history \(h\) is:
 3. adversary chooses the visible witness \(w\), before the current draw;
 4. Nature draws \(y\sim p\), and \(y\) becomes part of the public history.
 
-For fixed \(w\), the current error section is
+For a fixed witness \(w\), the immediate error section is
 \[
-L_w=\{y:y<w\},
+L_w=\{y:y<w\}.
 \]
-which is measurable and has \(\mu(L_w)=0\). Its one-step conditional risk under draw law \(p\) is \(p(L_w)\).
+It is measurable, countable, and \(\mu(L_w)=0\). Let
+\[
+e_w(y)=\mathbf1\{y<w\}.
+\]
 
-Let \(\operatorname{Next}(h,x,p,w,y)\) be the next public history. Define the finite-horizon **sequential section-risk upper envelope**
+### Upper integral for a possibly nonmeasurable continuation
+
+For an arbitrary nonnegative function \(f:Y\to[0,\infty]\), define its upper integral (outer expectation)
 \[
-V_0(h)=0,
-\]
-\[
-V_{n+1}(h)=
-\sup_x\inf_p\sup_{w\in Y}
-\left[
-p(L_w)+
-\int_Y V_n(\operatorname{Next}(h,x,p,w,y))\,p(dy)
-\right].
+U_p(f)=
+\inf\left\{
+\int g\,dp:
+g\text{ measurable and } f(y)\le g(y)\ \forall y
+\right\}.
 \tag{4}
 \]
-This recursion respects the information order \(\sup_x\inf_p\sup_w\). It is an upper envelope for the terminal global payoff because of (2). It is not asserted to equal the terminal global supremum on paths with repeated contexts.
+The constant function \(+\infty\) is always an admissible majorant, so this infimum is well-defined even when \(f\) is not measurable.
 
-### Zero-value proof
+The Lean development proves the properties needed for conditional-risk composition:
 
-Use the same learner action \(p_0=\mu\) at every history. Then for every context and every pre-draw witness,
+- **Monotonicity:** \(f\le g\) pointwise implies \(U_p(f)\le U_p(g)\).
+- **Agreement with Lebesgue integration:** if \(f\) is measurable, then \(U_p(f)=\int f\,dp\).
+- **Addition of a measurable immediate cost:** if \(g\) is measurable and nonnegative, then
+  \[
+  U_p(f+g)\le U_p(f)+\int g\,dp.
+  \tag{5}
+  \]
+- For the fixed-witness section, \(U_p(e_w)=p(L_w)\), since \(e_w\) is measurable.
+
+These are kernel-checked in **upperLIntegral_mono**, **upperLIntegral_eq_lintegral_of_measurable**, **upperLIntegral_add_measurable_le**, **lintegral_lowerSegmentIndicator_eq_measure**, and **upperLIntegral_lowerSegmentIndicator_eq_measure**.
+
+Let \(\operatorname{Next}(h,x,p,w,y)\) be the next public history. The **exact one-step outer-risk operator** is
 \[
-p_0(L_w)=\mu(L_w)=0.
+\mathcal B^+V(h)=
+\sup_x\inf_p\sup_{w\in Y}
+U_p\!\left(
+y\mapsto e_w(y)+V(\operatorname{Next}(h,x,p,w,y))
+\right).
+\tag{6}
+\]
+It preserves the public information order \(\sup_x\inf_p\sup_w\). No measurability of \(y\mapsto V(\operatorname{Next}(\cdots,y))\) is required: \(U_p\) is explicitly defined for arbitrary nonnegative functions using measurable majorants.
+
+The formalization proves:
+\[
+\mathcal B^+V(h)\le
+\sup_x\inf_p\sup_w
+\left[p(L_w)+U_p(V\circ\operatorname{Next})\right],
+\tag{7}
+\]
+by (5), and proves that both Bellman operators are monotone in \(V\). Thus the exact outer-risk operator is bounded by the simpler stagewise section-risk envelope without replacing an upper integral by a lower integral or using the ordinary tower property on a nonmeasurable payoff.
+
+### Zero-value theorem
+
+Define
+\[
+W_0(h)=0,\qquad W_{n+1}(h)=\mathcal B^+W_n(h).
+\tag{8}
+\]
+Use the same learner action \(p_0=\mu\) at every public history. For every pre-draw witness \(w\),
+\[
+U_\mu(e_w)=\mu(L_w)=0.
 \]
 Induct on \(n\).
 
-- Base: \(V_0(h)=0\).
-- Step: assume \(V_n(h')=0\) for every history \(h'\). The continuation integrand in (4), under \(p_0\), is the constant zero function, hence measurable, and its integral is zero. Thus the learner can make the bracket zero for every \(x,w\). All terms are nonnegative, so \(V_{n+1}(h)=0\).
+- Base: \(W_0(h)=0\).
+- Step: assume \(W_n(h')=0\) for every history \(h'\). Then for each fixed \(x,w\), the continuation function is identically zero, so the exact one-step outer risk is
+  \[
+  U_\mu(e_w+0)=U_\mu(e_w)=\mu(L_w)=0.
+  \]
+  The learner can therefore force the Bellman bracket to zero for every \(x,w\). All risks are nonnegative, so \(W_{n+1}(h)=0\).
 
-Therefore
+Hence
 \[
-\boxed{V_n(h)=0\quad\text{for every finite }n\text{ and every history }h.}
+\boxed{W_n(h)=0\quad\text{for every finite }n\text{ and every history }h.}
 \]
-The Lean declarations \`publicGlobalSupBellmanStep_eq_zero_of_policy\`, \`publicGlobalSupGameValue_eq_zero\`, and \`omegaOne_publicGlobalSupGameValue_eq_zero\` check the Bellman step, induction, and the concrete \(\omega_1\) law. No Sion minimax interchange is needed: a single explicit learner law witnesses the upper bound, and nonnegativity gives the lower bound.
+Lean checks this through **publicGlobalSupOuterBellmanStep_eq_zero_of_policy**, **publicGlobalSupOuterGameValue_eq_zero**, and **omegaOne_publicGlobalSupOuterGameValue_eq_zero**.
 
-The Lean theorem `publicGlobalSupBellmanStep_mono` additionally checks that the Bellman risk operator is monotone in its continuation functional. This is the order-preservation property used when carrying a pointwise terminal-sup upper bound through the nested nonnegative-risk recursion.
-
-The value in (4) is deliberately defined through iterated one-step risks. The proof of zero only integrates constant measurable continuations. For arbitrary continuation functions, ordinary conditional-expectation semantics would require the appropriate section measurability; the formal operator is not a claim that every history-to-continuation composition is measurable.
+The exact outer-risk recursion (8) is the primary sequential game-value semantics. Its stagewise envelope (the earlier **publicGlobalSupBellmanStep**) is a convenient upper bound. Neither is defined by integrating a full-path nonmeasurable reward over a product space.
 
 ## 4. Deterministic lower bound
 
@@ -152,7 +193,7 @@ The existing \`deterministicLearner_global_separation_witness\` in \`OmegaOneSep
 R^\star_{\mathrm{seq,rand}}(T)=0,\qquad
 R^\star_{\mathrm{det}}(T)=T.
 \]
-The randomized conclusion follows because (2) dominates the terminal loss and the sequential upper-envelope value (4) is zero. The deterministic conclusion uses the fresh-context lower-bound transcript.
+The randomized conclusion follows because (2) dominates the terminal global supremum pathwise, and the exact sequential outer-risk value (8) is zero. The deterministic conclusion uses the fresh-context lower-bound transcript.
 
 ## 5. Product-measurability obstruction and what is—and is not—proved
 
@@ -162,7 +203,7 @@ E=\{(w,y)\in Y\times Y:y<w\}
 \]
 is not measurable in the product of the two countable-cocountable sigma algebras. For each fixed \(w\), the \(y\)-section is countable and has measure zero; for each fixed \(y\), the \(w\)-section is cocountable and has measure one. If \(E\) were product-measurable, Tonelli would give incompatible iterated integrals \(0\) and \(1\).
 
-The recursion avoids this invalid joint-measurability step: at a public node the witness is already fixed, and only the one-coordinate section \(L_w\) is measured. The continuation is evaluated recursively; along the zero-risk learner strategy it is identically zero.
+The exact recursion avoids this invalid joint-measurability step: at a public node the witness is already fixed, the immediate section \(L_w\) is measurable, and any possibly nonmeasurable continuation is assigned its upper integral via measurable majorants. Along the zero-risk learner strategy the continuation is identically zero. This is a nested outer-risk semantics, not an ordinary product-space expectation.
 
 **Scope boundary.** This is a mathematically defined sequential conditional-risk semantics for a particular non-standard measurable-space set-realizable game. It does not construct an ordinary product-space random variable for the nonmeasurable terminal payoff, nor prove that the usual expectation of that payoff exists for every nonmeasurable adaptive adversary. Thus it is a candidate resolution in the explicitly stated sequential-risk model, not a theorem covering all standard-Borel/ordinary-expectation formulations of the paper's open question.
 
@@ -187,7 +228,7 @@ Do not overextend this result to every uncountable source. The repository's \`RN
   - \`publicGlobalSupGameValue_eq_zero\`
   - \`omegaOne_publicGlobalSupGameValue_eq_zero\`
 
-The new context-repeat correction is being checked by the current PR Actions run. Earlier verified code commits are not substituted for verification of the current head; the final report must cite the exact checked head SHA.
+The final code head verified here is **0d6c7e9cc581db4ed9f109f766519838c9a2894d**. GitHub Actions run [41272999925](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41272999925) completed successfully: Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4 jobs both succeeded. The Lean log reports no sorryAx; the new outer-risk theorems depend only on propext, Classical.choice, and Quot.sound. The new outer-risk development is Lean-formalized; the successful Rocq job independently compiles the repository's existing ordinal/countable-ideal foundations, not a second port of the new Bellman module.
 
 ## 8. Tool and repository roles
 
