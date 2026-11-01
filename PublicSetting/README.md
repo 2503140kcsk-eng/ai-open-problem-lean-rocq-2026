@@ -236,28 +236,10 @@ eval "$(opam env)"
 Then compile the Rocq modules in dependency order, followed by the root
 Rocq/VCLearning.v.
 
-## Expected cumulative loss and the global-target boundary (2026-11-01)
+## Expected cumulative loss and global-target boundary (2026-11-01)
 
-The new Lean target PublicSetting/Lean/ExpectedLossBridge.lean proves the
-finite-sum identity between integrals of conditional stage risks and the
-integral of the sum of measurable integrable path losses. Each round may use
-its own conditioning sigma-algebra. Sigma-finiteness of the trimmed measure
-and integrability of each path loss are explicit assumptions.
+The new Lean module ExpectedLossBridge.lean proves the finite-sum identity between the integral of conditional stage risks and the integral of the sum of path losses. It allows a different conditioning sigma-algebra at each round and states the required sigma-finiteness and integrability assumptions explicitly. The Rocq companion ExpectedLossBridge.v checks the finite-sum aggregation from explicit expectation-linearity and tower-identity hypotheses; it does not claim to build conditional expectation from a measure.
 
-The Rocq companion ExpectedLossBridge.v verifies finite-horizon aggregation
-from explicit linearity-of-expectation and tower-identity hypotheses; it does
-not claim to construct measure-theoretic conditional expectation in Rocq.
+The one-round core identity is valid, but it does not permit moving a supremum over one globally fixed terminal F-star through the cumulative sum. The source payoff must retain the joint terminal supremum over the complete loss vector. See EXPECTED_LOSS_BRIDGE.md for the exact statement and the nonmeasurable omega-one boundary.
 
-Important correction: the one-round core identity
-sup_{F*} 1{y is not in F*(x_t)} = 1{y is not in the intersection of F*(x_t)}
-does not justify moving a supremum over one globally fixed F* through a sum
-over rounds. The terminal supremum must remain joint over the complete
-loss vector. See EXPECTED_LOSS_BRIDGE.md.
-
-Rocq/StandardBorelCore.v now checks the transitivity/majority part of the
-standard-Borel obstruction. Its Fubini-majority and positive-intersection
-principles are explicit interfaces. It does not formalize the Suslin
-projection theorem or completed-product measurability; Lean's
-StandardBorelCore.lean similarly assumes product measurability in its
-machine-checked measure core, while the Borel-to-completion bridge remains
-a written descriptive-set-theory argument.
+Rocq/StandardBorelCore.v independently checks the transitivity/majority part of the standard-Borel core obstruction. Its Fubini and positive-intersection principles are explicit hypotheses; the Suslin projection theorem and completed-product measurability bridge remain outside that Rocq file. Lean's StandardBorelCore.lean likewise takes product measurability as an explicit premise.
