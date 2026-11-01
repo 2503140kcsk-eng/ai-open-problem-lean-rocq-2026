@@ -148,19 +148,40 @@ This lower-bound strategy ignores past sampled predictions, so it is also valid 
 
 **Critical limitation:** the construction is only existence-realizable, not set-realizable. The final sets S_t are sometimes {k} and sometimes {0,1}; there is no fixed F*⊆{f₀,f₁} with S_t=F*(x_t) for all t. Hence this example does not solve the PR's set-realizable public randomized-versus-deterministic open problem. It proves that no universal randomized o(T) theorem is possible across all realizability regimes, even with two hypotheses.
 
-## 5. What remains open in the target problem
+## 5. Candidate resolution in the broad measurable-space model; stronger regular cases remain open
 
-The paper's Theorem 19 is an oblivious-versus-public separation for randomized partial-feedback learning. It is not a randomized-versus-deterministic separation.
+The paper's §5.3 leaves open whether randomized and deterministic learners can have different learnability in the public set-realizable setting. The new PR module GlobalSupSequentialRisk.lean provides a candidate resolution **within the paper's broad measurable-space model**, using \(Y=\omega_1\) with the countable-cocountable sigma algebra. It must not be confused with a standard-Borel or finite-seed implementation.
 
-The final paragraph of §5.3 explicitly leaves open whether randomized and deterministic learners have different learnability in the public setting. The present repository still has not supplied a hypothesis class satisfying, in the *same public set-realizable model*,
+The construction fixes one hypothesis domain \(H=Y^{\mathbb N}\) for all horizons. For one threshold sequence \(\beta\), the same global family
 \[
-R^\star_{\rm rand}(T)=o(T)
-\quad\text{and}\quad
-R^\star_{\rm det}(T)=\Omega(T)
+F^\star_\beta=\{f\in Y^{\mathbb N}:\forall t,\ \beta_t\le f(t)\}
 \]
-for all sufficiently large T. It would be mathematically incorrect to claim that the standard-Borel core obstruction, the finite-class upper bound, or the existence-realizable lower bound resolves that open question.
+induces the upper-tail acceptable set \(S_{\beta_t}=\{y:\beta_t\le y\}\) at every context \(t\). For a finite transcript with pre-draw witnesses \(w_t\), the exact terminal-sup identity is
+\[
+\sup_{\forall t<T,\ \beta_t\le w_t}
+  \sum_{t<T}\mathbf1\{y_t\notin S_{\beta_t}\}
+=
+\sum_{t<T}\mathbf1\{y_t<w_t\}.
+\]
+The proof is a direct two-sided bound: each feasible threshold is no larger than its witness, and the single feasible vector \(\beta_t=w_t\) attains the right side. It does not exchange sup and sum or choose unrelated roundwise global families.
 
-The new standard-Borel theorem rules out one promising route: a Borel-parametrized acceptable-set family with a uniform every-witness core section mass greater than 1/2 would force a deterministic universally acceptable label. It does not rule out constructions without that uniform core-risk premise.
+The game value is then defined recursively by the public protocol's actual move order:
+\[
+V_0(h)=0,\qquad
+V_{n+1}(h)=
+\sup_x\inf_p\sup_w
+\left[
+p(\{y:y<w\})+
+\int V_n(\operatorname{Next}(h,x,p,w,y))\,p(dy)
+\right].
+\]
+Each fixed-witness lower section is measurable and countable, hence null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite horizon and every history: the continuation integrand is identically zero, so no measurability of the history-to-successor map or full path space is required. Deterministic learners are forced into exactly \(T\) mistakes by choosing \(w_t=\operatorname{succ}(\hat y_t)\); the same global threshold family realizes all the acceptable tails and supplies a zero-loss comparator.
+
+This candidate is formalized in Lean 4.35 / Mathlib 4.35. The globalTailTerminalSupLoss_eq_predictableMissCount theorem proves the exact terminal-sup identity; globalTailFamilyOnNat_projection keeps the hypothesis domain fixed as \(Y^{\mathbb N}\); and publicGlobalSupGameValue_eq_zero / omegaOne_publicGlobalSupGameValue_eq_zero prove the recursive zero value. CI run [41268919254](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41268919254) succeeds for both Lean and Rocq on commit d8fa1d8ed0ae163df56c69169d705462ad0cb340.
+
+**Important boundary.** The full pathwise relation can be non-product-measurable; this proof does not turn it into an ordinary measurable random variable or apply the usual conditional-expectation tower to it. Rather, the exact terminal-sup identity reduces it to pre-draw one-coordinate sections, and the nested public value is defined by sequential conditional risks. This is the interpretation of the game value being proved.
+
+The construction is **not standard Borel** and cannot be sampled exactly from a finite or countably enumerable random seed/output space. The existing PRNG no-go theorem records that obstruction. Consequently, the stronger variant requiring standard-Borel label spaces, finite-bit PRNGs, or ordinarily implementable randomization remains open in this repository. The paper's general measurable-space formulation and the computability/standard-Borel restrictions are different mathematical models.
 
 ## 6. Tool and repository responsibilities
 
