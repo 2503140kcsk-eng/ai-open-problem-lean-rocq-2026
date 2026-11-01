@@ -52,6 +52,7 @@ retrieval, proof search, and proof-kernel checking are different activities.
 
 - Lean/SequentialKernelMinimax.lean: strategy-indexed history-dependent path kernels, finite-prefix consistency, trajectory tower property, and Sion minimax interface.
 - Lean/AppendixGBackwardInduction.lean: finite-horizon public/oblivious recursion and equation (26).
+- Lean/GlobalSupSequentialRisk.lean: context-indexed global hypothesis families, terminal-sup domination (and fresh-context equality), plus the sequential section-risk Bellman induction.
 - Rocq/ConcreteOmegaOne.v: Gaia-backed omega_one adapter and countable-supremum closure.
 - Rocq/PRNGNoGo.v: no countable-output sampler can push forward to the countable-cocountable 0/1 law.
 - RNG_COMPATIBILITY.md: exact sampler impossibility and the separate infinite-real-source consistency boundary.
