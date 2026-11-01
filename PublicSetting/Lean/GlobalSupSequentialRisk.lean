@@ -352,6 +352,51 @@ theorem upperLIntegral_zero
         ⟨fun _ => 0, measurable_const, fun _ => le_rfl⟩)
   · exact bot_le
 
+/-- Measurable indicator of the fixed-witness error section. -/
+def lowerSegmentIndicator (w : Label) : Label → ℝ≥0∞ :=
+  (lowerSegment w).indicator (fun _ => (1 : ℝ≥0∞))
+
+theorem lowerSegmentIndicator_measurable (w : Label) :
+    Measurable (lowerSegmentIndicator w) := by
+  exact measurable_const.indicator (Or.inl (lowerSegment_countable w))
+
+/-- The upper integral of the measurable fixed-witness error indicator is
+exactly its section probability. -/
+theorem upperLIntegral_lowerSegmentIndicator_eq_measure
+    (μ : Measure Label) (w : Label) :
+    upperLIntegral μ (lowerSegmentIndicator w) = μ (lowerSegment w) := by
+  rw [upperLIntegral_eq_lintegral_of_measurable μ
+    (lowerSegmentIndicator w) (lowerSegmentIndicator_measurable w)]
+  change
+    (∫⁻ y, (lowerSegment w).indicator (fun _ => (1 : ℝ≥0∞)) y ∂μ) =
+      μ (lowerSegment w)
+  rw [lintegral_indicator_const (Or.inl (lowerSegment_countable w))]
+  simp
+
+/-- Exact one-step outer-risk bound: the upper integral of the current
+measurable miss indicator plus an arbitrary continuation is at most the
+current section probability plus the continuation upper integral. -/
+theorem upperLIntegral_lowerSegment_add_le
+    (p : Measure Label) (w : Label) (continuation : Label → ℝ≥0∞) :
+    upperLIntegral p
+      (fun y => lowerSegmentIndicator w y + continuation y) ≤
+        p (lowerSegment w) + upperLIntegral p continuation := by
+  calc
+    upperLIntegral p
+        (fun y => lowerSegmentIndicator w y + continuation y)
+      = upperLIntegral p
+          (fun y => continuation y + lowerSegmentIndicator w y) := by
+            congr 1
+            funext y
+            exact add_comm _ _
+    _ ≤ upperLIntegral p continuation +
+          ∫⁻ y, lowerSegmentIndicator w y ∂p :=
+      upperLIntegral_add_measurable_le p continuation
+        (lowerSegmentIndicator w) (lowerSegmentIndicator_measurable w)
+    _ = upperLIntegral p continuation + p (lowerSegment w) := by
+      rw [upperLIntegral_lowerSegmentIndicator_eq_measure]
+    _ = p (lowerSegment w) + upperLIntegral p continuation := add_comm _ _
+
 /-- The sequential one-step operator for the public protocol.
 
 Order of play is sup_x inf_p sup_w: the adversary chooses the context,
@@ -444,6 +489,154 @@ noncomputable def publicGlobalSupGameValue
       publicGlobalSupBellmanStep draw next
         (publicGlobalSupGameValue draw next n) h
 
+/-- Exact one-step upper-risk Bellman operator. It takes the upper
+integral of the current measurable miss indicator plus the nonmeasurable
+continuation, in the actual public move order. -/
+noncomputable def publicGlobalSupOuterBellmanStep
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (continuation : H → ℝ≥0∞)
+    (h : H) : ℝ≥0∞ :=
+  ⨆ x, ⨅ p, ⨆ w,
+    upperLIntegral (draw p)
+      (fun y => lowerSegmentIndicator w y + continuation (next h x p w y))
+
+/-- The exact outer-risk Bellman operator is bounded by the simpler
+stagewise envelope operator. -/
+theorem publicGlobalSupOuterBellmanStep_le_stagewise
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (continuation : H → ℝ≥0∞)
+    (h : H) :
+    publicGlobalSupOuterBellmanStep draw next continuation h ≤
+      publicGlobalSupBellmanStep draw next continuation h := by
+  unfold publicGlobalSupOuterBellmanStep publicGlobalSupBellmanStep
+  apply iSup_le
+  intro x
+  refine le_iSup_of_le x ?_
+  apply iInf_mono
+  intro p
+  apply iSup_mono
+  intro w
+  exact upperLIntegral_lowerSegment_add_le (draw p) w
+    (fun y => continuation (next h x p w y))
+
+/-- The exact outer-risk Bellman operator is monotone in its continuation. -/
+theorem publicGlobalSupOuterBellmanStep_mono
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (continuation₁ continuation₂ : H → ℝ≥0∞)
+    (hcontinuation : ∀ h, continuation₁ h ≤ continuation₂ h)
+    (h : H) :
+    publicGlobalSupOuterBellmanStep draw next continuation₁ h ≤
+      publicGlobalSupOuterBellmanStep draw next continuation₂ h := by
+  unfold publicGlobalSupOuterBellmanStep
+  apply iSup_le
+  intro x
+  refine le_iSup_of_le x ?_
+  apply iInf_mono
+  intro p
+  apply iSup_mono
+  intro w
+  exact upperLIntegral_mono (draw p)
+    (fun y => add_le_add_right
+      (hcontinuation (next h x p w y)) (lowerSegmentIndicator w y))
+
+/-- A fixed learner action with zero section risks and zero continuation
+forces the exact outer-risk Bellman value to zero. -/
+theorem publicGlobalSupOuterBellmanStep_eq_zero_of_policy
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (continuation : H → ℝ≥0∞)
+    (p0 : P)
+    (hzero : ∀ w, draw p0 (lowerSegment w) = 0)
+    (hcont : ∀ h, continuation h = 0)
+    (h : H) :
+    publicGlobalSupOuterBellmanStep draw next continuation h = 0 := by
+  classical
+  unfold publicGlobalSupOuterBellmanStep
+  apply le_antisymm
+  · apply iSup_le
+    intro x
+    calc
+      (⨅ p, ⨆ w,
+          upperLIntegral (draw p)
+            (fun y => lowerSegmentIndicator w y +
+              continuation (next h x p w y)))
+        ≤
+          (⨆ w,
+            upperLIntegral (draw p0)
+              (fun y => lowerSegmentIndicator w y +
+                continuation (next h x p0 w y))) :=
+          iInf_le (fun p =>
+            ⨆ w, upperLIntegral (draw p)
+              (fun y => lowerSegmentIndicator w y +
+                continuation (next h x p w y))) p0
+      _ = 0 := by
+        apply le_antisymm
+        · apply iSup_le
+          intro w
+          have hfun :
+              (fun y => lowerSegmentIndicator w y +
+                continuation (next h x p0 w y)) =
+              lowerSegmentIndicator w := by
+            funext y
+            simp [hcont]
+          rw [hfun, upperLIntegral_lowerSegmentIndicator_eq_measure]
+          exact hzero w
+        · exact bot_le
+  · exact bot_le
+
+/-- Finite-horizon public value defined by exact sequential outer
+conditional risks, without requiring a measurable full-path payoff. -/
+noncomputable def publicGlobalSupOuterGameValue
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H) :
+    ℕ → H → ℝ≥0∞
+  | 0, _ => 0
+  | n + 1, h =>
+      publicGlobalSupOuterBellmanStep draw next
+        (publicGlobalSupOuterGameValue draw next n) h
+
+/-- Backward induction for the exact outer-risk value. -/
+theorem publicGlobalSupOuterGameValue_eq_zero
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (p0 : P)
+    (hzero : ∀ w, draw p0 (lowerSegment w) = 0) :
+    ∀ n h, publicGlobalSupOuterGameValue draw next n h = 0 := by
+  intro n
+  induction n with
+  | zero =>
+      intro h
+      rfl
+  | succ n ih =>
+      intro h
+      simp only [publicGlobalSupOuterGameValue]
+      exact publicGlobalSupOuterBellmanStep_eq_zero_of_policy
+        draw next (publicGlobalSupOuterGameValue draw next n)
+        p0 hzero ih h
+
+/-- Concrete omega-one outer-risk game value is zero at every finite
+horizon and every public history. -/
+theorem omegaOne_publicGlobalSupOuterGameValue_eq_zero
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H)
+    (p0 : P)
+    (hdraw : draw p0 = countableCocountableMeasure) :
+    ∀ n h, publicGlobalSupOuterGameValue draw next n h = 0 := by
+  apply publicGlobalSupOuterGameValue_eq_zero draw next p0
+  intro w
+  rw [hdraw]
+  exact lowerSegment_measure_zero w
+
 /-- Backward induction: if p0 uses a law giving zero mass to every strict
 initial segment, then the recursively defined public value is zero at
 every finite horizon and every public history, irrespective of how the
@@ -490,6 +683,12 @@ theorem omegaOne_publicGlobalSupGameValue_eq_zero
 #print axioms globalHypothesisTerminalSupLoss_eq_predictableMissCount
 #print axioms globalTailTerminalSupLoss_eq_predictableMissCount
 #print axioms publicGlobalSupBellmanStep_mono
+#print axioms upperLIntegral_add_measurable_le
+#print axioms upperLIntegral_lowerSegmentIndicator_eq_measure
+#print axioms publicGlobalSupOuterBellmanStep_le_stagewise
+#print axioms publicGlobalSupOuterBellmanStep_mono
+#print axioms publicGlobalSupOuterGameValue_eq_zero
+#print axioms omegaOne_publicGlobalSupOuterGameValue_eq_zero
 #print axioms publicGlobalSupGameValue_eq_zero
 #print axioms omegaOne_publicGlobalSupGameValue_eq_zero
 
