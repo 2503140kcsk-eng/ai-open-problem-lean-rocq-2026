@@ -101,7 +101,7 @@ jobs:
               ocamlfind query elpi
               opam list --installed --short
               mkdir -p /tmp/rocq-check /tmp/rocq-root-check
-              cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/_RocqProject /tmp/rocq-check/
+              cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/ExpectedLossBridge.v /input/StandardBorelCore.v /input/_RocqProject /tmp/rocq-check/
               cd /tmp/rocq-check
               rocq --version
               rocq compile -Q . PublicSetting PublicSetting.v
@@ -111,6 +111,8 @@ jobs:
               rocq compile -Q . PublicSetting OmegaOneSeparation.v
               rocq compile -Q . PublicSetting PRNGNoGo.v
               rocq compile -Q . PublicSetting ConcreteOmegaOne.v
+              rocq compile -Q . PublicSetting ExpectedLossBridge.v
+              rocq compile -Q . PublicSetting StandardBorelCore.v
               cp /input-root/VCLearning.v /tmp/rocq-root-check/
               cd /tmp/rocq-root-check
               rocq compile VCLearning.v'

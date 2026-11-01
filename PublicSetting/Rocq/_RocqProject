@@ -6,3 +6,5 @@ AdaptiveMoments.v
 OmegaOneSeparation.v
 PRNGNoGo.v
 ConcreteOmegaOne.v
+ExpectedLossBridge.v
+StandardBorelCore.v

@@ -1,6 +1,7 @@
+[package]
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore", "AppendixGBackwardInduction", "PublicProtocolKernel"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore", "AppendixGBackwardInduction", "PublicProtocolKernel", "ExpectedLossBridge"]
 
 [[require]]
 name = "mathlib"
@@ -36,3 +37,6 @@ name = "AppendixGBackwardInduction"
 
 [[lean_lib]]
 name = "PublicProtocolKernel"
+
+[[lean_lib]]
+name = "ExpectedLossBridge"

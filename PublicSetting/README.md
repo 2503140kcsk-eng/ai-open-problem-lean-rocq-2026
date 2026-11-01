@@ -235,3 +235,29 @@ eval "$(opam env)"
 
 Then compile the Rocq modules in dependency order, followed by the root
 Rocq/VCLearning.v.
+
+## Expected cumulative loss and the global-target boundary (2026-11-01)
+
+The new Lean target PublicSetting/Lean/ExpectedLossBridge.lean proves the
+finite-sum identity between integrals of conditional stage risks and the
+integral of the sum of measurable integrable path losses. Each round may use
+its own conditioning sigma-algebra. Sigma-finiteness of the trimmed measure
+and integrability of each path loss are explicit assumptions.
+
+The Rocq companion ExpectedLossBridge.v verifies finite-horizon aggregation
+from explicit linearity-of-expectation and tower-identity hypotheses; it does
+not claim to construct measure-theoretic conditional expectation in Rocq.
+
+Important correction: the one-round core identity
+sup_{F*} 1{y is not in F*(x_t)} = 1{y is not in the intersection of F*(x_t)}
+does not justify moving a supremum over one globally fixed F* through a sum
+over rounds. The terminal supremum must remain joint over the complete
+loss vector. See EXPECTED_LOSS_BRIDGE.md.
+
+Rocq/StandardBorelCore.v now checks the transitivity/majority part of the
+standard-Borel obstruction. Its Fubini-majority and positive-intersection
+principles are explicit interfaces. It does not formalize the Suslin
+projection theorem or completed-product measurability; Lean's
+StandardBorelCore.lean similarly assumes product measurability in its
+machine-checked measure core, while the Borel-to-completion bridge remains
+a written descriptive-set-theory argument.
