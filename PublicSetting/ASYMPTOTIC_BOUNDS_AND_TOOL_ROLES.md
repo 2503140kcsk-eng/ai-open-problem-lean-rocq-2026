@@ -179,7 +179,7 @@ p(\{y:y<w\})+
 \int V_n(\operatorname{Next}(h,x,p,w,y))\,p(dy)
 \right].
 \]
-Every fixed-witness lower section is countable, measurable, and null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite \(n\) and history: at the selected learner law, the continuation integrand is the constant zero function. The terminal global supremum is bounded by this stagewise upper envelope. No full-history or full-path product measurability is assumed in the zero-risk induction.
+Every fixed-witness lower section is countable, measurable, and null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite \(n\) and history: at the selected learner law, the continuation integrand is the constant zero function. The terminal global supremum is bounded by this stagewise upper envelope. The Lean theorem publicGlobalSupBellmanStep_mono additionally proves that the Bellman operator is order-preserving in its continuation functional, so this domination is compatible with nested risk composition. No full-history or full-path product measurability is assumed in the zero-risk induction.
 
 For the deterministic lower bound, the adversary uses fresh contexts \(x_t=t\) and the witness \(w_t=\operatorname{succ}(\hat y_t)\). One global threshold function realizes all the upper tails and rejects every deterministic prediction, giving exactly \(T\) mistakes and zero comparator loss. Together, these give randomized sequential upper value zero and deterministic worst-case regret \(T\) in this selected nonstandard measurable-space instance.
 
