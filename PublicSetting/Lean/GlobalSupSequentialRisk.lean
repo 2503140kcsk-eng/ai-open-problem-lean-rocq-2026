@@ -101,6 +101,21 @@ noncomputable def globalHypothesisTerminalSupLoss {T : ℕ}
     ∑ t : Fin T,
       if prediction t < beta.1 t then (1 : ℝ≥0∞) else 0
 
+/-- Terminal loss after choosing one common vector of upper-tail thresholds
+subject to the visible-witness constraints. -/
+noncomputable def globalTailTerminalSupLoss {T : ℕ}
+    (witness prediction : Fin T → Label) : ℝ≥0∞ :=
+  ⨆ beta : {beta : Fin T → Label // ∀ t, beta t ≤ witness t},
+    ∑ t : Fin T,
+      if prediction t < beta.1 t then (1 : ℝ≥0∞) else 0
+
+/-- The predictable stage-loss sum induced by the witnesses fixed before
+each current draw. -/
+noncomputable def predictableMissCount {T : ℕ}
+    (witness prediction : Fin T → Label) : ℝ≥0∞ :=
+  ∑ t : Fin T,
+    if prediction t < witness t then (1 : ℝ≥0∞) else 0
+
 /-- The terminal supremum over genuine infinite global families is still
 exactly the predictable miss count. The extension after time T can be
 filled by the zero ordinal; the same infinite sequence defines one global
@@ -128,21 +143,6 @@ theorem globalHypothesisTerminalSupLoss_eq_predictableMissCount {T : ℕ}
     · intro t
       simp [betaExt]
     · simp [betaExt]
-
-/-- Terminal loss after choosing one common vector of upper-tail thresholds
-subject to the visible-witness constraints. -/
-noncomputable def globalTailTerminalSupLoss {T : ℕ}
-    (witness prediction : Fin T → Label) : ℝ≥0∞ :=
-  ⨆ beta : {beta : Fin T → Label // ∀ t, beta t ≤ witness t},
-    ∑ t : Fin T,
-      if prediction t < beta.1 t then (1 : ℝ≥0∞) else 0
-
-/-- The predictable stage-loss sum induced by the witnesses fixed before
-each current draw. -/
-noncomputable def predictableMissCount {T : ℕ}
-    (witness prediction : Fin T → Label) : ℝ≥0∞ :=
-  ∑ t : Fin T,
-    if prediction t < witness t then (1 : ℝ≥0∞) else 0
 
 /-- Exact global-sup identity: the terminal supremum over a single globally
 consistent hypothesis family equals the predictable miss count. No
