@@ -148,24 +148,28 @@ This lower-bound strategy ignores past sampled predictions, so it is also valid 
 
 **Critical limitation:** the construction is only existence-realizable, not set-realizable. The final sets S_t are sometimes {k} and sometimes {0,1}; there is no fixed F*⊆{f₀,f₁} with S_t=F*(x_t) for all t. Hence this example does not solve the PR's set-realizable public randomized-versus-deterministic open problem. It proves that no universal randomized o(T) theorem is possible across all realizability regimes, even with two hypotheses.
 
-## 5. Candidate resolution in the broad measurable-space model; stronger regular cases remain open
+## 5. Context-aware global supremum and sequential-risk candidate
 
-The paper's §5.3 leaves open whether randomized and deterministic learners can have different learnability in the public set-realizable setting. The new PR module GlobalSupSequentialRisk.lean provides a candidate resolution **within the paper's broad measurable-space model**, using \(Y=\omega_1\) with the countable-cocountable sigma algebra. It must not be confused with a standard-Borel or finite-seed implementation.
+The paper's §5.3 asks whether randomized and deterministic learners can differ in learnability in the public set-realizable setting. The omega-one construction chooses the measurable label space \(Y=\omega_1\), the admissible set family \(\mathcal S(Y)=\{S_\beta:\beta\in Y\}\) of upper tails, and context space \(X=\mathbb N\). Its hypothesis class is \(H=Y^X\).
 
-The construction fixes one hypothesis domain \(H=Y^{\mathbb N}\) for all horizons. For one threshold sequence \(\beta\), the same global family
+For one global threshold function \(\beta:X\to Y\), the same set
 \[
-F^\star_\beta=\{f\in Y^{\mathbb N}:\forall t,\ \beta_t\le f(t)\}
+F^\star_\beta=\{f\in Y^X:\forall x\in X,\ \beta(x)\le f(x)\}
 \]
-induces the upper-tail acceptable set \(S_{\beta_t}=\{y:\beta_t\le y\}\) at every context \(t\). For a finite transcript with pre-draw witnesses \(w_t\), the exact terminal-sup identity is
+induces \(F^\star_\beta(x)=S_{\beta(x)}\) at every context. For an arbitrary context sequence \(x_t\), witnesses \(w_t\) fixed before the corresponding draws, and predictions \(y_t\), the actual terminal global supremum is
 \[
-\sup_{\forall t<T,\ \beta_t\le w_t}
-  \sum_{t<T}\mathbf1\{y_t\notin S_{\beta_t}\}
-=
-\sum_{t<T}\mathbf1\{y_t<w_t\}.
+G_T(\mathbf x,\mathbf w,\mathbf y)=
+\sup_{\beta:X\to Y:\ \beta(x_t)\le w_t}
+\sum_{t<T}\mathbf1\{y_t<\beta(x_t)\}.
 \]
-The proof is a direct two-sided bound: each feasible threshold is no larger than its witness, and the single feasible vector \(\beta_t=w_t\) attains the right side. It does not exchange sup and sum or choose unrelated roundwise global families.
+The correct general theorem is
+\[
+G_T(\mathbf x,\mathbf w,\mathbf y)
+\le\sum_{t<T}\mathbf1\{y_t<w_t\}.
+\]
+This is strict in general when contexts repeat, because one global \(F^\star\) must use the same acceptable set at every occurrence of a context. If the context sequence is injective, a single global threshold function can set \(\beta(x_t)=w_t\) for every round, and equality holds. The Lean declarations globalContextTerminalSupLoss_le_predictableMissCount and globalContextTerminalSupLoss_eq_predictableMissCount_of_injective machine-check these two statements. The earlier globalHypothesisTerminalSupLoss identity is the fresh-context special case \(x_t=t\), not a general identity for repeated contexts.
 
-The game value is then defined recursively by the public protocol's actual move order:
+At each public node the context \(x\) is chosen, the learner chooses a law \(p\), and the adversary fixes the witness \(w\) before Nature samples. The sequential section-risk upper envelope is
 \[
 V_0(h)=0,\qquad
 V_{n+1}(h)=
@@ -175,13 +179,13 @@ p(\{y:y<w\})+
 \int V_n(\operatorname{Next}(h,x,p,w,y))\,p(dy)
 \right].
 \]
-Each fixed-witness lower section is measurable and countable, hence null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite horizon and every history: the continuation integrand is identically zero, so no measurability of the history-to-successor map or full path space is required. Deterministic learners are forced into exactly \(T\) mistakes by choosing \(w_t=\operatorname{succ}(\hat y_t)\); the same global threshold family realizes all the acceptable tails and supplies a zero-loss comparator.
+Every fixed-witness lower section is countable, measurable, and null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite \(n\) and history: at the selected learner law, the continuation integrand is the constant zero function. The terminal global supremum is bounded by this stagewise upper envelope. No full-history or full-path product measurability is assumed in the zero-risk induction.
 
-This candidate is formalized in Lean 4.35 / Mathlib 4.35. The **globalHypothesisFamily** / **globalHypothesisFamily_projection** declarations explicitly encode one global target family from each infinite threshold sequence. The **globalHypothesisTerminalSupLoss** definition ranges directly over feasible infinite sequences in the fixed class, and **globalHypothesisTerminalSupLoss_eq_predictableMissCount** proves the exact terminal-sup identity. The additional finite-prefix theorem **globalTailTerminalSupLoss_eq_predictableMissCount** gives an equivalent finite-horizon formulation. **publicGlobalSupGameValue_eq_zero** and **omegaOne_publicGlobalSupGameValue_eq_zero** prove the recursive zero value. CI run [41269353301](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41269353301) succeeds for both Lean and Rocq on code commit 8163730ead0aacc0a7e33ca453c00dc36130d63f.
+For the deterministic lower bound, the adversary uses fresh contexts \(x_t=t\) and the witness \(w_t=\operatorname{succ}(\hat y_t)\). One global threshold function realizes all the upper tails and rejects every deterministic prediction, giving exactly \(T\) mistakes and zero comparator loss. Together, these give randomized sequential upper value zero and deterministic worst-case regret \(T\) in this selected nonstandard measurable-space instance.
 
-**Important boundary.** The full pathwise relation can be non-product-measurable; this proof does not turn it into an ordinary measurable random variable or apply the usual conditional-expectation tower to it. Rather, the exact terminal-sup identity reduces it to pre-draw one-coordinate sections, and the nested public value is defined by sequential conditional risks. This is the interpretation of the game value being proved.
+**Scope boundary.** This is a candidate separation under the explicitly defined iterated sequential-risk semantics. The full terminal payoff need not be a product-measurable random variable, so the development does not claim that its ordinary full-path expectation exists for every unrestricted adaptive adversary, nor that the usual conditional-expectation tower applies to the nonmeasurable payoff. It is not a standard-Borel or finite-bit-sampler construction. The original problem in all standard-Borel / ordinary-expectation variants remains outside this result.
 
-The construction is **not standard Borel** and cannot be sampled exactly from a finite or countably enumerable random seed/output space. The existing PRNG no-go theorem records that obstruction. Consequently, the stronger variant requiring standard-Borel label spaces, finite-bit PRNGs, or ordinarily implementable randomization remains open in this repository. The paper's general measurable-space formulation and the computability/standard-Borel restrictions are different mathematical models.
+The code is formalized in Lean 4.35 / Mathlib 4.35. The current context-repeat correction is checked by GitHub Actions run [41271568696](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41271568696) on code commit 8767d80602622e646d8841d0e16c459a7ea4e326 (Lean and Rocq both successful). The proof note GLOBAL_SUP_SEQUENTIAL_RISK.md records the full hypotheses, proof, and limits.
 
 ## 6. Tool and repository responsibilities
 
