@@ -66,9 +66,12 @@ G_T(\mathbf w,\mathbf y)
 **Proof.** For every feasible vector, \(y_t<\beta_t\le w_t\) implies \(y_t<w_t\), so its sum is bounded above by the right side of (1). Conversely, choose the one vector \(\boldsymbol\beta=\mathbf w\). It is feasible and attains exactly the right side. The vector is a single global choice, and its associated \(F^\star_{\boldsymbol\beta}\) is one global family in the fixed domain \(Y^{\mathbb N}\). No exchange of supremum and summation occurs, and no roundwise family is substituted for the global one.
 
 Lean declarations:
-- **globalTailFamilyOnNat_projection** proves the common-family coordinate representation in the single domain \(Y^{\mathbb N}\).
-- **globalTailTerminalSupLoss_eq_predictableMissCount** proves identity (1).
-- **globalTailFamily_projection** proves the corresponding finite-domain representation.
+- **globalHypothesisFamily** and **globalHypothesisFamily_projection** define one actual global target family \(F^\star_\beta\subseteq H\) for each infinite threshold sequence and prove that its coordinate image is \(S_{\beta_t}\).
+- **globalHypothesisTerminalSupLoss** takes the terminal supremum directly over all feasible infinite sequences \(\beta\in Y^{\mathbb N}\), i.e. over one horizon-independent global family at a time.
+- **globalHypothesisTerminalSupLoss_eq_predictableMissCount** proves identity (1) for that literal infinite-family supremum.
+- **globalTailFamilyOnNat_projection** and **globalTailTerminalSupLoss_eq_predictableMissCount** provide the finite-prefix representation as an additional equivalent check.
+
+In the paper's notation, the admissible acceptable-set family is \(\mathcal S(Y)=\{S_\beta:\beta\in Y\}\) and the collection-version-space universe is \(\tilde H=\mathcal P(H)\). Any terminally compatible \(F^\star\subseteq H\) induces a sequence of upper tails \(S_{\beta_t}\); conversely, for every feasible sequence \(\beta\) the concrete set \(F^\star_\beta\) above realizes all those tails simultaneously. Since terminal loss depends only on the coordinate images \(F^\star(t)\), optimizing over all compatible subsets \(F^\star\in\mathcal P(H)\) has exactly the same value as optimizing over the feasible global sequences \(\beta\).
 
 ## 3. Sequential conditional-risk value
 
