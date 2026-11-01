@@ -1,6 +1,6 @@
 name = "public-setting-separation"
 version = "0.1.0"
-defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore", "AppendixGBackwardInduction", "PublicProtocolKernel", "ExpectedLossBridge"]
+defaultTargets = ["PublicSetting", "PublicProtocol", "ProbabilisticBounds", "AdaptiveMoments", "OmegaOneSeparation", "SequentialKernelMinimax", "SequentialConditionalRisk", "StandardBorelCore", "AppendixGBackwardInduction", "PublicProtocolKernel", "ExpectedLossBridge", "ProofAxiomAudit"]
 
 [[require]]
 name = "mathlib"
@@ -39,3 +39,6 @@ name = "PublicProtocolKernel"
 
 [[lean_lib]]
 name = "ExpectedLossBridge"
+
+[[lean_lib]]
+name = "ProofAxiomAudit"

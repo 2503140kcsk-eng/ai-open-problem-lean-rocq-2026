@@ -31,16 +31,18 @@ theorem integral_finset_condExp_eq_integral_finset
         = ∑ i ∈ rounds, ∫ ω, (μ[loss i | filtration i]) ω ∂μ := by
           apply integral_finsetSum
           intro i hi
-          letI : SigmaFinite (μ.trim (hfiltration i)) := hσ i
+          haveI : SigmaFinite (μ.trim (hfiltration i)) := hσ i
           exact integrable_condExp
     _ = ∑ i ∈ rounds, ∫ ω, loss i ω ∂μ := by
           apply Finset.sum_congr rfl
           intro i hi
-          letI : SigmaFinite (μ.trim (hfiltration i)) := hσ i
+          haveI : SigmaFinite (μ.trim (hfiltration i)) := hσ i
           exact integral_condExp (hfiltration i)
     _ = ∫ ω, ∑ i ∈ rounds, loss i ω ∂μ := by
           symm
           apply integral_finsetSum
           exact hloss
+
+#print axioms PublicSetting.ExpectedLossBridge.integral_finset_condExp_eq_integral_finset
 
 end PublicSetting.ExpectedLossBridge
