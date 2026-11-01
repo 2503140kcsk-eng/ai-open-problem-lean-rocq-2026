@@ -176,7 +176,7 @@ Hence
 \[
 \boxed{W_n(h)=0\quad\text{for every finite }n\text{ and every history }h.}
 \]
-Lean checks this through **publicGlobalSupOuterBellmanStep_eq_zero_of_policy**, **publicGlobalSupOuterGameValue_eq_zero**, and **omegaOne_publicGlobalSupOuterGameValue_eq_zero**.
+Lean checks this through **publicGlobalSupOuterBellmanStep_eq_zero_of_policy**, **publicGlobalSupOuterGameValue_eq_zero**, and **omegaOne_publicGlobalSupOuterGameValue_eq_zero**. The separate finite-horizon comparison theorem **publicGlobalSupOuterGameValue_le_stagewiseGameValue** proves by induction that the exact outer-risk value is bounded by the stagewise section-risk envelope at every history.
 
 The exact outer-risk recursion (8) is the primary sequential game-value semantics. Its stagewise envelope (the earlier **publicGlobalSupBellmanStep**) is a convenient upper bound. Neither is defined by integrating a full-path nonmeasurable reward over a product space.
 
@@ -228,7 +228,7 @@ Do not overextend this result to every uncountable source. The repository's \`RN
   - \`publicGlobalSupGameValue_eq_zero\`
   - \`omegaOne_publicGlobalSupGameValue_eq_zero\`
 
-The final code head verified here is **0d6c7e9cc581db4ed9f109f766519838c9a2894d**. GitHub Actions run [41272999925](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41272999925) completed successfully: Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4 jobs both succeeded. The Lean log reports no sorryAx; the new outer-risk theorems depend only on propext, Classical.choice, and Quot.sound. The new outer-risk development is Lean-formalized; the successful Rocq job independently compiles the repository's existing ordinal/countable-ideal foundations, not a second port of the new Bellman module.
+The final code head verified here is **d88c9495f64afacde4b5bff92b636c9250cd8229**. GitHub Actions run [41273293794](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41273293794) completed successfully: Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4 jobs both succeeded. The Lean log reports no sorryAx; the new outer-risk, finite-horizon domination, and zero-value theorems depend only on propext, Classical.choice, and Quot.sound. The new outer-risk development is Lean-formalized; the successful Rocq job independently compiles the repository's existing ordinal/countable-ideal foundations, not a second port of the new Bellman module.
 
 ## 8. Tool and repository roles
 
