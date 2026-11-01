@@ -304,13 +304,13 @@ theorem upperLIntegral_zero
     upperLIntegral μ (fun _ : α => (0 : ℝ≥0∞)) = 0 := by
   classical
   apply le_antisymm
-  · exact bot_le
   · unfold upperLIntegral
     simpa using
       (iInf_le
         (fun g : {g : α → ℝ≥0∞ // Measurable g ∧
           ∀ x, (0 : ℝ≥0∞) ≤ g x} => ∫⁻ x, g.1 x ∂μ)
         ⟨fun _ => 0, measurable_const, fun _ => le_rfl⟩)
+  · exact bot_le
 
 /-- The sequential one-step operator for the public protocol.
 
@@ -379,7 +379,7 @@ theorem publicGlobalSupBellmanStep_eq_zero_of_policy
         ≤
           (⨆ w,
             draw p0 (lowerSegment w) +
-              ∫⁻ y, continuation (next h x p0 w y) ∂draw p0) :=
+              upperLIntegral (draw p0) (fun y => continuation (next h x p0 w y))) :=
           iInf_le (fun p =>
             ⨆ w, draw p (lowerSegment w) +
               upperLIntegral (draw p) (fun y => continuation (next h x p w y))) p0
