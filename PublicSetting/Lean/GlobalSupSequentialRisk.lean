@@ -277,9 +277,14 @@ theorem upperLIntegral_mono
   unfold upperLIntegral
   apply le_iInf
   intro majorant
-  exact iInf_le _
+  let candidate :
+      {g : α → ℝ≥0∞ // Measurable g ∧ ∀ x, f x ≤ g x} :=
     ⟨majorant.1, majorant.2.1,
       fun x => le_trans (hfg x) (majorant.2.2 x)⟩
+  exact iInf_le
+    (fun g : {g : α → ℝ≥0∞ // Measurable g ∧ ∀ x, f x ≤ g x} =>
+      ∫⁻ x, g.1 x ∂μ)
+    candidate
 
 /-- On a measurable integrand, the upper integral agrees with the
 ordinary nonnegative Lebesgue integral. -/
@@ -291,7 +296,13 @@ theorem upperLIntegral_eq_lintegral_of_measurable
   classical
   apply le_antisymm
   · unfold upperLIntegral
-    exact iInf_le _ ⟨f, hf, fun _ => le_rfl⟩
+    let candidate :
+        {g : α → ℝ≥0∞ // Measurable g ∧ ∀ x, f x ≤ g x} :=
+      ⟨f, hf, fun _ => le_rfl⟩
+    exact iInf_le
+      (fun g : {g : α → ℝ≥0∞ // Measurable g ∧ ∀ x, f x ≤ g x} =>
+        ∫⁻ x, g.1 x ∂μ)
+      candidate
   · unfold upperLIntegral
     apply le_iInf
     intro majorant
@@ -348,7 +359,7 @@ theorem publicGlobalSupBellmanStep_mono
   intro p
   apply iSup_mono
   intro w
-  exact add_le_add_left
+  exact add_le_add_right
     (upperLIntegral_mono (draw p)
         (fun y => hcontinuation (next h x p w y)))
     (draw p (lowerSegment w))
