@@ -116,6 +116,96 @@ noncomputable def predictableMissCount {T : ℕ}
   ∑ t : Fin T,
     if prediction t < witness t then (1 : ℝ≥0∞) else 0
 
+/-- The global hypothesis family for a set-valued concept on an
+arbitrary context space X. Its coordinate image at x is the upper tail
+with threshold beta x. -/
+def globalContextHypothesisFamily {X : Type*} (beta : X → Label) :
+    Set (X → Label) :=
+  {f | ∀ x, beta x ≤ f x}
+
+/-- One and the same context-indexed hypothesis family induces the
+acceptable set at every context. -/
+theorem globalContextHypothesisFamily_projection
+    {X : Type*} (beta : X → Label) (x : X) :
+    Set.image (fun f : X → Label => f x) (globalContextHypothesisFamily beta) =
+      upperTail (beta x) := by
+  classical
+  ext y
+  constructor
+  · rintro ⟨f, hf, rfl⟩
+    exact hf x
+  · intro hy
+    change beta x ≤ y at hy
+    refine ⟨Function.update beta x y, ?_, ?_⟩
+    · intro z
+      by_cases hz : z = x
+      · subst z
+        simpa using hy
+      · simp [Function.update, hz]
+    · simp
+
+/-- The terminal supremum over a single global function beta : X -> Y,
+where repeated occurrences of a context must use the same threshold. -/
+noncomputable def globalContextTerminalSupLoss
+    {X : Type*} {T : ℕ}
+    (context : Fin T → X) (witness prediction : Fin T → Label) : ℝ≥0∞ :=
+  ⨆ beta : {beta : X → Label // ∀ t, beta (context t) ≤ witness t},
+    ∑ t : Fin T,
+      if prediction t < beta.1 (context t) then (1 : ℝ≥0∞) else 0
+
+/-- For arbitrary context sequences, the terminal global supremum is
+bounded above by the sum of the pre-draw section losses. Repeated contexts
+can make this inequality strict, because one global hypothesis family must
+use the same acceptable set whenever a context repeats. -/
+theorem globalContextTerminalSupLoss_le_predictableMissCount
+    {X : Type*} {T : ℕ}
+    (context : Fin T → X) (witness prediction : Fin T → Label) :
+    globalContextTerminalSupLoss context witness prediction ≤
+      predictableMissCount witness prediction := by
+  classical
+  unfold globalContextTerminalSupLoss predictableMissCount
+  apply iSup_le
+  intro beta
+  apply Finset.sum_le_sum
+  intro t ht
+  by_cases h : prediction t < beta.1 (context t)
+  · have hw : prediction t < witness t :=
+      lt_of_lt_of_le h (beta.2 t)
+    simp [h, hw]
+  · simp [h]
+
+/-- If every round has a distinct context, the previous upper bound is an
+equality: one global threshold function can simultaneously set beta(x_t)=w_t.
+This is the precise condition under which the independent-coordinate
+terminal-sup identity applies. -/
+theorem globalContextTerminalSupLoss_eq_predictableMissCount_of_injective
+    {X : Type*} {T : ℕ}
+    (context : Fin T → X) (hcontext : Function.Injective context)
+    (witness prediction : Fin T → Label) :
+    globalContextTerminalSupLoss context witness prediction =
+      predictableMissCount witness prediction := by
+  classical
+  apply le_antisymm
+  · exact globalContextTerminalSupLoss_le_predictableMissCount
+      context witness prediction
+  · let zeroLabel : Label := ⟨0, Ordinal.omega_pos 1⟩
+    let betaExt : X → Label := fun x =>
+      if hx : ∃ t : Fin T, context t = x then
+        witness (Classical.choose hx)
+      else zeroLabel
+    have heq : ∀ t : Fin T, betaExt (context t) = witness t := by
+      intro t
+      have hx : ∃ s : Fin T, context s = context t := ⟨t, rfl⟩
+      have hchoose : Classical.choose hx = t := by
+        apply hcontext
+        exact Classical.choose_spec hx
+      simp [betaExt, hx, hchoose]
+    have hbeta : ∀ t : Fin T, betaExt (context t) ≤ witness t := by
+      intro t
+      rw [heq t]
+    refine le_iSup_of_le ⟨betaExt, hbeta⟩ ?_
+    simp [predictableMissCount, heq]
+
 /-- The terminal supremum over genuine infinite global families is still
 exactly the predictable miss count. The extension after time T can be
 filled by the zero ordinal; the same infinite sequence defines one global
@@ -273,6 +363,9 @@ theorem omegaOne_publicGlobalSupGameValue_eq_zero
 
 #print axioms globalTailFamily_projection
 #print axioms globalHypothesisFamily_projection
+#print axioms globalContextHypothesisFamily_projection
+#print axioms globalContextTerminalSupLoss_le_predictableMissCount
+#print axioms globalContextTerminalSupLoss_eq_predictableMissCount_of_injective
 #print axioms globalHypothesisTerminalSupLoss_eq_predictableMissCount
 #print axioms globalTailTerminalSupLoss_eq_predictableMissCount
 #print axioms publicGlobalSupGameValue_eq_zero
