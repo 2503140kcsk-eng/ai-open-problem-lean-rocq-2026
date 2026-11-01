@@ -19,7 +19,7 @@ For a finite horizon (T), an admissible global threshold vector is
 [
 B(w)=\{\boldsymbol\beta\in Y^T:\forall t<T,\ \beta_t\le w_t\}.
 ]
-It determines one hypothesis family
+It determines one hypothesis family inside that fixed class, namely
 [
 F^\star_{\boldsymbol\beta}
 =\{f\in Y^T:\forall t<T,\ \beta_t\le f(t)\}.
@@ -44,7 +44,7 @@ Then
 
 **Proof.** If (y_t<\beta_t\le w_t), then (y_t<w_t). Termwise, every feasible vector has loss no larger than the right-hand side of (1), so the supremum is at most that sum. Conversely, the one vector (\boldsymbol\beta=\mathbf w) is feasible, and its loss is exactly the right-hand side. Hence equality. This argument never interchanges a supremum with a sum and never selects a different global family on different rounds.
 
-The Lean theorem `globalTailTerminalSupLoss_eq_predictableMissCount` machine-checks this identity. `globalTailFamily_projection` machine-checks that each coordinate upper tail is induced by the same function family.
+The Lean theorem `globalTailTerminalSupLoss_eq_predictableMissCount` machine-checks this identity. `globalTailFamily_projection` checks the finite-coordinate representation, and `globalTailFamilyOnNat_projection` checks the stronger statement inside the single horizon-independent class \\(H=Y^{\\mathbb N}\\): every finite-horizon coordinate image is still the required upper tail of one common family.
 
 ## 3. Sequential conditional-risk semantics
 
