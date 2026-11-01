@@ -645,6 +645,38 @@ theorem omegaOne_publicGlobalSupOuterGameValue_eq_zero
   rw [hdraw]
   exact lowerSegment_measure_zero w
 
+/-- Recursive domination: at every finite horizon and public history,
+the exact outer-risk value is bounded by the stagewise section-risk
+envelope. This is the dynamic-programming bridge from the pathwise
+terminal-global-sup inequality to the sequential outer-risk value. -/
+theorem publicGlobalSupOuterGameValue_le_stagewiseGameValue
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H) :
+    ∀ n h,
+      publicGlobalSupOuterGameValue draw next n h ≤
+        publicGlobalSupGameValue draw next n h := by
+  intro n
+  induction n with
+  | zero =>
+      intro h
+      rfl
+  | succ n ih =>
+      intro h
+      simp only [publicGlobalSupOuterGameValue, publicGlobalSupGameValue]
+      calc
+        publicGlobalSupOuterBellmanStep draw next
+            (publicGlobalSupOuterGameValue draw next n) h
+          ≤ publicGlobalSupBellmanStep draw next
+              (publicGlobalSupOuterGameValue draw next n) h :=
+            publicGlobalSupOuterBellmanStep_le_stagewise
+              draw next (publicGlobalSupOuterGameValue draw next n) h
+        _ ≤ publicGlobalSupBellmanStep draw next
+              (publicGlobalSupGameValue draw next n) h :=
+            publicGlobalSupBellmanStep_mono draw next
+              (publicGlobalSupOuterGameValue draw next n)
+              (publicGlobalSupGameValue draw next n) ih h
+
 /-- Backward induction: if p0 uses a law giving zero mass to every strict
 initial segment, then the recursively defined public value is zero at
 every finite horizon and every public history, irrespective of how the
@@ -696,6 +728,7 @@ theorem omegaOne_publicGlobalSupGameValue_eq_zero
 #print axioms lintegral_lowerSegmentIndicator_eq_measure
 #print axioms publicGlobalSupOuterBellmanStep_le_stagewise
 #print axioms publicGlobalSupOuterBellmanStep_mono
+#print axioms publicGlobalSupOuterGameValue_le_stagewiseGameValue
 #print axioms publicGlobalSupOuterGameValue_eq_zero
 #print axioms omegaOne_publicGlobalSupOuterGameValue_eq_zero
 #print axioms publicGlobalSupGameValue_eq_zero
