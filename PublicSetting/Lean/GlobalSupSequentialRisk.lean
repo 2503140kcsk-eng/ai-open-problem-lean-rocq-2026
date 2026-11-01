@@ -256,6 +256,62 @@ theorem globalTailTerminalSupLoss_eq_predictableMissCount {T : ℕ}
   · refine le_iSup_of_le ⟨witness, fun _ => le_rfl⟩ ?_
     rfl
 
+/-- Upper integral (outer expectation) of an arbitrary nonnegative
+function, defined as the infimum of integrals of measurable pointwise
+majorants. Unlike the lower integral of a nonmeasurable function, this is an
+upper-risk bound. -/
+noncomputable def upperLIntegral
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) (f : α → ℝ≥0∞) : ℝ≥0∞ :=
+  ⨅ g : {g : α → ℝ≥0∞ // Measurable g ∧ ∀ x, f x ≤ g x},
+    ∫⁻ x, g.1 x ∂μ
+
+/-- The upper integral is monotone for arbitrary functions, without
+assuming measurability of either integrand. -/
+theorem upperLIntegral_mono
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) {f g : α → ℝ≥0∞}
+    (hfg : ∀ x, f x ≤ g x) :
+    upperLIntegral μ f ≤ upperLIntegral μ g := by
+  classical
+  unfold upperLIntegral
+  apply le_iInf
+  intro majorant
+  exact iInf_le _
+    ⟨majorant.1, majorant.2.1,
+      fun x => le_trans (hfg x) (majorant.2.2 x)⟩
+
+/-- On a measurable integrand, the upper integral agrees with the
+ordinary nonnegative Lebesgue integral. -/
+theorem upperLIntegral_eq_lintegral_of_measurable
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) (f : α → ℝ≥0∞)
+    (hf : Measurable f) :
+    upperLIntegral μ f = ∫⁻ x, f x ∂μ := by
+  classical
+  apply le_antisymm
+  · unfold upperLIntegral
+    exact iInf_le _ ⟨f, hf, fun _ => le_rfl⟩
+  · unfold upperLIntegral
+    apply le_iInf
+    intro majorant
+    exact lintegral_mono (fun x => majorant.2.2 x)
+
+/-- The upper integral of the constant-zero continuation is zero. -/
+theorem upperLIntegral_zero
+    {α : Type*} [MeasurableSpace α]
+    (μ : Measure α) :
+    upperLIntegral μ (fun _ : α => (0 : ℝ≥0∞)) = 0 := by
+  classical
+  apply le_antisymm
+  · exact bot_le
+  · unfold upperLIntegral
+    simpa using
+      (iInf_le
+        (fun g : {g : α → ℝ≥0∞ // Measurable g ∧
+          ∀ x, (0 : ℝ≥0∞) ≤ g x} => ∫⁻ x, g.1 x ∂μ)
+        ⟨fun _ => 0, measurable_const, fun _ => le_rfl⟩)
+
 /-- The sequential one-step operator for the public protocol.
 
 Order of play is sup_x inf_p sup_w: the adversary chooses the context,
@@ -270,7 +326,7 @@ noncomputable def publicGlobalSupBellmanStep
     (h : H) : ℝ≥0∞ :=
   ⨆ x, ⨅ p, ⨆ w,
     draw p (lowerSegment w) +
-      ∫⁻ y, continuation (next h x p w y) ∂draw p
+      upperLIntegral (draw p) (fun y => continuation (next h x p w y))
 
 /-- The Bellman section-risk operator is monotone in its continuation
 functional. This is the order-preservation needed to carry a pointwise
@@ -293,7 +349,8 @@ theorem publicGlobalSupBellmanStep_mono
   apply iSup_mono
   intro w
   exact add_le_add_left
-    (lintegral_mono (fun y => hcontinuation (next h x p w y)))
+    (upperLIntegral_mono (draw p)
+        (fun y => hcontinuation (next h x p w y)))
     (draw p (lowerSegment w))
 
 /-- A single learner action whose every one-step section risk vanishes,
@@ -318,19 +375,19 @@ theorem publicGlobalSupBellmanStep_eq_zero_of_policy
     calc
       (⨅ p, ⨆ w,
           draw p (lowerSegment w) +
-            ∫⁻ y, continuation (next h x p w y) ∂draw p)
+            upperLIntegral (draw p) (fun y => continuation (next h x p w y)))
         ≤
           (⨆ w,
             draw p0 (lowerSegment w) +
               ∫⁻ y, continuation (next h x p0 w y) ∂draw p0) :=
           iInf_le (fun p =>
             ⨆ w, draw p (lowerSegment w) +
-              ∫⁻ y, continuation (next h x p w y) ∂draw p) p0
+              upperLIntegral (draw p) (fun y => continuation (next h x p w y))) p0
       _ = 0 := by
         apply le_antisymm
         · apply iSup_le
           intro w
-          simp [hzero w, hcont]
+          simp [hzero w, hcont, upperLIntegral_zero]
         · exact bot_le
   · exact bot_le
 
