@@ -54,8 +54,9 @@ theorem globalTailFamilyOnNat_projection {T : ℕ}
     exact hf t
   · intro hy
     change beta t ≤ y at hy
+    let zeroLabel : Label := ⟨0, Ordinal.omega_pos 1⟩
     let base : ℕ → Label := fun n =>
-      if hn : n < T then beta ⟨n, hn⟩ else ⊥
+      if hn : n < T then beta ⟨n, hn⟩ else zeroLabel
     refine ⟨Function.update base t y, ?_, ?_⟩
     · intro s
       by_cases hst : (s : ℕ) = (t : ℕ)
