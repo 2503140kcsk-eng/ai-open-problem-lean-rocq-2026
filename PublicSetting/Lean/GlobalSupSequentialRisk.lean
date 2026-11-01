@@ -66,6 +66,69 @@ theorem globalTailFamilyOnNat_projection {T : ℕ}
       · simp [Function.update, base, s.isLt, hst]
     · simp [Function.update, base, t.isLt, hy]
 
+/-- One global terminal hypothesis family, determined by an infinite
+threshold sequence on the fixed context domain Nat. -/
+def globalHypothesisFamily (beta : ℕ → Label) : Set (ℕ → Label) :=
+  {f | ∀ n, beta n ≤ f n}
+
+/-- Every coordinate image of one infinite global family is exactly its
+upper-tail acceptable set. -/
+theorem globalHypothesisFamily_projection
+    (beta : ℕ → Label) (t : ℕ) :
+    Set.image (fun f : ℕ → Label => f t) (globalHypothesisFamily beta) =
+      upperTail (beta t) := by
+  classical
+  ext y
+  constructor
+  · rintro ⟨f, hf, rfl⟩
+    exact hf t
+  · intro hy
+    change beta t ≤ y at hy
+    refine ⟨Function.update beta t y, ?_, ?_⟩
+    · intro n
+      by_cases h : n = t
+      · subst n
+        simpa using hy
+      · simp [Function.update, h]
+    · simp
+
+/-- The literal terminal supremum over one globally indexed hypothesis
+family in the fixed class Y^Nat. Its feasible global threshold sequence
+must contain every pre-draw visible witness in the corresponding tail. -/
+noncomputable def globalHypothesisTerminalSupLoss {T : ℕ}
+    (witness prediction : Fin T → Label) : ℝ≥0∞ :=
+  ⨆ beta : {beta : ℕ → Label // ∀ t : Fin T, beta t ≤ witness t},
+    ∑ t : Fin T,
+      if prediction t < beta.1 t then (1 : ℝ≥0∞) else 0
+
+/-- The terminal supremum over genuine infinite global families is still
+exactly the predictable miss count. The extension after time T can be
+filled by the zero ordinal; the same infinite sequence defines one global
+family, not a new family at each round. -/
+theorem globalHypothesisTerminalSupLoss_eq_predictableMissCount {T : ℕ}
+    (witness prediction : Fin T → Label) :
+    globalHypothesisTerminalSupLoss witness prediction =
+      predictableMissCount witness prediction := by
+  classical
+  unfold globalHypothesisTerminalSupLoss predictableMissCount
+  apply le_antisymm
+  · apply iSup_le
+    intro beta
+    apply Finset.sum_le_sum
+    intro t ht
+    by_cases h : prediction t < beta.1 t
+    · have hw : prediction t < witness t :=
+        lt_of_lt_of_le h (beta.2 t)
+      simp [h, hw]
+    · simp [h]
+  · let zeroLabel : Label := ⟨0, Ordinal.omega_pos 1⟩
+    let betaExt : ℕ → Label := fun n =>
+      if hn : n < T then witness ⟨n, hn⟩ else zeroLabel
+    refine le_iSup_of_le ⟨betaExt, ?_⟩ ?_
+    · intro t
+      simp [betaExt]
+    · simp [betaExt]
+
 /-- Terminal loss after choosing one common vector of upper-tail thresholds
 subject to the visible-witness constraints. -/
 noncomputable def globalTailTerminalSupLoss {T : ℕ}
@@ -209,6 +272,8 @@ theorem omegaOne_publicGlobalSupGameValue_eq_zero
   exact lowerSegment_measure_zero w
 
 #print axioms globalTailFamily_projection
+#print axioms globalHypothesisFamily_projection
+#print axioms globalHypothesisTerminalSupLoss_eq_predictableMissCount
 #print axioms globalTailTerminalSupLoss_eq_predictableMissCount
 #print axioms publicGlobalSupGameValue_eq_zero
 #print axioms omegaOne_publicGlobalSupGameValue_eq_zero
