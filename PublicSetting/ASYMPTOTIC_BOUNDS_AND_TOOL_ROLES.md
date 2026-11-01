@@ -195,7 +195,7 @@ It respects the public protocol order: context, learner draw law, pre-draw witne
 \left[p(\{y:y<w\})+
 U_p(V(\operatorname{Next}(h,x,p,w,\cdot)))\right].
 \]
-This upper-integral formulation is crucial: it does not silently use the lower integral for a nonmeasurable continuation and does not apply the ordinary conditional-expectation tower to a nonmeasurable full-path payoff.
+The Lean theorem **publicGlobalSupOuterBellmanStep_le_stagewise** formalizes the one-step bound, and **publicGlobalSupOuterGameValue_le_stagewiseGameValue** lifts it by finite-horizon induction to every public history. The corresponding monotonicity lemmas are also kernel-checked. This upper-integral formulation is crucial: it does not silently use the lower integral for a nonmeasurable continuation and does not apply the ordinary conditional-expectation tower to a nonmeasurable full-path payoff.
 
 Use the fixed learner law \(p=\mu\), the countable-cocountable probability on \(Y=\omega_1\). For every pre-draw witness \(w\), the section \(L_w=\{y:y<w\}\) is countable, measurable, and null. The continuation at the zero-risk induction step is the constant zero function, so its upper integral is also zero. Backward induction therefore gives exact outer-risk value zero at every finite horizon and every public history. The pathwise terminal-sup inequality above transfers this stagewise upper bound to the terminal global regret in the explicitly defined sequential outer-risk semantics.
 
@@ -205,7 +205,7 @@ For the deterministic lower bound, the adversary uses fresh contexts \(x_t=t\) a
 
 This is a candidate separation under the explicitly defined iterated outer-risk semantics. The full terminal payoff need not be a product-measurable random variable; the result does not establish an ordinary full-path expectation for every unrestricted adaptive adversary. It is not a standard-Borel construction and does not yield a finite-bit or countable-range sampler for the countable-cocountable law. Standard-Borel / conventional full-path-expectation versions remain separate.
 
-The final code head is **0d6c7e9cc581db4ed9f109f766519838c9a2894d**. GitHub Actions run [41272999925](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41272999925) completed successfully for Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4. The exact outer-risk Bellman development is Lean-formalized; the Rocq job independently checks the existing ordinal and countable-ideal foundations rather than a Rocq port of the new Bellman module.
+The final code head is **d88c9495f64afacde4b5bff92b636c9250cd8229**. GitHub Actions run [41273293794](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41273293794) completed successfully for Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4. The exact outer-risk Bellman development is Lean-formalized; the Rocq job independently checks the existing ordinal and countable-ideal foundations rather than a Rocq port of the new Bellman module.
 
 ## 6. Tool and repository responsibilities
 
