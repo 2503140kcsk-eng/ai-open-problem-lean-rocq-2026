@@ -273,8 +273,8 @@ noncomputable def publicGlobalSupBellmanStep
       ∫⁻ y, continuation (next h x p w y) ∂draw p
 
 /-- The Bellman section-risk operator is monotone in its continuation
-functional. This is the order-preservation needed to carry the pathwise
-terminal-sup domination through the iterated nonnegative risk recursion. -/
+functional. This is the order-preservation needed to carry a pointwise
+terminal-sup bound through the iterated nonnegative-risk recursion. -/
 theorem publicGlobalSupBellmanStep_mono
     {H X P : Type*}
     (draw : P → Measure Label)
@@ -287,12 +287,14 @@ theorem publicGlobalSupBellmanStep_mono
   unfold publicGlobalSupBellmanStep
   apply iSup_le
   intro x
+  refine le_iSup_of_le x ?_
   apply iInf_mono
   intro p
   apply iSup_mono
   intro w
-  apply add_le_add_left
-  exact lintegral_mono (fun y => hcontinuation (next h x p w y))
+  exact add_le_add_left
+    (lintegral_mono (fun y => hcontinuation (next h x p w y)))
+    (draw p (lowerSegment w))
 
 /-- A single learner action whose every one-step section risk vanishes,
 combined with a zero continuation, forces the public Bellman value to zero.
