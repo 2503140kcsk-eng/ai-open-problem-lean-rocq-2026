@@ -135,6 +135,8 @@ Therefore
 \]
 The Lean declarations \`publicGlobalSupBellmanStep_eq_zero_of_policy\`, \`publicGlobalSupGameValue_eq_zero\`, and \`omegaOne_publicGlobalSupGameValue_eq_zero\` check the Bellman step, induction, and the concrete \(\omega_1\) law. No Sion minimax interchange is needed: a single explicit learner law witnesses the upper bound, and nonnegativity gives the lower bound.
 
+The Lean theorem `publicGlobalSupBellmanStep_mono` additionally checks that the Bellman risk operator is monotone in its continuation functional. This is the order-preservation property used when carrying a pointwise terminal-sup upper bound through the nested nonnegative-risk recursion.
+
 The value in (4) is deliberately defined through iterated one-step risks. The proof of zero only integrates constant measurable continuations. For arbitrary continuation functions, ordinary conditional-expectation semantics would require the appropriate section measurability; the formal operator is not a claim that every history-to-continuation composition is measurable.
 
 ## 4. Deterministic lower bound
