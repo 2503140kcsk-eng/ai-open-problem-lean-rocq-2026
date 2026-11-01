@@ -1,43 +1,56 @@
--- Formalization skeleton for Information Complexity of VC Learning
--- Independently checkable in Lean 4 + Mathlib
--- Problem: Steinke & Zakynthinou COLT 2020; progress Hanneke & Wang arXiv:2610.10600 (2026)
-
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Real.Basic
-import Mathlib.Order.Basic
+-- Machine-checked threshold shattering lemmas using Lean 4 core only.
+-- The information-complexity / eCMI theorem remains an open research target and
+-- is deliberately not represented as a proved theorem in this file.
 
 namespace VCLearning
 
-/-- A concept is a subset of the instance space, here modeled as a predicate on a type. --/
-def Concept (X : Type*) := X → Bool
+/-- A concept is a Boolean-valued classifier. -/
+abbrev Concept (X : Type) := X → Bool
 
-/-- VC-dimension: the largest size of a shattered set. --/
-def shatters {X : Type*} (H : Set (Concept X)) (S : Finset X) : Prop :=
-  ∀ labeling : S → Bool, ∃ h ∈ H, ∀ x : S, h x.1 = labeling x
+/-- Initial-segment threshold: x is positive precisely when x < t. -/
+def thresholdConcept (t : Nat) : Concept Nat := fun x => decide (x < t)
 
-def VCDim {X : Type*} (H : Set (Concept X)) : ℕ :=
-  sSup { n | ∃ S : Finset X, S.card = n ∧ shatters H S }
+/-- The class of all natural-number thresholds. -/
+def ThresholdClass (h : Concept Nat) : Prop :=
+  ∃ t : Nat, h = thresholdConcept t
 
-/-- Threshold concepts on the reals (or any linear order). VC-dimension is 1. --/
-def thresholdConcept (t : ℝ) : Concept ℝ := fun x => decide (x ≤ t)
+/-- Every labeling of a single point is realized by some threshold. -/
+def ShattersSingleton (H : Concept Nat → Prop) (a : Nat) : Prop :=
+  ∀ label : Bool, ∃ h, H h ∧ h a = label
 
-def ThresholdClass : Set (Concept ℝ) := { thresholdConcept t | t : ℝ }
+/-- A pair is shattered when all four two-bit labelings are realizable. -/
+def ShattersPair (H : Concept Nat → Prop) (a b : Nat) : Prop :=
+  ∀ first second : Bool, ∃ h, H h ∧ h a = first ∧ h b = second
 
-/-- Classic fact: VC-dimension of thresholds is 1. --/
-theorem vc_dim_thresholds : VCDim ThresholdClass = 1 := by
-  -- Proof sketch (to be completed with Mathlib shattering arguments):
-  -- Upper bound: any 2 points a < b cannot be shattered because the labeling (true,false) is impossible for a threshold.
-  -- Lower bound: any singleton is shattered.
-  sorry -- Placeholder for full formal proof; the statement is standard and machine-checkable once filled.
+/-- Thresholds shatter every singleton: t=a yields false, t=a+1 yields true. -/
+theorem thresholds_shatter_singleton (a : Nat) :
+    ShattersSingleton ThresholdClass a := by
+  intro label
+  cases label with
+  | false =>
+      refine ⟨thresholdConcept a, ⟨a, rfl⟩, ?_⟩
+      simp [thresholdConcept]
+  | true =>
+      refine ⟨thresholdConcept (a + 1), ⟨a + 1, rfl⟩, ?_⟩
+      simp [thresholdConcept]
 
-/-- Simplified statement corresponding to the known positive result for eCMI.
-    In the realizable case there exists a (randomized) learner whose evaluated CMI is O(d).
-    Here we only record the existence claim for d = 1 (thresholds) as a formal placeholder. --/
-theorem exists_low_eCMI_for_thresholds :
-    ∃ (learner : List (ℝ × Bool) → Concept ℝ),
-      True -- placeholder for "eCMI(learner) ≤ C for absolute C" and optimal risk
-    := by
-  use fun _ => thresholdConcept 0
-  trivial
+/-- If a < b, the non-monotone labeling (false,true) cannot be realized.
+Thus no two-point set is shattered by the threshold class. -/
+theorem thresholds_not_shatter_pair {a b : Nat} (hab : a < b) :
+    ¬ ShattersPair ThresholdClass a b := by
+  intro hpair
+  obtain ⟨h, hh, ha, hb⟩ := hpair false true
+  obtain ⟨t, rfl⟩ := hh
+  change decide (a < t) = false at ha
+  change decide (b < t) = true at hb
+  have ha' : ¬ a < t := of_decide_eq_false ha
+  have hb' : b < t := of_decide_eq_true hb
+  exact ha' (Nat.lt_trans hab hb')
+
+/-- A precise pair/singleton characterization witnessed by the thresholds. -/
+theorem threshold_class_dimension_one_pairwise :
+    (∀ a, ShattersSingleton ThresholdClass a) ∧
+    (∀ a b, a < b → ¬ ShattersPair ThresholdClass a b) :=
+  ⟨thresholds_shatter_singleton, fun _ _ h => thresholds_not_shatter_pair h⟩
 
 end VCLearning
