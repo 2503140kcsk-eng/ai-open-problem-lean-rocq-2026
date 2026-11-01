@@ -148,15 +148,15 @@ This lower-bound strategy ignores past sampled predictions, so it is also valid 
 
 **Critical limitation:** the construction is only existence-realizable, not set-realizable. The final sets S_t are sometimes {k} and sometimes {0,1}; there is no fixed F*⊆{f₀,f₁} with S_t=F*(x_t) for all t. Hence this example does not solve the PR's set-realizable public randomized-versus-deterministic open problem. It proves that no universal randomized o(T) theorem is possible across all realizability regimes, even with two hypotheses.
 
-## 5. Context-aware global supremum and sequential-risk candidate
+## 5. Context-aware global supremum and sequential outer-risk candidate
 
-The paper's §5.3 asks whether randomized and deterministic learners can differ in learnability in the public set-realizable setting. The omega-one construction chooses the measurable label space \(Y=\omega_1\), the admissible set family \(\mathcal S(Y)=\{S_\beta:\beta\in Y\}\) of upper tails, and context space \(X=\mathbb N\). Its hypothesis class is \(H=Y^X\).
+The paper's §5.3 asks whether randomized and deterministic learners can differ in learnability in the public set-realizable setting. The omega-one construction chooses the measurable label space \(Y=\omega_1\), the admissible set family \(\mathcal S(Y)=\{S_\beta:\beta\in Y\}\) of upper tails, context space \(X=\mathbb N\), and hypothesis class \(H=Y^X\).
 
 For one global threshold function \(\beta:X\to Y\), the same set
 \[
 F^\star_\beta=\{f\in Y^X:\forall x\in X,\ \beta(x)\le f(x)\}
 \]
-induces \(F^\star_\beta(x)=S_{\beta(x)}\) at every context. For an arbitrary context sequence \(x_t\), witnesses \(w_t\) fixed before the corresponding draws, and predictions \(y_t\), the actual terminal global supremum is
+induces \(F^\star_\beta(x)=S_{\beta(x)}\) at every context. For an arbitrary context sequence \(x_t\), pre-draw witnesses \(w_t\), and predictions \(y_t\), the actual terminal global supremum is
 \[
 G_T(\mathbf x,\mathbf w,\mathbf y)=
 \sup_{\beta:X\to Y:\ \beta(x_t)\le w_t}
@@ -167,25 +167,45 @@ The correct general theorem is
 G_T(\mathbf x,\mathbf w,\mathbf y)
 \le\sum_{t<T}\mathbf1\{y_t<w_t\}.
 \]
-This is strict in general when contexts repeat, because one global \(F^\star\) must use the same acceptable set at every occurrence of a context. If the context sequence is injective, a single global threshold function can set \(\beta(x_t)=w_t\) for every round, and equality holds. The Lean declarations globalContextTerminalSupLoss_le_predictableMissCount and globalContextTerminalSupLoss_eq_predictableMissCount_of_injective machine-check these two statements. The earlier globalHypothesisTerminalSupLoss identity is the fresh-context special case \(x_t=t\), not a general identity for repeated contexts.
+This may be strict when contexts repeat, because one global \(F^\star\) must use the same acceptable set at every occurrence of a context. If the context sequence is injective, a single global threshold function can set \(\beta(x_t)=w_t\) for every round, and equality holds. Lean checks these two statements as **globalContextTerminalSupLoss_le_predictableMissCount** and **globalContextTerminalSupLoss_eq_predictableMissCount_of_injective**. The earlier infinite-index equality is only the fresh-context special case \(x_t=t\).
 
-At each public node the context \(x\) is chosen, the learner chooses a law \(p\), and the adversary fixes the witness \(w\) before Nature samples. The sequential section-risk upper envelope is
+### Exact sequential outer-risk recursion
+
+For an arbitrary nonnegative (possibly nonmeasurable) continuation \(f:Y\to[0,\infty]\), define the upper integral / outer expectation
 \[
-V_0(h)=0,\qquad
-V_{n+1}(h)=
-\sup_x\inf_p\sup_w
-\left[
-p(\{y:y<w\})+
-\int V_n(\operatorname{Next}(h,x,p,w,y))\,p(dy)
-\right].
+U_p(f)=\inf\left\{\int g\,dp:
+g\text{ measurable and }f\le g\text{ pointwise}\right\}.
 \]
-Every fixed-witness lower section is countable, measurable, and null under the countable-cocountable probability \(\mu\). The learner uses \(p=\mu\) at every history. Backward induction gives \(V_n(h)=0\) for every finite \(n\) and history: at the selected learner law, the continuation integrand is the constant zero function. The terminal global supremum is bounded by this stagewise upper envelope. The Lean theorem publicGlobalSupBellmanStep_mono additionally proves that the Bellman operator is order-preserving in its continuation functional, so this domination is compatible with nested risk composition. No full-history or full-path product measurability is assumed in the zero-risk induction.
+The Lean implementation proves monotonicity, agreement with the ordinary nonnegative Lebesgue integral on measurable functions, and
+\[
+U_p(f+g)\le U_p(f)+\int g\,dp
+\]
+for each measurable nonnegative immediate cost \(g\).
 
-For the deterministic lower bound, the adversary uses fresh contexts \(x_t=t\) and the witness \(w_t=\operatorname{succ}(\hat y_t)\). One global threshold function realizes all the upper tails and rejects every deterministic prediction, giving exactly \(T\) mistakes and zero comparator loss. Together, these give randomized sequential upper value zero and deterministic worst-case regret \(T\) in this selected nonstandard measurable-space instance.
+Let \(e_w(y)=\mathbf1\{y<w\}\) be the measurable current-round error section. The exact one-step outer-risk operator is
+\[
+\mathcal B^+V(h)=
+\sup_x\inf_p\sup_w
+U_p\!\left(e_w+
+V(\operatorname{Next}(h,x,p,w,\cdot))\right).
+\]
+It respects the public protocol order: context, learner draw law, pre-draw witness, then sample. Its upper-integral addition inequality bounds it by the stagewise envelope
+\[
+\sup_x\inf_p\sup_w
+\left[p(\{y:y<w\})+
+U_p(V(\operatorname{Next}(h,x,p,w,\cdot)))\right].
+\]
+This upper-integral formulation is crucial: it does not silently use the lower integral for a nonmeasurable continuation and does not apply the ordinary conditional-expectation tower to a nonmeasurable full-path payoff.
 
-**Scope boundary.** This is a candidate separation under the explicitly defined iterated sequential-risk semantics. The full terminal payoff need not be a product-measurable random variable, so the development does not claim that its ordinary full-path expectation exists for every unrestricted adaptive adversary, nor that the usual conditional-expectation tower applies to the nonmeasurable payoff. It is not a standard-Borel or finite-bit-sampler construction. The original problem in all standard-Borel / ordinary-expectation variants remains outside this result.
+Use the fixed learner law \(p=\mu\), the countable-cocountable probability on \(Y=\omega_1\). For every pre-draw witness \(w\), the section \(L_w=\{y:y<w\}\) is countable, measurable, and null. The continuation at the zero-risk induction step is the constant zero function, so its upper integral is also zero. Backward induction therefore gives exact outer-risk value zero at every finite horizon and every public history. The pathwise terminal-sup inequality above transfers this stagewise upper bound to the terminal global regret in the explicitly defined sequential outer-risk semantics.
 
-The code is formalized in Lean 4.35 / Mathlib 4.35. The current context-repeat correction is checked by GitHub Actions run [41271568696](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41271568696) on code commit 8767d80602622e646d8841d0e16c459a7ea4e326 (Lean and Rocq both successful). The proof note GLOBAL_SUP_SEQUENTIAL_RISK.md records the full hypotheses, proof, and limits.
+For the deterministic lower bound, the adversary uses fresh contexts \(x_t=t\) and witnesses \(w_t=\operatorname{succ}(\hat y_t)\). One global threshold function realizes all the upper tails and rejects every deterministic prediction, giving exactly \(T\) mistakes and zero comparator loss. Thus the selected nonstandard measurable-space sequential-risk instance has randomized outer-risk upper value \(0\) and deterministic worst-case loss \(T\).
+
+### Scope boundary
+
+This is a candidate separation under the explicitly defined iterated outer-risk semantics. The full terminal payoff need not be a product-measurable random variable; the result does not establish an ordinary full-path expectation for every unrestricted adaptive adversary. It is not a standard-Borel construction and does not yield a finite-bit or countable-range sampler for the countable-cocountable law. Standard-Borel / conventional full-path-expectation versions remain separate.
+
+The final code head is **0d6c7e9cc581db4ed9f109f766519838c9a2894d**. GitHub Actions run [41272999925](https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41272999925) completed successfully for Lean 4.35 / Mathlib 4.35 and Rocq 9.2 / Gaia 2.4. The exact outer-risk Bellman development is Lean-formalized; the Rocq job independently checks the existing ordinal and countable-ideal foundations rather than a Rocq port of the new Bellman module.
 
 ## 6. Tool and repository responsibilities
 
