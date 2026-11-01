@@ -353,12 +353,24 @@ theorem upperLIntegral_zero
   · exact bot_le
 
 /-- Measurable indicator of the fixed-witness error section. -/
-def lowerSegmentIndicator (w : Label) : Label → ℝ≥0∞ :=
+noncomputable def lowerSegmentIndicator (w : Label) : Label → ℝ≥0∞ :=
   (lowerSegment w).indicator (fun _ => (1 : ℝ≥0∞))
 
 theorem lowerSegmentIndicator_measurable (w : Label) :
     Measurable (lowerSegmentIndicator w) := by
   exact measurable_const.indicator (Or.inl (lowerSegment_countable w))
+
+/-- The ordinary integral of the measurable fixed-witness error indicator
+is exactly its section probability. -/
+theorem lintegral_lowerSegmentIndicator_eq_measure
+    (μ : Measure Label) (w : Label) :
+    (∫⁻ y, lowerSegmentIndicator w y ∂μ) = μ (lowerSegment w) := by
+  change
+    (∫⁻ y, (lowerSegment w).indicator (fun _ => (1 : ℝ≥0∞)) y ∂μ) =
+      μ (lowerSegment w)
+  rw [lintegral_indicator_const (s := lowerSegment w)
+    (Or.inl (lowerSegment_countable w))]
+  simp
 
 /-- The upper integral of the measurable fixed-witness error indicator is
 exactly its section probability. -/
@@ -367,11 +379,7 @@ theorem upperLIntegral_lowerSegmentIndicator_eq_measure
     upperLIntegral μ (lowerSegmentIndicator w) = μ (lowerSegment w) := by
   rw [upperLIntegral_eq_lintegral_of_measurable μ
     (lowerSegmentIndicator w) (lowerSegmentIndicator_measurable w)]
-  change
-    (∫⁻ y, (lowerSegment w).indicator (fun _ => (1 : ℝ≥0∞)) y ∂μ) =
-      μ (lowerSegment w)
-  rw [lintegral_indicator_const (Or.inl (lowerSegment_countable w))]
-  simp
+  exact lintegral_lowerSegmentIndicator_eq_measure μ w
 
 /-- Exact one-step outer-risk bound: the upper integral of the current
 measurable miss indicator plus an arbitrary continuation is at most the
@@ -394,7 +402,7 @@ theorem upperLIntegral_lowerSegment_add_le
       upperLIntegral_add_measurable_le p continuation
         (lowerSegmentIndicator w) (lowerSegmentIndicator_measurable w)
     _ = upperLIntegral p continuation + p (lowerSegment w) := by
-      rw [upperLIntegral_lowerSegmentIndicator_eq_measure]
+      rw [lintegral_lowerSegmentIndicator_eq_measure]
     _ = p (lowerSegment w) + upperLIntegral p continuation := add_comm _ _
 
 /-- The sequential one-step operator for the public protocol.
@@ -587,7 +595,7 @@ theorem publicGlobalSupOuterBellmanStep_eq_zero_of_policy
             funext y
             simp [hcont]
           rw [hfun, upperLIntegral_lowerSegmentIndicator_eq_measure]
-          exact hzero w
+          simpa [hzero w]
         · exact bot_le
   · exact bot_le
 
@@ -685,6 +693,7 @@ theorem omegaOne_publicGlobalSupGameValue_eq_zero
 #print axioms publicGlobalSupBellmanStep_mono
 #print axioms upperLIntegral_add_measurable_le
 #print axioms upperLIntegral_lowerSegmentIndicator_eq_measure
+#print axioms lintegral_lowerSegmentIndicator_eq_measure
 #print axioms publicGlobalSupOuterBellmanStep_le_stagewise
 #print axioms publicGlobalSupOuterBellmanStep_mono
 #print axioms publicGlobalSupOuterGameValue_eq_zero
