@@ -37,6 +37,18 @@ characterization only.
   countably additive 0–1 mass and stagewise risk lemmas. It is not itself a
   concrete encoding of the full omega-one measure/game.
 
+### Terminal global supremum and sequential-risk recursion
+
+PublicSetting/Lean/GlobalSupSequentialRisk.lean formalizes the omega-one upper-tail instance with a **single context-indexed global family**
+\[
+F^\star_\beta=\{f:X\to Y:\forall x,\ \beta(x)\le f(x)\}.
+\]
+For arbitrary context sequences, the true terminal global supremum is bounded by the stagewise miss sum. Equality is proved when the contexts are pairwise distinct; it can be strict when a context repeats, since one global family must reuse the same acceptable set at that context. The declarations globalContextTerminalSupLoss_le_predictableMissCount and globalContextTerminalSupLoss_eq_predictableMissCount_of_injective formalize the two claims.
+
+The public Bellman recursion uses the actual move order (context, learner law, pre-draw witness, sample) and the one-coordinate risk \(p(\{y:y<w\})\). The countable-cocountable law makes every fixed-witness section null, and backward induction proves zero sequential upper value. For the deterministic lower bound, the adversary chooses fresh contexts \(x_t=t\), so one global family rejects every deterministic prediction and incurs exactly \(T\) mistakes.
+
+This is an iterated sequential-risk semantics. It avoids treating the nonmeasurable full-path error relation as an ordinary product-measurable random variable; it does not claim an ordinary full-path expectation exists for every unrestricted adaptive adversary. The label space is not standard Borel, and the result does not establish a standard-Borel or finite-bit sampler.
+
 ### Sequential processes and tower property
 
 PublicSetting/Lean/SequentialKernelMinimax.lean uses Mathlib's
@@ -103,15 +115,18 @@ Details are in PublicSetting/RNG_COMPATIBILITY.md.
    Gaia's concrete omegaOne carrier.
 2. Instantiate the generic sequential kernel and Appendix G framework with
    the full public partial-feedback strategy correspondence.
-3. Address product measurability of unrestricted adaptive pathwise losses.
-   In the countable-cocountable omega-one sigma algebra, sectionwise nullity
-   does not imply product measurability of the global error relation.
-   The ordinary tower theorem cannot be applied to a nonmeasurable reward.
+3. Relate the new iterated sequential-risk value to conventional full-path
+   expected regret under additional measurable-strategy assumptions. In the
+   countable-cocountable omega-one sigma algebra, sectionwise nullity does not
+   imply product measurability of the global error relation; the new Bellman
+   proof deliberately avoids applying the ordinary tower theorem to that
+   nonmeasurable reward.
 4. Prove the concrete strategy-space compactness and Sion regularity
    hypotheses for the chosen public game.
-5. Do not claim the original Section 3.3 randomized-vs-deterministic
-   learnability open question is solved until the above application theorem
-   is proved in the intended model.
+5. The omega-one result is a candidate separation for the explicitly defined
+   sequential-risk semantics. Do not extend it to standard-Borel,
+   finite-bit-samplable, or ordinary full-path-expectation models without a
+   separate theorem establishing those stronger requirements.
 
 These are explicit mathematical/model boundaries, not hidden unfinished
 proofs. The source files and CI determine which individual claims are
