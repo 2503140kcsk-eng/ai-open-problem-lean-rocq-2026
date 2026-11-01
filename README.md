@@ -37,17 +37,21 @@ characterization only.
   countably additive 0–1 mass and stagewise risk lemmas. It is not itself a
   concrete encoding of the full omega-one measure/game.
 
-### Terminal global supremum and sequential-risk recursion
+### Terminal global supremum and sequential outer-risk recursion
 
 PublicSetting/Lean/GlobalSupSequentialRisk.lean formalizes the omega-one upper-tail instance with a **single context-indexed global family**
 \[
 F^\star_\beta=\{f:X\to Y:\forall x,\ \beta(x)\le f(x)\}.
 \]
-For arbitrary context sequences, the true terminal global supremum is bounded by the stagewise miss sum. Equality is proved when the contexts are pairwise distinct; it can be strict when a context repeats, since one global family must reuse the same acceptable set at that context. The declarations globalContextTerminalSupLoss_le_predictableMissCount and globalContextTerminalSupLoss_eq_predictableMissCount_of_injective formalize the two claims.
+For arbitrary context sequences, the true terminal global supremum is bounded by the stagewise miss sum. Equality is proved when the contexts are pairwise distinct; it can be strict when a context repeats, since one global family must reuse the same acceptable set at that context. The declarations **globalContextTerminalSupLoss_le_predictableMissCount** and **globalContextTerminalSupLoss_eq_predictableMissCount_of_injective** formalize the two claims.
 
-The public Bellman recursion uses the actual move order (context, learner law, pre-draw witness, sample) and the one-coordinate risk \(p(\{y:y<w\})\). The countable-cocountable law makes every fixed-witness section null, and backward induction proves zero sequential upper value. For the deterministic lower bound, the adversary chooses fresh contexts \(x_t=t\), so one global family rejects every deterministic prediction and incurs exactly \(T\) mistakes.
+The exact sequential-risk operator uses the upper integral
+\[
+U_p(f)=\inf\{\int g\,dp:g\text{ measurable and }f\le g\},
+\]
+which is defined even for a nonmeasurable continuation. It agrees with the ordinary Lebesgue integral on measurable functions, is monotone, and obeys \(U_p(f+g)\le U_p(f)+\int g\,dp\) for measurable nonnegative immediate costs. The outer-risk Bellman recursion preserves the move order (context, learner law, pre-draw witness, sample). Since each fixed-witness section is countable and null under the countable-cocountable law, backward induction proves zero outer-risk value at every finite horizon and public history.
 
-This is an iterated sequential-risk semantics. It avoids treating the nonmeasurable full-path error relation as an ordinary product-measurable random variable; it does not claim an ordinary full-path expectation exists for every unrestricted adaptive adversary. The label space is not standard Borel, and the result does not establish a standard-Borel or finite-bit sampler.
+For the deterministic lower bound, the adversary chooses fresh contexts \(x_t=t\), so one global family rejects every deterministic prediction and incurs exactly \(T\) mistakes. The construction is a non-standard measurable-space example under the explicitly defined sequential outer-risk semantics. It does not turn the full terminal payoff into an ordinary product-measurable random variable or establish conventional full-path expectation for every unrestricted adaptive adversary; standard-Borel and finite-bit-sampler variants remain separate.
 
 ### Sequential processes and tower property
 
