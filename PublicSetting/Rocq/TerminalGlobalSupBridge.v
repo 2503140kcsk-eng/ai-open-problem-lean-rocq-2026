@@ -4,46 +4,50 @@ Import ListNotations.
 (*
   Independent Rocq check of the order-theoretic core of the terminal bridge.
 
-  A value of beta : X -> nat is one fixed global target-threshold function.
-  It is not reselected at each round.  The theorem proves that every such
-  globally compatible function is bounded by the sum of predictable
-  witness-section misses.  In universal-upper-bound form this is the
-  order-theoretic content of the terminal supremum inequality.
+  The label type and its strict/non-strict relations are parameters.  The
+  only order law used is lt_le_trans, and decidable comparison is an explicit
+  parameter rather than an imported classical axiom.
 
-  This file deliberately does not postulate a probability space, a
-  measurable path payoff, or a conditional-expectation tower theorem.
-  Those are checked separately in the Lean measure-theoretic development.
+  One beta : X -> Label is fixed for the entire trace.  It is never selected
+  afresh at each round.  The proof establishes that every globally
+  compatible beta has terminal trace loss bounded by the predictable
+  witness-miss count.
 
-  The elementary proof uses only Nat.ltb reflection and monotonicity of
-  addition; it deliberately avoids automation that could enlarge the
-  axiom dependency set.
+  This file does not assert a probability space, measurability, an upper
+  integral, or a conditional-expectation tower theorem.  Those analytic
+  statements remain in the Lean development.
 *)
 
 Section TerminalGlobalSupBridge.
 
-  Context {X : Type}.
+  Context {X Label : Type}.
+  Context (lt le : Label -> Label -> Prop).
+  Context (lt_dec : forall a b, {lt a b} + {~ lt a b}).
+
+  Hypothesis lt_le_trans :
+    forall a b c, lt a b -> le b c -> lt a c.
 
   Record PublicRound : Type := {
     round_context : X;
-    round_witness : nat;
-    round_prediction : nat
+    round_witness : Label;
+    round_prediction : Label
   }.
 
   Definition globallyCompatibleRound
-      (beta : X -> nat) (r : PublicRound) : Prop :=
-    beta (round_context r) <= round_witness r.
+      (beta : X -> Label) (r : PublicRound) : Prop :=
+    le (beta (round_context r)) (round_witness r).
 
   Definition oneGlobalFamilyRoundLoss
-      (beta : X -> nat) (r : PublicRound) : nat :=
-    if Nat.ltb (round_prediction r) (beta (round_context r))
+      (beta : X -> Label) (r : PublicRound) : nat :=
+    if lt_dec (round_prediction r) (beta (round_context r))
     then 1 else 0.
 
   Definition predictableRoundMiss (r : PublicRound) : nat :=
-    if Nat.ltb (round_prediction r) (round_witness r)
+    if lt_dec (round_prediction r) (round_witness r)
     then 1 else 0.
 
   Fixpoint terminalLossForOneGlobalFamily
-      (trace : list PublicRound) (beta : X -> nat) : nat :=
+      (trace : list PublicRound) (beta : X -> Label) : nat :=
     match trace with
     | [] => 0
     | r :: rest =>
@@ -59,29 +63,28 @@ Section TerminalGlobalSupBridge.
     end.
 
   Lemma one_global_family_round_loss_le_predictable
-      (beta : X -> nat) (r : PublicRound) :
+      (beta : X -> Label) (r : PublicRound) :
     globallyCompatibleRound beta r ->
     oneGlobalFamilyRoundLoss beta r <= predictableRoundMiss r.
   Proof.
     intro Hcompatible.
     unfold oneGlobalFamilyRoundLoss, predictableRoundMiss.
-    destruct (Nat.ltb (round_prediction r)
-      (beta (round_context r))) eqn:Hbeta.
-    - apply Nat.ltb_lt in Hbeta.
-      assert (Hmiss :
-        Nat.ltb (round_prediction r) (round_witness r) = true).
-      { apply Nat.ltb_lt.
-        eapply Nat.lt_le_trans; [exact Hbeta | exact Hcompatible]. }
-      rewrite Hmiss.
-      apply Nat.le_refl.
-    - destruct (Nat.ltb (round_prediction r) (round_witness r))
-        eqn:Hmiss; simpl.
+    destruct (lt_dec (round_prediction r)
+      (beta (round_context r))) as [Hbeta | Hnotbeta].
+    - destruct (lt_dec (round_prediction r) (round_witness r))
+        as [Hmiss | Hnotmiss].
+      + simpl. apply Nat.le_refl.
+      + exfalso.
+        apply Hnotmiss.
+        eapply lt_le_trans; eassumption.
+    - destruct (lt_dec (round_prediction r) (round_witness r));
+        simpl.
       + apply Nat.le_0_l.
       + apply Nat.le_refl.
   Qed.
 
   Theorem terminal_one_global_family_loss_le_predictable_miss_count :
-    forall (trace : list PublicRound) (beta : X -> nat),
+    forall (trace : list PublicRound) (beta : X -> Label),
       Forall (globallyCompatibleRound beta) trace ->
       terminalLossForOneGlobalFamily trace beta <=
         predictableMissCount trace.
@@ -98,7 +101,7 @@ Section TerminalGlobalSupBridge.
 
   Definition terminalSupremumBounded
       (trace : list PublicRound) (budget : nat) : Prop :=
-    forall beta : X -> nat,
+    forall beta : X -> Label,
       Forall (globallyCompatibleRound beta) trace ->
       terminalLossForOneGlobalFamily trace beta <= budget.
 
