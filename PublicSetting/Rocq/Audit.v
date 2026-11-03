@@ -1,0 +1,51 @@
+From PublicSetting Require Import
+  OmegaOneSeparation PRNGNoGo ConcreteOmegaOne ExpectedLossBridge StandardBorelCore.
+
+Set Printing Width 160.
+
+(* Every Check labels the following assumptions and opaque-dependency output
+   with the exact theorem whose transitive proof dependencies are inspected. *)
+
+Check countable_additivity_zero_one.
+Print Assumptions countable_additivity_zero_one.
+Print Opaque Dependencies countable_additivity_zero_one.
+
+Check miss_set_mass_zero.
+Print Assumptions miss_set_mass_zero.
+Print Opaque Dependencies miss_set_mass_zero.
+
+Check sequential_conditional_risk_zero.
+Print Assumptions sequential_conditional_risk_zero.
+Print Opaque Dependencies sequential_conditional_risk_zero.
+
+Check total_loss_exact.
+Print Assumptions total_loss_exact.
+Print Opaque Dependencies total_loss_exact.
+
+Check no_enumerable_seed_sampler_realizes_target.
+Print Assumptions no_enumerable_seed_sampler_realizes_target.
+Print Opaque Dependencies no_enumerable_seed_sampler_realizes_target.
+
+Check target_mass_of_sampler_range_is_zero.
+Print Assumptions target_mass_of_sampler_range_is_zero.
+Print Opaque Dependencies target_mass_of_sampler_range_is_zero.
+
+Check PublicSettingConcreteOmegaOne.omegaOne_iff_countable_ordinal.
+Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_iff_countable_ordinal.
+Print Opaque Dependencies PublicSettingConcreteOmegaOne.omegaOne_iff_countable_ordinal.
+
+Check PublicSettingConcreteOmegaOne.omegaOne_countable_sup.
+Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_countable_sup.
+Print Opaque Dependencies PublicSettingConcreteOmegaOne.omegaOne_countable_sup.
+
+Check PublicSettingConcreteOmegaOne.omegaOne_not_countable.
+Print Assumptions PublicSettingConcreteOmegaOne.omegaOne_not_countable.
+Print Opaque Dependencies PublicSettingConcreteOmegaOne.omegaOne_not_countable.
+
+Check expected_cumulative_loss_eq_expected_stagewise_risk.
+Print Assumptions expected_cumulative_loss_eq_expected_stagewise_risk.
+Print Opaque Dependencies expected_cumulative_loss_eq_expected_stagewise_risk.
+
+Check standard_borel_universal_acceptable_point.
+Print Assumptions standard_borel_universal_acceptable_point.
+Print Opaque Dependencies standard_borel_universal_acceptable_point.

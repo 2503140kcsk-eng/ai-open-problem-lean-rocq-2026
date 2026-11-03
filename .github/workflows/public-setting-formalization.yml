@@ -19,7 +19,7 @@ concurrency:
 jobs:
   lean:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: PublicSetting/Lean
@@ -43,6 +43,8 @@ jobs:
         run: lake exe cache get
       - name: Build Lean proofs
         run: lake build
+      - name: Kernel-check exported Lean proofs and standard axioms
+        run: lake check
       - name: Check root VC-learning formalization
         run: lean ../../Lean/VCLearning.lean
 
@@ -101,7 +103,7 @@ jobs:
               ocamlfind query elpi
               opam list --installed --short
               mkdir -p /tmp/rocq-check /tmp/rocq-root-check
-              cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/ExpectedLossBridge.v /input/StandardBorelCore.v /input/_RocqProject /tmp/rocq-check/
+              cp /input/PublicSetting.v /input/PublicProtocol.v /input/ProbabilisticBounds.v /input/AdaptiveMoments.v /input/OmegaOneSeparation.v /input/PRNGNoGo.v /input/ConcreteOmegaOne.v /input/ExpectedLossBridge.v /input/StandardBorelCore.v /input/Audit.v /input/_RocqProject /tmp/rocq-check/
               cd /tmp/rocq-check
               rocq --version
               rocq compile -Q . PublicSetting PublicSetting.v
@@ -113,6 +115,10 @@ jobs:
               rocq compile -Q . PublicSetting ConcreteOmegaOne.v
               rocq compile -Q . PublicSetting ExpectedLossBridge.v
               rocq compile -Q . PublicSetting StandardBorelCore.v
+              rocq compile -Q . PublicSetting Audit.v
+              echo "=== Independent Rocq compiled-library kernel and assumptions audit ==="
+              rocqchk -Q . PublicSetting -o PublicSetting.Audit
               cp /input-root/VCLearning.v /tmp/rocq-root-check/
               cd /tmp/rocq-root-check
-              rocq compile VCLearning.v'
+              rocq compile VCLearning.v
+              rocqchk -o VCLearning'
