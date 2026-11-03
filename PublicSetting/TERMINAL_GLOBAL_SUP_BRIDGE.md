@@ -48,11 +48,13 @@ selection rule (its equation (5)). In each round, the order is:
 
 Only after all rounds and all realized predictions are fixed does the adversary
 specify the hidden acceptable sets, subject to every witness constraint. In
-the set-realizable case, this means choosing one `F* ∈ ~H` (a collection
+the set-realizable case, this means choosing one `F* ∈ \widetilde{\mathcal H}` (an admissible collection
 of hypotheses) such that `S_t=F*(x_t)` and `y_t^vis ∈ S_t` for every t.
 The terminal comparator is therefore a single globally consistent set,
 selected after the prediction path, not a fresh set chosen independently at
-each round.
+each round. The pathwise expression in equation (5) is the terminal
+supremum of `sum_t 1{yhat_t notin F*(x_t)}` over all such witness-consistent
+`F*`.
 
 This distinction is the central quantifier issue. Definition 1 is written
 for a fixed admissible sequence, with expectation over the learner's draws.
