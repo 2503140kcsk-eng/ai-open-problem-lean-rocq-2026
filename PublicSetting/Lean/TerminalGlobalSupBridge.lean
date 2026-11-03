@@ -1,5 +1,4 @@
 import GlobalSupSequentialRisk
-import ExpectedLossBridge
 
 /-!
 # Terminal global supremum -> sequential upper-risk bridge
@@ -121,29 +120,25 @@ theorem terminalGlobalSup_upperIntegral_le_sequentialBellmanBudget
   exact (terminalGlobalSup_upperIntegral_le_stagewise_lintegral
     pathMeasure context witness hstage).trans hbudget
 
-/-- The existing finite-horizon conditional-expectation theorem, re-exported
-with its assumptions visible at this boundary: each filtration is a
-sub-sigma-algebra of the path sigma-algebra, each trimmed measure is
-sigma-finite, and every real loss is integrable. -/
-theorem ordinaryExpectedLossBridge
-    {Ω ι : Type*} {m₀ : MeasurableSpace Ω}
-    (μ : Measure[m₀] Ω)
-    (rounds : Finset ι)
-    (filtration : ι → MeasurableSpace Ω)
-    (hfiltration : ∀ i, filtration i ≤ m₀)
-    (hσ : ∀ i, SigmaFinite (μ.trim (hfiltration i)))
-    (loss : ι → Ω → ℝ)
-    (hloss : ∀ i, i ∈ rounds → Integrable (loss i) μ) :
-    ∫ ω, ∑ i ∈ rounds, (μ[loss i | filtration i]) ω ∂μ =
-      ∫ ω, ∑ i ∈ rounds, loss i ω ∂μ :=
-  PublicSetting.ExpectedLossBridge.integral_finset_condExp_eq_integral_finset
-    μ rounds filtration hfiltration hσ loss hloss
+/-- The sequential upper-risk Bellman value is bounded by the
+stagewise conditional-risk Bellman value at every finite horizon and public
+history. This is the already-established backward-induction theorem from
+GlobalSupSequentialRisk.lean, exposed here next to the terminal path bound.
+It is a statement about the recursively defined game values, not an
+unconditional identification of an arbitrary path measure with that game. -/
+theorem sequentialOuterBellmanValue_le_stagewise
+    {H X P : Type*}
+    (draw : P → Measure Label)
+    (next : H → X → P → Label → Label → H) :
+    ∀ n h,
+      publicGlobalSupOuterGameValue draw next n h ≤
+        publicGlobalSupGameValue draw next n h :=
+  publicGlobalSupOuterGameValue_le_stagewiseGameValue draw next
 
 #print axioms terminalGlobalSupPathLoss_le_stagewisePredictablePathRisk
 #print axioms terminalGlobalSup_upperIntegral_le_stagewise_upperIntegral
 #print axioms terminalGlobalSup_upperIntegral_le_stagewise_lintegral
 #print axioms terminalGlobalSup_upperIntegral_eq_lintegral_of_jointly_measurable
 #print axioms terminalGlobalSup_upperIntegral_le_sequentialBellmanBudget
-#print axioms ordinaryExpectedLossBridge
 
 end PublicSetting.TerminalGlobalSupBridge
