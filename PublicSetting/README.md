@@ -1,6 +1,6 @@
 # Public-setting partial-feedback formalization
 
-Status: 2026-10-31. This README distinguishes checked theorem statements from
+Status: 2026-11-03. This README distinguishes checked theorem statements from
 remaining integration work. A green Lean build, a green Rocq build, and a
 solution of the original open learning-theory problem are three different
 claims.
@@ -243,3 +243,23 @@ The new Lean module ExpectedLossBridge.lean proves the finite-sum identity betwe
 The one-round core identity is valid, but it does not permit moving a supremum over one globally fixed terminal F-star through the cumulative sum. The source payoff must retain the joint terminal supremum over the complete loss vector. See EXPECTED_LOSS_BRIDGE.md for the exact statement and the nonmeasurable omega-one boundary.
 
 Rocq/StandardBorelCore.v independently checks the transitivity/majority part of the standard-Borel core obstruction. Its Fubini and positive-intersection principles are explicit hypotheses; the Suslin projection theorem and completed-product measurability bridge remain outside that Rocq file. Lean's StandardBorelCore.lean likewise takes product measurability as an explicit premise.
+
+
+## Terminal global-supremum / upper-integral bridge (2026-11-03)
+
+The follow-up module Lean/TerminalGlobalSupBridge.lean connects the
+single-global-target terminal loss to an upper integral on path space. It
+proves the pathwise bound, its upper-integral monotone lift, equality with
+ordinary extended expectation under joint measurability, and a conditional
+bound by a separately supplied sequential Bellman budget. The Rocq companion
+independently checks the finite-trace order-theoretic core.
+
+The new result is intentionally scoped to the upper-tail target class already
+formalized here. It does not resolve the source paper's general public
+randomized-versus-deterministic open question, and does not infer joint
+measurability from sectionwise measurability.
+
+See TERMINAL_GLOBAL_SUP_BRIDGE.md for the full comparison of quantifier order
+and terminal loss, standard-Borel majority-core obstruction, descriptive-set-
+theoretic proof boundary, author-confirmation questions, and responsibility
+matrix.

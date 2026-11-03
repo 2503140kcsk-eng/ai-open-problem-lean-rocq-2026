@@ -68,3 +68,12 @@ The literature search was performed through academic and web-search connectors. 
    - Push: https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41163413199
    - Pull request: https://github.com/2503140kcsk-eng/ai-open-problem-lean-rocq-2026/actions/runs/41163416315
    Both workflows built Lean 4.35 and Rocq 9.2 successfully; all 4 logs had zero diagnostics for errors, warnings, deprecations, hints, or unfinished proofs.
+
+
+16. Terminal global-supremum / expected-loss bridge research, checked 2026-11-03:
+   - Shao, Fang, Lin, Tao, Partial Feedback Online Learning, arXiv:2601.21462v3. The exact Definition 1 expected-regret quantifiers, public move order, set-realizable one-global-subset condition, and the Section 5.3 open question were rechecked against the full HTML: https://arxiv.org/html/2601.21462v3
+   - Cong Fang's official Peking University profile publicly lists fangcong@pku.edu.cn: https://www.ai.pku.edu.cn/en/info/1409/1827.htm. The author-confirmation questions in TERMINAL_GLOBAL_SUP_BRIDGE.md have not been sent and have no recorded response.
+   - The Mathlib 4.35.0 conditional-expectation and upper-integral APIs are pinned by the imports in Lean/ExpectedLossBridge.lean and Lean/GlobalSupSequentialRisk.lean. Mathlib source: https://github.com/leanprover-community/mathlib4
+   - Rocq official reference for assumption and opaque-dependency auditing: https://rocq-prover.org/doc/V9.1.0/refman/proof-engine/vernacular-commands.html
+   - Lean 4.35.0 release / Lake documentation, including the lake check command: https://github.com/leanprover/lean4/releases/tag/v4.35.0
+   - The repeated-context finite sanity-check was evaluated in Wolfram: global supremum = 1, stagewise envelope = 2, inequality = True. This is a computational check of the example, not a theorem proof.
