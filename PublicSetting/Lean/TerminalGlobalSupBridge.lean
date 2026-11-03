@@ -140,5 +140,6 @@ theorem sequentialOuterBellmanValue_le_stagewise
 #print axioms terminalGlobalSup_upperIntegral_le_stagewise_lintegral
 #print axioms terminalGlobalSup_upperIntegral_eq_lintegral_of_jointly_measurable
 #print axioms terminalGlobalSup_upperIntegral_le_sequentialBellmanBudget
+#print axioms sequentialOuterBellmanValue_le_stagewise
 
 end PublicSetting.TerminalGlobalSupBridge
