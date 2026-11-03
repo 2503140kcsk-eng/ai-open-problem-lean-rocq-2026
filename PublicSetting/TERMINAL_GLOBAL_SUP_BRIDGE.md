@@ -51,10 +51,10 @@ witness is chosen. The exact quantifiers around a terminal choice of F* and
 its dependence on the completed sample path are included in the author
 questions below; do not silently replace them by a roundwise choice.
 
-The source's Section 5.3 leaves the general public randomized-versus-
-deterministic learnability question open. Theorem 19 is an oblivious-versus-
-public separation, not the same theorem. The finite-Helly/nested-inclusion
-question in Section 3.2 is also different.
+The source leaves the general public randomized-versus-deterministic
+learnability question open at the end of Section 3.3. Theorem 19 is an
+oblivious-versus-public separation, not the same theorem. The finite-Helly /
+nested-inclusion question in Section 3.2 is also different.
 
 ## 2. What the two existing Lean files actually prove
 
@@ -226,11 +226,14 @@ has complement measure exactly one half and no point lies in both sets.
 ### Formalization boundary
 
 - Lean's `StandardBorelCore.lean` proves the Fubini/majority/transitivity
-  core once product measurability of R is supplied.
-- The implication from a Borel relation M to the completed-product
-  measurability of the coanalytic relation R is currently a written
-  descriptive-set-theoretic argument, not a theorem proved by the current
-  Lean file.
+  core only when R is measurable in the **uncompleted product sigma-algebra**.
+- Descriptive set theory gives universal measurability of R, i.e. measurability
+  in the completion of the product probability measure. The implication
+  from a Borel relation M to that completed-product measurability is currently
+  a written argument, not a theorem proved by the current Lean file. A
+  further completion-aware measure-space formalization is required before
+  that descriptive-set-theoretic conclusion can be fed into the current
+  theorem unchanged.
 - Rocq's `StandardBorelCore.v` assumes the Fubini-majority and section
   intersection principles explicitly, then proves the transitivity argument.
 - Consequently, neither formal module claims a kernel-checked proof of the
