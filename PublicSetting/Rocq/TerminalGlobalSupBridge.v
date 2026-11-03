@@ -1,4 +1,4 @@
-From Stdlib Require Import Arith Lia List.
+From Stdlib Require Import Arith List.
 Import ListNotations.
 
 (*
@@ -13,6 +13,10 @@ Import ListNotations.
   This file deliberately does not postulate a probability space, a
   measurable path payoff, or a conditional-expectation tower theorem.
   Those are checked separately in the Lean measure-theoretic development.
+
+  The elementary proof uses only Nat.ltb reflection and monotonicity of
+  addition; it deliberately avoids automation that could enlarge the
+  axiom dependency set.
 *)
 
 Section TerminalGlobalSupBridge.
@@ -66,9 +70,14 @@ Section TerminalGlobalSupBridge.
     - apply Nat.ltb_lt in Hbeta.
       assert (Hmiss :
         Nat.ltb (round_prediction r) (round_witness r) = true).
-      { apply Nat.ltb_lt. unfold globallyCompatibleRound in Hcompatible. lia. }
-      rewrite Hmiss. lia.
-    - destruct (Nat.ltb (round_prediction r) (round_witness r)); lia.
+      { apply Nat.ltb_lt.
+        eapply Nat.lt_le_trans; [exact Hbeta | exact Hcompatible]. }
+      rewrite Hmiss.
+      apply Nat.le_refl.
+    - destruct (Nat.ltb (round_prediction r) (round_witness r))
+        eqn:Hmiss; simpl.
+      + apply Nat.le_0_l.
+      + apply Nat.le_refl.
   Qed.
 
   Theorem terminal_one_global_family_loss_le_predictable_miss_count :
@@ -78,13 +87,13 @@ Section TerminalGlobalSupBridge.
         predictableMissCount trace.
   Proof.
     induction trace as [|r rest IH].
-    - intros beta Hcompat. simpl. lia.
+    - intros beta Hcompat. reflexivity.
     - intros beta Hcompat.
       inversion Hcompat as [|r' rest' Hr Hrest]; subst.
       simpl.
-      specialize (IH beta Hrest).
-      pose proof (one_global_family_round_loss_le_predictable beta r Hr).
-      lia.
+      apply Nat.add_le_mono.
+      + exact (one_global_family_round_loss_le_predictable beta r Hr).
+      + exact (IH beta Hrest).
   Qed.
 
   Definition terminalSupremumBounded
