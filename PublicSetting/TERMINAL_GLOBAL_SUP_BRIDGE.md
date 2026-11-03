@@ -17,39 +17,54 @@ arXiv:2601.21462v3 (2026-04-02):
 - https://arxiv.org/abs/2601.21462
 - https://arxiv.org/html/2601.21462v3
 
-The paper's Definition 1 fixes a finite admissible sequence
+The paper's Definition 1 quantifies over an admissible finite sequence
 `(x_t,S_t,y_t^vis)_{t=1}^T`, with
-`S_t ∈ S(Y)` and `y_t^vis ∈ S_t`. For a learner A,
+`S_t ∈ S(Y)` and `y_t^vis ∈ S_t`. For each such sequence and learner A,
 
 ```
-ell_T(A) = sum_t E[1{yhat_t notin S_t}]
+ell_T(A) = sum_t E_{yhat_t ~ pi_t}[1{yhat_t notin S_t}]
 ell_T(f) = sum_t 1{f(x_t) notin S_t}
 R_A(T,H) = sup_admissible_sequences
              (ell_T(A) - inf_{f in H} ell_T(f))
 R*(T,H) = inf_A R_A(T,H).
 ```
 
-In the set-realizable regime there is one fixed subset
-`F* ⊆ H` such that `S_t = F*(x_t)` for every t, where
-`F*(x) = {f(x) : f ∈ F*}`. The same F* is used across the whole
-horizon; it is not a fresh optimizer or a new target family at each round.
+The order in Definition 1 is therefore: fix an admissible sequence, take
+the learner's prediction expectation, then take the worst-case supremum over
+sequences; finally take the infimum over learners. The expectation in this
+definition is explicitly over `yhat_t ~ pi_t`.
 
-The equivalent public-protocol description in Section 3 has the move order:
+In the set-realizable regime, one fixed subset `F* ⊆ H` satisfies
+`S_t = F*(x_t)` for every t, where
+`F*(x) = {f(x) : f ∈ F*}`. It is not a new subset of H at every round.
 
-1. adversary chooses `x_t`;
-2. learner chooses its distribution `pi_t`;
-3. adversary chooses/reveals `y_t^vis ∈ S_t`;
-4. Nature samples `yhat_t ~ pi_t`;
-5. the acceptable sets `S_{1:T}` are hidden during play and are specified
-   at the end, subject to the witness constraints and the chosen realizability
-   regime.
+Section 5.3 then gives the *public* sequential protocol and terminal
+selection rule (its equation (5)). In each round, the order is:
 
-Thus the current visible witness is selected before the current draw. The
-adversary can condition on previous completed public history. In the public
-formulation, the learner's distribution is part of the move order before the
-witness is chosen. The exact quantifiers around a terminal choice of F* and
-its dependence on the completed sample path are included in the author
-questions below; do not silently replace them by a roundwise choice.
+1. the adversary chooses `x_t`;
+2. the learner chooses its distribution `pi_t`;
+3. the adversary chooses/reveals `y_t^vis`;
+4. Nature samples `yhat_t ~ pi_t`.
+
+Only after all rounds and all realized predictions are fixed does the adversary
+specify the hidden acceptable sets, subject to every witness constraint. In
+the set-realizable case, this means choosing one `F* ∈ ~H` (a collection
+of hypotheses) such that `S_t=F*(x_t)` and `y_t^vis ∈ S_t` for every t.
+The terminal comparator is therefore a single globally consistent set,
+selected after the prediction path, not a fresh set chosen independently at
+each round.
+
+This distinction is the central quantifier issue. Definition 1 is written
+for a fixed admissible sequence, with expectation over the learner's draws.
+The public protocol instead allows the final `F*` (and hence all `S_t`) to
+depend on the completed prediction path. The paper gives the move order and
+terminal constraint, but the passages checked here do not state a general
+joint-measurability or standard-Borel hypothesis for the resulting
+path-dependent terminal loss. In particular, the equivalence between the
+fixed-sequence expectation in Definition 1 and an ordinary expectation of a
+pathwise terminal supremum needs clarification. We do not silently exchange
+`E[sup_{F*}]` and `sup_{F*} E`, nor replace a possibly nonmeasurable
+terminal payoff by an ordinary expectation.
 
 The source leaves the general public randomized-versus-deterministic
 learnability question open at the end of Section 5.3, after Theorem 19.
@@ -256,25 +271,24 @@ A public institutional profile for coauthor Cong Fang lists
 `fangcong@pku.edu.cn`:
 https://www.ai.pku.edu.cn/en/info/1409/1827.htm
 
-The following points should be confirmed by an author before treating any
-interpretive choice as part of the paper's theorem:
+The following points should be confirmed by an author before treating
+any terminal pathwise expectation as part of the original model:
 
-1. In the public protocol, does the adversary choose the current visible
-   witness after seeing the learner's distribution `pi_t`, but strictly
-   before the current sample `yhat_t`?
-2. In the set-realizable regime, is one subset `F* ⊆ H` chosen for all
-   rounds, with each `S_t=F*(x_t)`; may this single F* be selected after
-   the complete public sample path is realized, subject to all witnesses
-   being accepted?
-3. When the terminal hidden sets are selected as a function of the completed
-   draw path, is `E[1{yhat_t notin S_t}]` intended as an ordinary expectation
-   under a measurable pathwise payoff? If yes, which joint measurability
-   assumption on the terminal selection / adversary is implicit?
-4. Does the paper assume the label space and relevant strategy spaces are
-   standard Borel, or is an arbitrary measurable space allowed throughout?
-5. Is an outer expectation / upper integral an admissible extension of the
-   model, or would that be a distinct definition of regret rather than the
-   original Definition 1?
+1. In the public set-realizable protocol of Section 5.3, should the terminal
+   objective be read as the expectation of the pathwise supremum
+   `E[sup_{F* consistent with all witnesses} sum_t 1{yhat_t notin F*(x_t)}]`,
+   or is a supremum/expectation in a different order intended?
+2. What exact measurability condition makes the terminal map from the full
+   prediction path to the selected `F*` (or to each error indicator)
+   measurable? Is a measurable graph / jointly measurable selection part of
+   the model, or is the sequential game defined directly by iterated
+   conditional expectations without a full-path random variable?
+3. Does the paper intend arbitrary measurable label spaces
+   `(Y, sigma(Y))` as the protocol states, or are standard-Borel assumptions
+   on Y, strategy spaces, or the terminal selection implicit elsewhere?
+4. Would replacing the ordinary pathwise expectation by an outer expectation
+   / upper integral be an admissible theorem-preserving interpretation, or a
+   distinct extension of the regret definition?
 
 No author response is currently recorded. Do not cite this question list as
 an endorsement or interpretation by the authors.
