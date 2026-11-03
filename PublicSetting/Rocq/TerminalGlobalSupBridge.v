@@ -116,5 +116,7 @@ Section TerminalGlobalSupBridge.
 
   Print Assumptions terminal_one_global_family_loss_le_predictable_miss_count.
   Print Assumptions single_global_family_terminal_supremum_bound.
+  Print Opaque Dependencies terminal_one_global_family_loss_le_predictable_miss_count.
+  Print Opaque Dependencies single_global_family_terminal_supremum_bound.
 
 End TerminalGlobalSupBridge.
