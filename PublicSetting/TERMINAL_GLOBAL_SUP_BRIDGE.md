@@ -52,9 +52,10 @@ its dependence on the completed sample path are included in the author
 questions below; do not silently replace them by a roundwise choice.
 
 The source leaves the general public randomized-versus-deterministic
-learnability question open at the end of Section 3.3. Theorem 19 is an
-oblivious-versus-public separation, not the same theorem. The finite-Helly /
-nested-inclusion question in Section 3.2 is also different.
+learnability question open at the end of Section 5.3, after Theorem 19.
+Theorem 19 itself is an oblivious-versus-public separation, not the same
+randomized-versus-deterministic question. The finite-Helly / nested-inclusion
+question in Section 5.2 is also different.
 
 ## 2. What the two existing Lean files actually prove
 
